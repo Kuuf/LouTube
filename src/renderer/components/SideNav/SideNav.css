@@ -1,11 +1,11 @@
 .sideNav {
   display: block;
-  block-size: calc(100vh - 60px);
+  block-size: 100vh;
   inline-size: 80px;
   overflow-x: hidden;
   position: sticky;
   inset-inline-start: 0;
-  inset-block-start: 60px;
+  inset-block-start: 0;
   z-index: 3;
   box-shadow: 1px -1px 1px -1px var(--primary-shadow-color);
   background-color: var(--side-nav-color);
@@ -45,10 +45,15 @@
   -webkit-user-drag: none;
 }
 
-.navOption.spatialNavFocused {
+.navOption[data-spatial-nav-focused] {
   outline: 3px solid #fff;
   outline-offset: -3px;
   border-radius: 12px;
+}
+
+.drawerScrim,
+.brand {
+  display: none;
 }
 
 .channelLink {
@@ -136,7 +141,9 @@
   inline-size: 90%;
   block-size: 1px;
   border: 0;
-  background-color: var(--primary-color);
+
+  /* Light gray, translucent so it also reads on light themes */
+  background-color: rgb(200 200 200 / 35%);
 }
 
 .refreshIcon {
@@ -163,11 +170,6 @@
 }
 
 @media only screen and (width > 680px) {
-  ::-webkit-scrollbar {
-    inline-size: 10px;
-    block-size: 10px;
-  }
-
   .opened {
     inline-size: 200px;
   }
@@ -293,3 +295,150 @@
   }
 }
 
+/*
+  TV drawer (wider than mobile). The side nav is an icon rail that slides
+  open over the page, labels beside the icons and the page dimmed behind it,
+  while it has the remote focus (`drawerOpen` in SideNav.vue). The rail keeps
+  its 80px in the page layout, the panel (.inner) overlays the page.
+  Closing is quicker than opening, with an accelerating curve.
+*/
+@media only screen and (width > 680px) {
+  .sideNav,
+  .sideNav.hiddenLabels {
+    overflow: visible;
+    inline-size: 80px;
+  }
+
+  .inner,
+  .hiddenLabels .inner {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 1;
+    inline-size: 80px;
+    overflow: hidden auto;
+    background-color: var(--side-nav-color);
+    transition:
+      inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15),
+      box-shadow 200ms ease-in;
+  }
+
+  .drawerOpen .inner {
+    inline-size: 260px;
+    box-shadow: 8px 0 32px rgb(0 0 0 / 50%);
+    transition:
+      inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1),
+      box-shadow 300ms ease-out;
+  }
+
+  .drawerScrim {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-color: rgb(0 0 0 / 55%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 200ms ease-in;
+  }
+
+  .drawerOpen .drawerScrim {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 300ms ease-out;
+  }
+
+  .navOption,
+  .navChannel {
+    display: flex;
+    align-items: center;
+    min-block-size: 52px;
+    padding: 0;
+  }
+
+  .navChannel[data-spatial-nav-focused] {
+    outline: 3px solid #fff;
+    outline-offset: -3px;
+    border-radius: 12px;
+  }
+
+  .drawerOpen .navOption[data-spatial-nav-focused],
+  .drawerOpen .navChannel[data-spatial-nav-focused] {
+    background-color: var(--side-nav-hover-color);
+    color: var(--side-nav-hover-text-color);
+  }
+
+  .navOption .thumbnailContainer,
+  .navChannel .thumbnailContainer {
+    flex: 0 0 80px;
+    margin-block: 0;
+  }
+
+  /* Logo on top, always shown, the name beside it only in the open drawer */
+  .brand {
+    --label-font-size: 22px;
+
+    display: flex;
+    align-items: center;
+    min-block-size: 72px;
+  }
+
+  .brandLogo {
+    flex: 0 0 auto;
+    inline-size: 48px;
+    margin-inline: 16px;
+  }
+
+  .brandName {
+    font-weight: bold;
+  }
+
+  .navChannel {
+    --label-font-size: 14px;
+  }
+
+  .navOption .navLabel,
+  .navChannel .navLabel,
+  .brandName,
+  .hiddenLabels .navOption .navLabel {
+    display: block;
+    flex: 1 1 0;
+    margin: 0;
+    padding-inline-end: 16px;
+    font-size: var(--label-font-size, 16px);
+    text-align: start;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    translate: -12px;
+    transition:
+      opacity 100ms ease-in,
+      translate 100ms ease-in;
+  }
+
+  .drawerOpen .navOption .navLabel,
+  .drawerOpen .navChannel .navLabel,
+  .drawerOpen .brandName {
+    opacity: 1;
+    translate: 0;
+    transition:
+      opacity 200ms ease-out 80ms,
+      translate 300ms cubic-bezier(0.05, 0.7, 0.1, 1) 80ms;
+  }
+
+  :global(body[dir='rtl']) .navOption .navLabel,
+  :global(body[dir='rtl']) .navChannel .navLabel,
+  :global(body[dir='rtl']) .brandName {
+    translate: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sideNav .inner,
+  .sideNav .drawerScrim,
+  .sideNav .navOption .navLabel,
+  .sideNav .navChannel .navLabel,
+  .sideNav .brandName {
+    transition: none;
+  }
+}

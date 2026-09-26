@@ -1,17 +1,51 @@
 <template>
   <FtFlexBox
     class="sideNav"
-    :class="[{opened: isOpen}, applyHiddenLabels]"
+    :class="[{opened: isOpen, drawerOpen}, applyHiddenLabels]"
     role="navigation"
   >
+    <!-- Dims the page behind the open drawer, click it to close the drawer -->
+    <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events, vuejs-accessibility/no-static-element-interactions -->
     <div
+      class="drawerScrim"
+      @click="closeDrawer"
+    />
+    <div
+      ref="inner"
       class="inner"
       :class="applyHiddenLabels"
     >
+      <div class="brand">
+        <img
+          class="brandLogo"
+          src="../../assets/img/loutube-logo.png"
+          alt=""
+        >
+        <span class="brandName">{{ APP_NAME }}</span>
+      </div>
       <router-link
-        :ref="(link) => setSidebarLink(0, link)"
         class="navOption topNavOption mobileShow"
-        :class="{ spatialNavFocused: isSidebarItemFocused(0) }"
+        role="button"
+        to="/tv/search"
+        :title="$t('Search Bar.Search')"
+      >
+        <div
+          class="thumbnailContainer"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'search']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p
+          class="navLabel"
+        >
+          {{ $t("Search Bar.Search") }}
+        </p>
+      </router-link>
+      <router-link
+        class="navOption mobileShow"
         role="button"
         to="/tv"
         :title="$t('TV.TV')"
@@ -32,9 +66,7 @@
         </p>
       </router-link>
       <router-link
-        :ref="(link) => setSidebarLink(1, link)"
         class="navOption mobileShow"
-        :class="{ spatialNavFocused: isSidebarItemFocused(1) }"
         role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"
@@ -55,9 +87,7 @@
         </p>
       </router-link>
       <router-link
-        :ref="(link) => setSidebarLink(2, link)"
         class="navOption mobileHidden"
-        :class="{ spatialNavFocused: isSidebarItemFocused(2) }"
         role="button"
         to="/subscribedchannels"
         :title="$t('Channels.Channels')"
@@ -145,9 +175,7 @@
       </router-link>
       <SideNavMoreOptions />
       <router-link
-        :ref="(link) => setSidebarLink(3, link)"
         class="navOption mobileShow"
-        :class="{ spatialNavFocused: isSidebarItemFocused(3) }"
         role="button"
         to="/history"
         :title="historyTitle"
@@ -169,9 +197,28 @@
       </router-link>
       <hr>
       <router-link
-        :ref="(link) => setSidebarLink(4, link)"
+        class="navOption mobileShow"
+        role="button"
+        to="/tv/profiles"
+        :title="$t('Profile.Profile Settings')"
+      >
+        <div
+          class="thumbnailContainer"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'circle-user']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p
+          class="navLabel"
+        >
+          {{ $t("Profile.Profile Settings") }}
+        </p>
+      </router-link>
+      <router-link
         class="navOption mobileShow smallMobileOnlyHidden"
-        :class="{ spatialNavFocused: isSidebarItemFocused(4) }"
         role="button"
         to="/settings"
         :title="settingsTitle"
@@ -192,9 +239,7 @@
         </p>
       </router-link>
       <router-link
-        :ref="(link) => setSidebarLink(5, link)"
         class="navOption mobileHidden"
-        :class="{ spatialNavFocused: isSidebarItemFocused(5) }"
         role="button"
         to="/about"
         :title="$t('About.About')"
@@ -265,7 +310,7 @@
               width="35"
               loading="lazy"
               :src="channel.thumbnail"
-              :alt="isOpen ? '' : channel.name"
+              alt=""
             >
             <FontAwesomeIcon
               v-else
@@ -274,7 +319,6 @@
             />
           </div>
           <p
-            v-if="isOpen"
             class="navLabel"
             dir="auto"
           >
@@ -288,8 +332,9 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRoute } from 'vue-router'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
@@ -300,11 +345,15 @@ import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { KeyboardShortcuts } from '../../../constants'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { navState } from '../../helpers/spatialNav/NavManager'
+import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
+const route = useRoute()
 
 const SUPPORTS_LOCAL_API = process.env.SUPPORTS_LOCAL_API
+
+// Brand name, not translated
+const APP_NAME = 'LouTube'
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const isOpen = computed(() => {
@@ -421,42 +470,100 @@ const showLogViewer = () => {
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
-// Spatial-nav (remote control) zone for the side nav. Single column, one
-// row per always-rendered core link: TV, Subscriptions, Channels, History,
-// Settings, About (index = row). Conditionally-rendered items (Trending,
-// Popular, Playlists, the log viewer link) and the dynamic subscriptions
-// list aren't wired in yet - add rows here if they need arrow-key nav too.
-// The grid never changes shape, so a plain constant is enough.
-const SIDEBAR_GRID = [[0], [1], [2], [3], [4], [5]]
+// Spatial-nav (remote control) zone for the side nav: every rendered
+// top-level link and subscribed channel link, in display order, so links
+// shown or hidden by settings (Trending, Popular, Playlists, ...) are always
+// in sync. Channels without a link (channel links disabled) are skipped.
+const inner = useTemplateRef('inner')
 
-/** @type {import('vue').ComponentPublicInstance[]} */
-const sidebarLinks = []
-
-/**
- * @param {number} row
- * @param {import('vue').ComponentPublicInstance | null} link
- */
-function setSidebarLink(row, link) {
-  sidebarLinks[row] = link
+function sidebarGrid() {
+  return gridFromElements(inner.value?.querySelectorAll(':scope > .navOption, .navChannel[href]') ?? [])
 }
 
-const { isFocused } = useSpatialZone('sidebar', () => SIDEBAR_GRID, {
+// The side nav opens as a drawer (labels shown, page dimmed) while it has
+// the remote focus. Pages without a spatial-nav zone of their own leave the
+// focus here after Enter, so the drawer also closes on Enter/Right and
+// reopens on the next Up/Down.
+const drawerOpen = ref(false)
+
+/** @returns {string | null} the content zone Right should return to, if any */
+function contentZoneId() {
+  const id = navState.lastContentZoneId
+  return id != null && navState.zones.has(id) ? id : null
+}
+
+function closeDrawer() {
+  drawerOpen.value = false
+
+  const id = contentZoneId()
+  if (id != null) {
+    activateZone(id)
+  }
+}
+
+const { isActive, focusedPosition } = useSpatialZone('sidebar', sidebarGrid, {
   isChrome: true,
   edges: {
+    // Left while closed (focus left here by a page without a zone) reopens
+    left: () => {
+      drawerOpen.value = true
+      return null
+    },
     // Pressing Right hands focus back to whichever content zone (video
     // grid, etc.) was active before the user navigated into the side nav.
-    right: () => navState.lastContentZoneId,
+    right: () => {
+      drawerOpen.value = false
+      return contentZoneId()
+    },
   },
   // Enter follows the focused link.
-  onSelect: ({ row }) => sidebarLinks[row]?.$el.click(),
+  onSelect: (_position, link) => {
+    drawerOpen.value = false
+    link?.click()
+  },
 })
 
-/**
- * @param {number} row
- */
-function isSidebarItemFocused(row) {
-  return isFocused(row, 0)
+watch(isActive, (active) => {
+  drawerOpen.value = active
+
+  // The route may have changed while focus was here (e.g. on a page
+  // without a zone of its own), so line up for the next entry now.
+  if (!active) {
+    syncPositionToRoute()
+  }
+})
+
+// Row, not position: a dead-end key press re-sets the same position
+watch(() => focusedPosition.value?.row, () => {
+  if (isActive.value) {
+    drawerOpen.value = true
+  }
+})
+
+// Entering the side nav from a page lands on that page's link: the one
+// with the longest path matching the route (/tv/search/foo is Search, not TV).
+function syncPositionToRoute() {
+  if (isActive.value) { return }
+
+  const path = route.path
+  let bestRow = -1
+  let bestLength = -1
+
+  sidebarGrid().forEach(([link], row) => {
+    const linkPath = link.getAttribute('href')?.replace(/^#/, '')
+    if (linkPath && (path === linkPath || path.startsWith(`${linkPath}/`)) && linkPath.length > bestLength) {
+      bestRow = row
+      bestLength = linkPath.length
+    }
+  })
+
+  if (bestRow !== -1) {
+    navState.lastPosition.set('sidebar', { row: bestRow, col: 0 })
+  }
 }
+
+watch(() => route.path, syncPositionToRoute, { flush: 'post' })
+onMounted(syncPositionToRoute)
 </script>
 
 <style scoped src="./SideNav.css" />

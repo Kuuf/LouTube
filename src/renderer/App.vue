@@ -10,9 +10,6 @@
       noTapHighlight: !tapHighlight
     }"
   >
-    <TopNav
-      :inert="isAnyPromptOpen"
-    />
     <SideNav
       :inert="isAnyPromptOpen"
     />
@@ -113,7 +110,6 @@ import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
-import TopNav from './components/TopNav/TopNav.vue'
 import SideNav from './components/SideNav/SideNav.vue'
 import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
@@ -743,4 +739,6 @@ function handleDragStart(event) {
 </script>
 
 <style src="./themes.css" />
+<style src="./spatialNav.css" />
+<style src="./videoLists.css" />
 <style scoped src="./App.css" />
