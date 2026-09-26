@@ -2137,25 +2137,16 @@ a:visited {
   }
 }
 
+/* No visible scrollbars anywhere (TV app: scrolling follows the remote's
+   focus). Scrolling itself still works. `scrollbar-width` is the standard,
+   the pseudo element covers older Android WebViews. */
+/* stylelint-disable-next-line no-descending-specificity -- different properties than the theme rules */
+* {
+  scrollbar-width: none;
+}
+
 ::-webkit-scrollbar {
-  inline-size: auto;
-  block-size: auto;
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-color);
-  border-radius: 6px;
-  border: 2px solid transparent;
-  background-clip: padding-box;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  border: 0;
-}
-
-::-webkit-scrollbar-thumb:hover,
-::-webkit-scrollbar-thumb:focus {
-  background: var(--scrollbar-color-hover);
+  display: none;
 }
 
 /***** REMOVE MAIN SCROLLBAR WHEN PROMPT IS OPEN ******/
