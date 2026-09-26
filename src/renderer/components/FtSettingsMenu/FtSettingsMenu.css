@@ -1,6 +1,6 @@
 .settingsMenu {
-  /* top nav + margin */
-  inset-block-start: 96px;
+  /* margin from the top of the page (there is no top nav) */
+  inset-block-start: 24px;
   position: sticky;
   display: flex;
   flex-direction: column;

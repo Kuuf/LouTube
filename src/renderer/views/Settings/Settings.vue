@@ -10,6 +10,7 @@
       />
       <div
         v-show="isInDesktopView || settingsSectionTypeOpenInMobile != null"
+        ref="contentRef"
         class="settingsContent"
       >
         <div class="switchRow">
@@ -70,6 +71,8 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 
 import store from '../../store/index'
+import { useSpatialZone } from '../../composables/useSpatialZone'
+import { focusableGrid, navState } from '../../helpers/spatialNav/NavManager'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
 const SETTINGS_MOBILE_WIDTH_THRESHOLD = 1015
@@ -244,6 +247,52 @@ function showKeyboardShortcutPrompt() {
  */
 function updateSettingsSectionSortEnabled(value) {
   store.dispatch('updateSettingsSectionSortEnabled', value)
+}
+
+// Spatial-nav (remote control): the section menu on the left, and every
+// control of the sections on the right. Tooltip buttons are skipped, they
+// would add a stop to most rows.
+const contentRef = useTemplateRef('contentRef')
+
+useSpatialZone('settings-menu', () => [...(menuRef.value?.$el.querySelectorAll('a.title') ?? [])].map(link => [link]), {
+  edges: {
+    left: 'sidebar',
+    right: 'settings-content',
+  },
+  // Enter jumps into the chosen section
+  onSelect: (_position, link) => {
+    const sectionType = link.dataset.section
+    navigateToSection(sectionType)
+    nextTick(() => focusContentSection(sectionType))
+  },
+})
+
+const contentZone = useSpatialZone('settings-content', () => focusableGrid(contentRef.value, '.tooltip *'), {
+  active: true,
+  edges: {
+    // Back to the menu, on the section currently scrolled to
+    left: () => {
+      const row = settingsSectionComponents.value.findIndex(section => section.type === activeSection.value)
+      if (row !== -1) {
+        navState.lastPosition.set('settings-menu', { row, col: 0 })
+      }
+      return 'settings-menu'
+    },
+  },
+})
+
+/**
+ * Focuses the first control of a section in the content zone.
+ * @param {string} sectionType
+ */
+function focusContentSection(sectionType) {
+  const row = focusableGrid(contentRef.value, '.tooltip *')
+    .findIndex(cells => cells[0].closest('[data-section]')?.dataset.section === sectionType)
+
+  if (row !== -1) {
+    navState.lastPosition.set('settings-content', { row, col: 0 })
+  }
+  contentZone.activate()
 }
 
 function handleMounted() {
