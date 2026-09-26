@@ -27,7 +27,8 @@ import { reactive } from 'vue'
  * @property {() => (unknown | null)[][]} getGrid
  *   Returns the current grid snapshot: rows of cells, top to bottom, each
  *   cell any truthy value or `null`/`undefined` for an empty slot to skip
- *   over. A cell that is a DOM `Element` is scrolled into view when it gains
+ *   over. A cell that is a DOM `Element` gets the FOCUSED_ATTRIBUTE (styled
+ *   globally in spatialNav.css) and is scrolled into view when it gains
  *   focus. Called fresh on every navigation step, so it can read live state.
  * @property {Partial<Record<Direction, EdgeTarget>>} [edges]
  *   Which zone to activate when a move would leave this zone in that
@@ -38,6 +39,10 @@ import { reactive } from 'vue'
  *   focus back to "whichever content zone was active before" via an
  *   `edges` function.
  * @property {(position: GridPosition | null) => void} [onFocusChange]
+ * @property {(event: KeyboardEvent) => boolean} [onKeyDown]
+ *   Sees every key press first while the zone is active (except in text
+ *   fields). Returning true means the zone handled it (calling
+ *   `preventDefault()` is then up to it), and spatial nav ignores it.
  * @property {(position: GridPosition, cell: unknown) => void} [onSelect]
  *   Called when Enter is pressed on the focused cell. Defaults to clicking
  *   the cell's first link/button when the cell is a DOM `Element`.
@@ -60,6 +65,85 @@ const navState = reactive({
 
 export { navState }
 
+/** Set on the focused cell when it is a DOM element, see spatialNav.css. */
+const FOCUSED_ATTRIBUTE = 'data-spatial-nav-focused'
+
+/** Mark list items with this so `gridFromElements` callers can find them. */
+export const ITEM_ATTRIBUTE = 'data-spatial-nav-item'
+
+/** @type {Element | null} */
+let focusedElement = null
+
+/**
+ * @param {Element | null} element
+ */
+function markFocusedElement(element) {
+  if (focusedElement === element) { return }
+
+  focusedElement?.removeAttribute(FOCUSED_ATTRIBUTE)
+  focusedElement = element
+  focusedElement?.setAttribute(FOCUSED_ATTRIBUTE, '')
+}
+
+/**
+ * Groups elements into grid rows by where they are rendered, so a zone's grid
+ * always matches the on-screen layout (list, any grid width, or a whole form).
+ * Elements that overlap vertically share a row, ordered left to right.
+ * Hidden elements (not rendered, zero-size, invisible or transparent) are
+ * skipped.
+ *
+ * @param {Iterable<Element>} elements - in document order
+ * @returns {Element[][]}
+ */
+export function gridFromElements(elements) {
+  /** @type {{ element: Element, left: number }[][]} */
+  const rows = []
+  let rowBottom = -Infinity
+
+  for (const element of elements) {
+    // Own opacity only: ancestors fade in on route changes while the zone activates
+    if (!element.checkVisibility({ visibilityProperty: true }) || getComputedStyle(element).opacity === '0') { continue }
+
+    const rect = element.getBoundingClientRect()
+    if (rect.width === 0 && rect.height === 0) { continue }
+
+    // Starts below the current row (1px tolerance for borders): new row
+    if (rect.top >= rowBottom - 1) {
+      rows.push([])
+      rowBottom = rect.bottom
+    } else {
+      rowBottom = Math.max(rowBottom, rect.bottom)
+    }
+
+    rows.at(-1).push({ element, left: rect.left })
+  }
+
+  return rows.map(row => row.sort((a, b) => a.left - b.left).map(cell => cell.element))
+}
+
+/** Everything a user can act on, for zones built from a whole form/page. */
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]'
+
+/**
+ * Grid of every visible focusable control in `container`, e.g. for a zone
+ * covering a whole form or settings page. Only the innermost of nested
+ * focusables is kept (a clickable card wrapping a button is one stop: the
+ * button).
+ *
+ * @param {Element | null | undefined} container
+ * @param {string} [excludeSelector] - skip focusables matching this (e.g.
+ *   `.tooltip *` for controls not worth a stop on a remote)
+ * @returns {Element[][]}
+ */
+export function focusableGrid(container, excludeSelector) {
+  if (!container) { return [] }
+
+  const focusables = [...container.querySelectorAll(FOCUSABLE_SELECTOR)]
+    .filter(element => !element.querySelector(FOCUSABLE_SELECTOR) && !(excludeSelector && element.matches(excludeSelector)))
+
+  return gridFromElements(focusables)
+}
+
 /**
  * @param {SpatialNavZone} zone
  */
@@ -75,6 +159,7 @@ export function unregisterZone(id) {
 
   if (navState.activeZoneId === id) {
     navState.activeZoneId = null
+    markFocusedElement(null)
   }
 
   // `lastPosition` is deliberately kept: re-registering the same zone id
@@ -139,6 +224,93 @@ function findNext(grid, pos, direction) {
   return candidate
 }
 
+const SCROLL_DURATION_MS = 180
+
+/** @type {WeakMap<Element, number>} running scroll animation frame per scroller */
+const scrollAnimations = new WeakMap()
+
+/**
+ * @param {Element} element
+ * @returns {Element} nearest vertically scrollable ancestor, or the document
+ */
+function getScrollParent(element) {
+  for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+    const { overflowY } = getComputedStyle(parent)
+    if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
+      return parent
+    }
+  }
+
+  return document.scrollingElement
+}
+
+/**
+ * Vertical equivalent of `scrollIntoView({ block: 'nearest' })` (respecting
+ * `scroll-margin`), but with a short ease-out animation. The browser's
+ * `behavior: 'smooth'` is slower and not configurable. A new call while one
+ * is running continues from the current position, so repeated key presses
+ * chain into one smooth movement.
+ *
+ * @param {Element} element
+ * @param {boolean} [isFollowUp] - see the end of the animation
+ */
+function scrollIntoViewAnimated(element, isFollowUp = false) {
+  const scroller = getScrollParent(element)
+  const isDocument = scroller === document.scrollingElement
+
+  const rect = element.getBoundingClientRect()
+  const style = getComputedStyle(element)
+  const top = rect.top - parseFloat(style.scrollMarginTop)
+  const bottom = rect.bottom + parseFloat(style.scrollMarginBottom)
+
+  const viewTop = isDocument ? 0 : scroller.getBoundingClientRect().top
+  const viewBottom = isDocument ? window.innerHeight : viewTop + scroller.clientHeight
+
+  let delta = 0
+  if (top < viewTop || bottom - top > viewBottom - viewTop) {
+    // Above the view, or taller than it: align its top
+    delta = top - viewTop
+  } else if (bottom > viewBottom) {
+    delta = bottom - viewBottom
+  }
+
+  if (Math.abs(delta) < 1) { return }
+
+  const start = scroller.scrollTop
+  const target = Math.min(Math.max(start + delta, 0), scroller.scrollHeight - scroller.clientHeight)
+  if (Math.abs(target - start) < 1) { return }
+
+  cancelAnimationFrame(scrollAnimations.get(scroller))
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    scroller.scrollTop = target
+    return
+  }
+
+  const startTime = performance.now()
+
+  const step = (now) => {
+    const progress = Math.min((now - startTime) / SCROLL_DURATION_MS, 1)
+    const eased = 1 - (1 - progress) ** 3 // ease-out cubic
+
+    scroller.scrollTop = start + (target - start) * eased
+
+    if (progress < 1) {
+      scrollAnimations.set(scroller, requestAnimationFrame(step))
+    } else {
+      scrollAnimations.delete(scroller)
+
+      // Lazily rendered list items grow once scrolled into view, which can
+      // push the element back out of view: one short follow-up corrects it.
+      if (!isFollowUp && element === focusedElement) {
+        scrollIntoViewAnimated(element, true)
+      }
+    }
+  }
+
+  scrollAnimations.set(scroller, requestAnimationFrame(step))
+}
+
 /**
  * @param {string} zoneId
  * @param {(unknown | null)[][]} grid
@@ -150,7 +322,10 @@ function setPosition(zoneId, grid, pos) {
 
   const cell = grid[pos.row]?.[pos.col]
   if (cell instanceof Element) {
-    cell.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    markFocusedElement(cell)
+    scrollIntoViewAnimated(cell)
+  } else {
+    markFocusedElement(null)
   }
 }
 
@@ -186,6 +361,17 @@ export function activateZone(id, { resetPosition = false } = {}) {
   }
 
   const grid = zone.getGrid()
+
+  if (grid.length === 0) {
+    // Content not rendered yet (e.g. still loading): keep the stored position
+    // rather than clamping it to 0,0, the zone re-activates once it has items.
+    if (resetPosition) {
+      navState.lastPosition.set(id, { row: 0, col: 0 })
+    }
+    markFocusedElement(null)
+    return true
+  }
+
   const stored = navState.lastPosition.get(id)
   const pos = clampToGrid(grid, resetPosition || !stored ? { row: 0, col: 0 } : stored)
 
@@ -215,7 +401,12 @@ export function handleDirection(direction) {
   if (!zone) { return false }
 
   const grid = zone.getGrid()
-  if (!grid || grid.length === 0) { return false }
+  if (!grid || grid.length === 0) {
+    // Nothing (left) to focus in this zone, e.g. no results: its edges still
+    // lead out of it, so focus can't get stuck here
+    const edge = resolveEdge(zone.edges?.[direction])
+    return edge ? activateZone(edge.id, { resetPosition: edge.resetPosition }) : false
+  }
 
   const current = clampToGrid(grid, navState.lastPosition.get(zoneId) ?? { row: 0, col: 0 })
   const next = findNext(grid, current, direction)
@@ -235,7 +426,23 @@ export function handleDirection(direction) {
   return activateZone(edge.id, { resetPosition: edge.resetPosition })
 }
 
-const SELECT_TARGET_SELECTOR = 'a[href], button'
+/**
+ * Clicking can remove the focused element (e.g. a button replaced by the
+ * form it opens). Once the page has updated, focus whatever now sits at the
+ * same position so the cursor doesn't vanish.
+ *
+ * @param {string} zoneId
+ * @param {Element} cell
+ */
+function refocusIfRemoved(zoneId, cell) {
+  requestAnimationFrame(() => {
+    if (!cell.isConnected && navState.activeZoneId === zoneId) {
+      activateZone(zoneId)
+    }
+  })
+}
+
+const CLICK_TARGET_SELECTOR = 'a[href], button, [role="button"], [role="option"], input[type="checkbox"], input[type="radio"]'
 
 /**
  * Activates the focused cell of the active zone, as if it was clicked.
@@ -257,10 +464,29 @@ export function handleSelect() {
     return true
   }
 
-  if (cell instanceof Element) {
-    const target = cell.matches(SELECT_TARGET_SELECTOR) ? cell : cell.querySelector(SELECT_TARGET_SELECTOR)
+  if (cell instanceof HTMLElement) {
+    // Text fields take DOM focus (opening the on-screen keyboard on
+    // Android TV) and sliders too (Left/Right then adjust them), selects open
+    // their option list, everything else is clicked.
+    if (isEditableInput(cell)) {
+      cell.focus()
+      return true
+    }
+
+    if (cell instanceof HTMLSelectElement) {
+      cell.focus()
+      try {
+        cell.showPicker()
+      } catch {
+        // Not supported, or not allowed right now: focused is the fallback
+      }
+      return true
+    }
+
+    const target = cell.matches(CLICK_TARGET_SELECTOR) ? cell : cell.querySelector(CLICK_TARGET_SELECTOR)
     if (target instanceof HTMLElement) {
       target.click()
+      refocusIfRemoved(zoneId, cell)
       return true
     }
   }
@@ -279,8 +505,18 @@ const KEY_TO_DIRECTION = {
  * @param {EventTarget | null} target
  */
 function isTypingTarget(target) {
-  const tagName = /** @type {HTMLElement} */ (target)?.tagName
-  return tagName === 'INPUT' || tagName === 'TEXTAREA' || /** @type {HTMLElement} */ (target)?.isContentEditable === true
+  return isEditableInput(target) || /** @type {HTMLElement} */ (target)?.tagName === 'TEXTAREA' || /** @type {HTMLElement} */ (target)?.isContentEditable === true
+}
+
+const EDITABLE_INPUT_TYPES = new Set(['text', 'search', 'email', 'url', 'password', 'number', 'tel', 'range'])
+
+/**
+ * Inputs edited with DOM focus, where Left/Right are the input's own (caret,
+ * slider value) and Up/Down leave it: single-line text fields and sliders.
+ * @param {EventTarget | null} target
+ */
+function isEditableInput(target) {
+  return target instanceof HTMLInputElement && EDITABLE_INPUT_TYPES.has(target.type)
 }
 
 /**
@@ -288,7 +524,23 @@ function isTypingTarget(target) {
  */
 function onKeyDown(event) {
   if (navState.activeZoneId == null) { return }
-  if (isTypingTarget(event.target)) { return }
+
+  if (isTypingTarget(event.target)) {
+    // Up/Down leave a text field (e.g. after closing the on-screen
+    // keyboard) or slider and carry on navigating from its cell.
+    if (isEditableInput(event.target) && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      /** @type {HTMLElement} */ (event.target).blur()
+      handleDirection(KEY_TO_DIRECTION[event.key])
+      event.preventDefault()
+    } else if (event.key === 'Enter' && /** @type {HTMLInputElement} */ (event.target).type === 'range') {
+      // Enter confirms a slider value
+      /** @type {HTMLElement} */ (event.target).blur()
+      event.preventDefault()
+    }
+    return
+  }
+
+  if (navState.zones.get(navState.activeZoneId)?.onKeyDown?.(event)) { return }
 
   // Android TV remotes send the D-pad center button to the WebView as Enter.
   if (event.key === 'Enter') {

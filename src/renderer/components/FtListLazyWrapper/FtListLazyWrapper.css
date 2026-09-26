@@ -6,13 +6,6 @@
   min-block-size: 131px;
 }
 
-/* Clear the 60px sticky top nav when spatial nav scrolls an item into view.
-   Not on .spatialNavFocused, as that class is only applied after the scroll. */
-.grid,
-.list {
-  scroll-margin: 68px 8px 8px;
-}
-
 .draggable:active {
   cursor: grabbing;
 }
@@ -20,10 +13,4 @@
 .draggedVideo {
   opacity: 0;
   transition: 0.01s;
-}
-
-.spatialNavFocused {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
-  border-radius: 12px;
 }

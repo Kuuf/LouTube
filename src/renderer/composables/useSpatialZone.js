@@ -18,17 +18,19 @@ import { activateZone, isZoneActive, navState, registerZone, unregisterZone } fr
  * @param {Partial<Record<Direction, import('../helpers/spatialNav/NavManager').EdgeTarget>>} [options.edges]
  * @param {boolean} [options.isChrome] - persistent UI (e.g. the side nav), see NavManager.
  * @param {boolean} [options.active] - activate this zone as soon as it mounts.
+ * @param {(event: KeyboardEvent) => boolean} [options.onKeyDown]
+ *   Sees key presses first, see NavManager.
  * @param {(position: GridPosition, cell: unknown) => void} [options.onSelect]
  *   Enter on the focused cell, see NavManager. Defaults to clicking the
  *   cell's first link/button when cells are DOM elements.
  */
 export function useSpatialZone(zoneId, grid, options = {}) {
-  const { edges = {}, isChrome = false, active = false, onSelect } = options
+  const { edges = {}, isChrome = false, active = false, onKeyDown, onSelect } = options
 
   const getGrid = () => (typeof grid === 'function' ? grid() : unref(grid)) ?? []
 
   onMounted(() => {
-    registerZone({ id: zoneId, getGrid, edges, isChrome, onSelect })
+    registerZone({ id: zoneId, getGrid, edges, isChrome, onKeyDown, onSelect })
     if (active) {
       activateZone(zoneId)
     }

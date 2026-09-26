@@ -6,6 +6,7 @@
     />
     <FtCard
       v-else
+      ref="card"
       class="card"
     >
       <h2>
@@ -16,11 +17,9 @@
         {{ $t("TV.TV") }}
       </h2>
       <FtElementList
-        ref="elementList"
         :data="shownResults"
         display="grid"
-        :columns="COLUMNS"
-        :focused-index="focusedIndex"
+        :columns="3"
       />
     </FtCard>
   </div>
@@ -28,7 +27,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
+import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
@@ -41,6 +40,7 @@ import { copyToClipboard, showToast } from '../../helpers/utils'
 import { getLocalTrending } from '../../helpers/api/local'
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
 import { useSpatialZone } from '../../composables/useSpatialZone'
+import { gridFromElements, ITEM_ATTRIBUTE } from '../../helpers/spatialNav/NavManager'
 
 const { t } = useI18n()
 
@@ -55,54 +55,17 @@ const region = computed(() => store.getters.getRegion.toUpperCase())
 
 const isLoading = ref(true)
 const shownResults = shallowRef([])
-const elementList = useTemplateRef('elementList')
+const card = useTemplateRef('card')
 
-const COLUMNS = 3
-
-// Arrow-key navigation grid matching the rendered COLUMNS-wide video grid.
-// Built from rendered items only: videos hidden by preferences render no
-// element, and the visual grid reflows around them, so they must not take a
-// cell either. Cells are the elements, so NavManager scrolls the focused one
-// into view.
-// Pressing Left in the first column exits to the side nav, which remembers
-// this spot and restores it (via `lastPosition`) on the way back.
-function renderedItems() {
-  const items = []
-
-  for (let index = 0; index < shownResults.value.length; index++) {
-    const element = elementList.value?.getItemElement(index)
-    if (element) {
-      items.push({ index, element })
-    }
-  }
-
-  return items
-}
-
-function videoGrid() {
-  const elements = renderedItems().map(item => item.element)
-  const rows = []
-
-  for (let start = 0; start < elements.length; start += COLUMNS) {
-    rows.push(elements.slice(start, start + COLUMNS))
-  }
-
-  return rows
-}
-
-const { focusedPosition } = useSpatialZone('tv-video-grid', videoGrid, {
+// Arrow-key navigation over the rendered video grid (hidden videos render no
+// element, so they are skipped). Pressing Left in the first column exits to
+// the side nav; this zone remembers its spot (via `lastPosition`) for when
+// focus comes back.
+const { isActive, activate } = useSpatialZone('tv-video-grid', () => gridFromElements(card.value?.$el.querySelectorAll(`[${ITEM_ATTRIBUTE}]`) ?? []), {
   active: true,
   edges: {
-    left: { id: 'sidebar', resetPosition: true },
+    left: 'sidebar',
   },
-})
-
-// Index in `shownResults` of the focused cell.
-const focusedIndex = computed(() => {
-  const pos = focusedPosition.value
-  if (!pos) { return -1 }
-
-  return renderedItems()[pos.row * COLUMNS + pos.col]?.index ?? -1
 })
 
 onMounted(async () => {
@@ -113,6 +76,12 @@ onMounted(async () => {
   }
 
   isLoading.value = false
+
+  // Focus the (restored) position now that the videos are rendered
+  await nextTick()
+  if (isActive.value) {
+    activate()
+  }
 })
 
 // YouTube no longer has a general trending page, only these categories

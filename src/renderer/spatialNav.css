@@ -1,0 +1,30 @@
+/* Remote-control focus cursor, set by helpers/spatialNav/NavManager.js on the
+   focused cell of the active zone (right before scrolling it into view). */
+[data-spatial-nav-focused] {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+  border-radius: 12px;
+
+  /* Keep the outline clear of the viewport edge when scrolled into view */
+  scroll-margin: 8px;
+}
+
+/* List item cards (videos, channels, playlists) are rounded. Focused, they
+   also get a background that contrasts with the page, from the theme's text
+   color: darker on light themes, lighter on dark ones. The box-shadow extends
+   it (and the outline follows) a little past the item, within the grid gap. */
+[data-spatial-nav-item] {
+  border-radius: 8px;
+  transition:
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+
+[data-spatial-nav-item][data-spatial-nav-focused] {
+  --focus-background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+
+  background-color: var(--focus-background);
+  box-shadow: 0 0 0 4px var(--focus-background);
+  outline-offset: 4px;
+  border-radius: 8px;
+}

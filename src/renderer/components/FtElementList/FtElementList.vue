@@ -5,13 +5,11 @@
   >
     <FtListLazyWrapper
       v-for="(result, index) in data"
-      :ref="(item) => setItemInstance(index, item)"
       :key="`${dataType || result.type}-${result.videoId || result.playlistId || result.postId || result.id || result._id || result.authorId || result.title}-${result.playlistItemId || index}-${result.lastUpdatedAt || 0}`"
       appearance="result"
       :data="result"
       :data-type="dataType || result.type"
       :first-screen="!renderAllItemsLazily && index < 16"
-      :is-focused="index === focusedIndex"
       :layout="displayValue"
       :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
       :use-channels-hidden-preference="useChannelsHiddenPreference"
@@ -137,15 +135,7 @@ const props = defineProps({
     type: Number,
     default: null,
   },
-  focusedIndex: {
-    // Index in `data` to highlight as the spatial-nav focus target, e.g.
-    // from `useSpatialZone`'s `focusedPosition.row`. -1 (default) = none.
-    type: Number,
-    default: -1,
-  },
 })
-
-defineExpose({ getItemElement })
 
 const emit = defineEmits([
   'move-dragged-video',
@@ -157,29 +147,6 @@ const emit = defineEmits([
   'drag-video',
   'drag-video-end'
 ])
-
-/** @type {import('vue').ComponentPublicInstance[]} */
-const itemInstances = []
-
-/**
- * @param {number} index
- * @param {import('vue').ComponentPublicInstance | null} item
- */
-function setItemInstance(index, item) {
-  itemInstances[index] = item
-}
-
-/**
- * Root element of the item at `index` in `data`, e.g. for spatial-nav grid
- * cells so the focused item can be scrolled into view. Resolved on each call,
- * as items hidden by preferences render no element.
- * @param {number} index
- * @returns {HTMLElement | null}
- */
-function getItemElement(index) {
-  const el = itemInstances[index]?.$el
-  return el instanceof HTMLElement ? el : null
-}
 
 /** @type {import('vue').ComputedRef<'grid' | 'list'>} */
 const listType = computed(() => {
