@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
 import ProfileSettings from '../views/ProfileSettings/ProfileSettings.vue'
+import TV from '../views/TV/TV.vue'
 import Trending from '../views/Trending/Trending.vue'
 import Popular from '../views/Popular/Popular.vue'
 import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
@@ -25,6 +26,14 @@ const router = createRouter({
         title: 'Subscriptions'
       },
       component: Subscriptions
+    },
+    {
+      path: '/tv',
+      name: 'tv',
+      meta: {
+        title: 'TV'
+      },
+      component: TV
     },
     {
       path: '/subscriptions',

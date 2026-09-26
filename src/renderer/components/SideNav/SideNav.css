@@ -45,6 +45,12 @@
   -webkit-user-drag: none;
 }
 
+.navOption.spatialNavFocused {
+  outline: 3px solid #fff;
+  outline-offset: -3px;
+  border-radius: 12px;
+}
+
 .channelLink {
   display: block;
   color: inherit;

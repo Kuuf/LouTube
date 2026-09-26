@@ -133,6 +133,7 @@ import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import { translateWindowTitle } from './helpers/strings'
 import { loadLocale } from './i18n/index'
+import { initGlobalKeyListener, teardownGlobalKeyListener } from './helpers/spatialNav/NavManager'
 
 import android from 'android'
 import { getUpdateInfo, updateAndroidTheme } from './helpers/android/system'
@@ -233,6 +234,7 @@ onMounted(async () => {
   document.addEventListener('keydown', handleKeyboardShortcuts)
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
+  initGlobalKeyListener()
 })
 
 onBeforeUnmount(() => {
@@ -241,6 +243,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('dragstart', handleDragStart)
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
+  teardownGlobalKeyListener()
 })
 
 /** @type {import('vue').ComputedRef<string>} */

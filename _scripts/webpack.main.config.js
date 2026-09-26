@@ -13,6 +13,9 @@ const config = {
   entry: {
     main: path.join(__dirname, '../src/main/index.js'),
   },
+  externals: {
+    android: 'var {}'
+  },
   module: {
     rules: [
       {

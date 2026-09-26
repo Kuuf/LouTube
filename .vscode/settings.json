@@ -28,5 +28,6 @@
     "jsonc",
     "yml",
     "yaml"
-  ]
+  ],
+  "references.preferredLocation": "view"
 }

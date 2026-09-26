@@ -9,7 +9,32 @@
       :class="applyHiddenLabels"
     >
       <router-link
-        class="navOption topNavOption mobileShow "
+        :ref="(link) => setSidebarLink(0, link)"
+        class="navOption topNavOption mobileShow"
+        :class="{ spatialNavFocused: isSidebarItemFocused(0) }"
+        role="button"
+        to="/tv"
+        :title="$t('TV.TV')"
+      >
+        <div
+          class="thumbnailContainer"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'tv']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p
+          class="navLabel"
+        >
+          {{ $t("TV.TV") }}
+        </p>
+      </router-link>
+      <router-link
+        :ref="(link) => setSidebarLink(1, link)"
+        class="navOption mobileShow"
+        :class="{ spatialNavFocused: isSidebarItemFocused(1) }"
         role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"
@@ -30,7 +55,9 @@
         </p>
       </router-link>
       <router-link
+        :ref="(link) => setSidebarLink(2, link)"
         class="navOption mobileHidden"
+        :class="{ spatialNavFocused: isSidebarItemFocused(2) }"
         role="button"
         to="/subscribedchannels"
         :title="$t('Channels.Channels')"
@@ -118,7 +145,9 @@
       </router-link>
       <SideNavMoreOptions />
       <router-link
+        :ref="(link) => setSidebarLink(3, link)"
         class="navOption mobileShow"
+        :class="{ spatialNavFocused: isSidebarItemFocused(3) }"
         role="button"
         to="/history"
         :title="historyTitle"
@@ -140,7 +169,9 @@
       </router-link>
       <hr>
       <router-link
+        :ref="(link) => setSidebarLink(4, link)"
         class="navOption mobileShow smallMobileOnlyHidden"
+        :class="{ spatialNavFocused: isSidebarItemFocused(4) }"
         role="button"
         to="/settings"
         :title="settingsTitle"
@@ -161,7 +192,9 @@
         </p>
       </router-link>
       <router-link
+        :ref="(link) => setSidebarLink(5, link)"
         class="navOption mobileHidden"
+        :class="{ spatialNavFocused: isSidebarItemFocused(5) }"
         role="button"
         to="/about"
         :title="$t('About.About')"
@@ -266,6 +299,8 @@ import store from '../../store/index'
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { KeyboardShortcuts } from '../../../constants'
+import { useSpatialZone } from '../../composables/useSpatialZone'
+import { navState } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
 
@@ -385,6 +420,43 @@ const showLogViewer = () => {
 }
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
+
+// Spatial-nav (remote control) zone for the side nav. Single column, one
+// row per always-rendered core link: TV, Subscriptions, Channels, History,
+// Settings, About (index = row). Conditionally-rendered items (Trending,
+// Popular, Playlists, the log viewer link) and the dynamic subscriptions
+// list aren't wired in yet - add rows here if they need arrow-key nav too.
+// The grid never changes shape, so a plain constant is enough.
+const SIDEBAR_GRID = [[0], [1], [2], [3], [4], [5]]
+
+/** @type {import('vue').ComponentPublicInstance[]} */
+const sidebarLinks = []
+
+/**
+ * @param {number} row
+ * @param {import('vue').ComponentPublicInstance | null} link
+ */
+function setSidebarLink(row, link) {
+  sidebarLinks[row] = link
+}
+
+const { isFocused } = useSpatialZone('sidebar', () => SIDEBAR_GRID, {
+  isChrome: true,
+  edges: {
+    // Pressing Right hands focus back to whichever content zone (video
+    // grid, etc.) was active before the user navigated into the side nav.
+    right: () => navState.lastContentZoneId,
+  },
+  // Enter follows the focused link.
+  onSelect: ({ row }) => sidebarLinks[row]?.$el.click(),
+})
+
+/**
+ * @param {number} row
+ */
+function isSidebarItemFocused(row) {
+  return isFocused(row, 0)
+}
 </script>
 
 <style scoped src="./SideNav.css" />
