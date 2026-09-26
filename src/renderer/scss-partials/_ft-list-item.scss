@@ -76,6 +76,10 @@ $watched-transition-duration: 0.5s;
   .videoThumbnail {
     display: grid;
 
+    /* Rounded, clipping the image and the overlays at its edges */
+    border-radius: 4px;
+    overflow: hidden;
+
     .thumbnailLink,
     .videoWatched,
     .videoDuration,

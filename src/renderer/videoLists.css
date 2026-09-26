@@ -1,0 +1,11 @@
+/* Video lists run edge to edge, from the side nav to the right side of the
+   screen with 32px in from each, straight on the page background instead of
+   a lighter card. A card holding a video list is
+   recognized by its list items (FtListLazyWrapper, Up Next). */
+.routerView .ft-card:has([data-spatial-nav-item]) {
+  inline-size: auto;
+  margin-inline: 0;
+  padding-inline: 32px;
+  background-color: transparent;
+  box-shadow: none;
+}

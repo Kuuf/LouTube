@@ -17,7 +17,9 @@
 .routerView {
   flex: 1 1 0%;
   margin-block: 18px;
-  margin-inline: 10px;
+
+  /* No side margins: video lists run edge to edge, see videoLists.css */
+  margin-inline: 0;
 }
 
 .banner {
@@ -78,14 +80,6 @@
 
   .flexBox:not(:has(.banner-wrapper)) {
     margin-block: 60px -75px;
-  }
-
-  .flexBox:has(.floatingRefreshSection) {
-    margin-block: 100px;
-  }
-
-  .flexBox:has(.floatingRefreshSection):has(.banner-wrapper) {
-    margin-block: 60px;
   }
 
   .changeLogText {
