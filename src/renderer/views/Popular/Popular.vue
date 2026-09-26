@@ -15,16 +15,16 @@
         />
         {{ $t("Most Popular") }}
       </h2>
+      <ft-refresh-widget
+        :disable-refresh="isLoading"
+        :last-refresh-timestamp="lastPopularRefreshTimestamp"
+        :title="$t('Most Popular')"
+        @click="fetchPopularInfo"
+      />
       <ft-element-list
         :data="shownResults"
       />
     </ft-card>
-    <ft-refresh-widget
-      :disable-refresh="isLoading"
-      :last-refresh-timestamp="lastPopularRefreshTimestamp"
-      :title="$t('Most Popular')"
-      @click="fetchPopularInfo"
-    />
   </div>
 </template>
 

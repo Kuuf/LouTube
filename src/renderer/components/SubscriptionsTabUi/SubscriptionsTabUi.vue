@@ -1,5 +1,11 @@
 <template>
   <div>
+    <FtRefreshWidget
+      :disable-refresh="isLoading || !activeProfileHasSubscriptions"
+      :last-refresh-timestamp="lastRefreshTimestamp"
+      :title="title"
+      @click="refresh"
+    />
     <FtLoader
       v-if="isLoading"
     />
@@ -63,12 +69,6 @@
       </FtAutoLoadNextPageWrapper>
     </template>
 
-    <FtRefreshWidget
-      :disable-refresh="isLoading || !activeProfileHasSubscriptions"
-      :last-refresh-timestamp="lastRefreshTimestamp"
-      :title="title"
-      @click="refresh"
-    />
   </div>
 </template>
 

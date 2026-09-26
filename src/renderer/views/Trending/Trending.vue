@@ -10,6 +10,12 @@
         />
         {{ $t("Trending.Trending") }}
       </h2>
+      <FtRefreshWidget
+        :disable-refresh="isLoading[currentTab]"
+        :last-refresh-timestamp="lastTrendingRefreshTimestamp"
+        :title="$t('Trending.Trending')"
+        @click="getTrendingInfo(true)"
+      />
       <FtFlexBox
         class="trendingInfoTabs"
         role="tablist"
@@ -89,12 +95,6 @@
         />
       </div>
     </FtCard>
-    <FtRefreshWidget
-      :disable-refresh="isLoading[currentTab]"
-      :last-refresh-timestamp="lastTrendingRefreshTimestamp"
-      :title="$t('Trending.Trending')"
-      @click="getTrendingInfo(true)"
-    />
   </div>
 </template>
 

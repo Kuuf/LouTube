@@ -1,35 +1,14 @@
-@use '../../scss-partials/utils';
-
+/* A row at the top of the feed's card (there is no top nav to pin it under) */
 .floatingRefreshSection {
-  box-sizing: border-box;
-  padding-block: 5px;
-  padding-inline: 10px;
-  box-shadow: 0 2px 1px 0 var(--primary-shadow-color);
-  background-color: var(--card-bg-color);
-  border-inline-start: 2px solid var(--primary-shadow-color);
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   justify-content: flex-end;
-
-  @include utils.fixed-top-bar;
-}
-
-.floatingRefreshSection:has(.lastRefreshTimestamp + .refreshButton) {
-  justify-content: space-between;
+  margin-block: 0 12px;
 }
 
 .lastRefreshTimestamp {
   margin-block: 0;
-  text-align: center;
-  font-size: 16px;
-}
-
-@media only screen and (width <= 680px) {
-  .floatingRefreshSection,
-  .floatingRefreshSection.sideNavOpen,
-  .floatingRefreshSection.hideLabelsSideBar {
-    inline-size: 100%;
-    border-inline-start: none;
-  }
+  font-size: 14px;
+  color: var(--tertiary-text-color);
 }
