@@ -11,8 +11,9 @@
       v-for="video in data"
       :key="video.videoId"
       :data="video"
-      appearance="recommendation"
-      force-list-type="list"
+      appearance="result"
+      force-list-type="grid"
+      data-spatial-nav-item
       :use-channels-hidden-preference="true"
       @pause-player="pausePlayer"
     />

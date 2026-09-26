@@ -6,6 +6,7 @@ import store from '../../store/index'
 import { KeyboardShortcuts } from '../../../constants'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { FullWindowButton } from './player-components/FullWindowButton'
+import { ExitWatchButton } from './player-components/ExitWatchButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { StatsButton } from './player-components/StatsButton'
@@ -183,6 +184,7 @@ export default defineComponent({
     'skip-to-next',
     'skip-to-prev',
     'player-reload-requested',
+    'exit-watch',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -858,16 +860,17 @@ export default defineComponent({
 
         elementList = uiConfig.overflowMenuButtons
 
-        uiConfig.controlPanelElements.push('overflow_menu', 'fullscreen')
+        // The watch page is a full screen view on TV, the exit button leaves it
+        uiConfig.controlPanelElements.push('overflow_menu', 'ft_exit_watch')
       } else {
+        // The watch page is a full screen view on TV: no theatre/full window
+        // modes, and the exit button leaves it in place of fullscreen
         uiConfig.controlPanelElements.push(
           'ft_screenshot',
           'ft_autoplay_toggle',
           'overflow_menu',
           'picture_in_picture',
-          'ft_theatre_mode',
-          'ft_full_window',
-          'fullscreen'
+          'ft_exit_watch'
         )
 
         uiConfig.overflowMenuButtons.push(
@@ -1870,6 +1873,23 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_theatre_mode', new TheatreModeButtonFactory())
     }
 
+    function registerExitWatchButton() {
+      events.addEventListener('exitWatch', () => {
+        emit('exit-watch')
+      })
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class ExitWatchButtonFactory {
+        create(rootElement, controls) {
+          return new ExitWatchButton(events, rootElement, controls)
+        }
+      }
+
+      shakaControls.registerElement('ft_exit_watch', new ExitWatchButtonFactory())
+    }
+
     function registerFullWindowButton() {
       events.addEventListener('setFullWindow', (/** @type {CustomEvent} */ event) => {
         if (event.detail) {
@@ -2025,6 +2045,8 @@ export default defineComponent({
 
       shakaControls.registerElement('ft_full_window', null)
       shakaOverflowMenu.registerElement('ft_full_window', null)
+
+      shakaControls.registerElement('ft_exit_watch', null)
 
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
@@ -2310,6 +2332,11 @@ export default defineComponent({
      */
     function keyboardShortcutHandler(event) {
       if (!player) {
+        return
+      }
+
+      // Already handled, e.g. by spatial navigation (remote control)
+      if (event.defaultPrevented) {
         return
       }
 
@@ -2776,7 +2803,7 @@ export default defineComponent({
           updateMediaSessionState(videoElement.paused ? STATE_PAUSED : STATE_PLAYING, Math.floor(videoElement.currentTime * 1000))
         })
         updateBufferInterval = setInterval(() => {
-          if (videoElement.buffered.length == 0) {
+          if (videoElement.buffered.length === 0) {
             updateMediaSessionState(videoElement.paused ? STATE_PAUSED : STATE_BUFFERING, Math.floor(videoElement.currentTime * 1000))
           }
         }, 0)
@@ -2848,6 +2875,7 @@ export default defineComponent({
 
       registerTheatreModeButton()
       registerFullWindowButton()
+      registerExitWatchButton()
       registerLegacyQualitySelection()
       registerStatsButton()
       registerSkipButtons()
@@ -3377,11 +3405,40 @@ export default defineComponent({
       return uiState
     }
 
+    /** Shows the controls, restarting their hide timer */
+    function showControls() {
+      ui?.getControls().showUI()
+    }
+
+    function areControlsShown() {
+      return ui?.getControls().isOpaque() ?? false
+    }
+
+    /** Closes the settings (overflow) menu and its submenus */
+    function closeMenus() {
+      ui?.getControls().hideSettingsMenus()
+    }
+
+    function togglePlayback() {
+      const video_ = video.value
+      if (!video_) { return }
+
+      if (video_.paused) {
+        video_.play()
+      } else {
+        video_.pause()
+      }
+    }
+
     expose({
       hasLoaded,
 
       isPaused,
       pause,
+      showControls,
+      areControlsShown,
+      closeMenus,
+      togglePlayback,
       getCurrentTime,
       setCurrentTime,
       destroyPlayer

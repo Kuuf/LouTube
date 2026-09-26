@@ -13,6 +13,7 @@ import WatchVideoLiveChat from '../../components/WatchVideoLiveChat/WatchVideoLi
 import WatchVideoPlaylist from '../../components/WatchVideoPlaylist/WatchVideoPlaylist.vue'
 import WatchVideoRecommendations from '../../components/WatchVideoRecommendations/WatchVideoRecommendations.vue'
 import FtAgeRestricted from '../../components/FtAgeRestricted/FtAgeRestricted.vue'
+import { useTvWatch } from './useTvWatch'
 import { calculateColorLuminance } from '../../helpers/colors'
 import {
   buildChaptersVttFile,
@@ -96,7 +97,7 @@ export default defineComponent({
   setup: function () {
     const { t, locale } = useI18n()
 
-    return { t, currentLocale: locale }
+    return { t, currentLocale: locale, ...useTvWatch() }
   },
   data: function () {
     return {

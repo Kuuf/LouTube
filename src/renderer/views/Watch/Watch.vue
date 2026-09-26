@@ -1,6 +1,7 @@
 <template>
   <div
-    class="videoLayout"
+    ref="watchRoot"
+    class="videoLayout tvWatch"
     :class="{
       isLoading,
       useTheatreMode: useTheatreMode && !isLoading,
@@ -55,6 +56,7 @@
           @skip-to-next="handleSkipToNext"
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
+          @exit-watch="exitWatch"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"
@@ -214,6 +216,7 @@
       />
       <watch-video-recommendations
         v-if="!isLoading && !hideRecommendedVideos"
+        ref="upNext"
         :data="recommendedVideos"
         class="watchVideoSideBar watchVideoRecommendations"
         :class="{
