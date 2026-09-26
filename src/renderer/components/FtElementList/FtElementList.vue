@@ -9,6 +9,7 @@
       :data="result"
       :data-type="dataType || result.type"
       :first-screen="!renderAllItemsLazily && index < 16"
+      :is-focused="index === focusedIndex"
       :layout="displayValue"
       :show-video-with-last-viewed-playlist="showVideoWithLastViewedPlaylist"
       :use-channels-hidden-preference="useChannelsHiddenPreference"
@@ -128,6 +129,12 @@ const props = defineProps({
   videoDraggingPossible: {
     type: Boolean,
     default: false,
+  },
+  focusedIndex: {
+    // Index in `data` to highlight as the spatial-nav focus target, e.g.
+    // from `useSpatialZone`'s `focusedPosition.row`. -1 (default) = none.
+    type: Number,
+    default: -1,
   },
 })
 

@@ -9,6 +9,7 @@
       list: layout === 'list',
       draggable: isDraggable,
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      spatialNavFocused: isFocused,
     }"
     :draggable="isDraggable"
     v-on="isDraggable ? draggableEventHandlers : {}"
@@ -93,6 +94,11 @@ const props = defineProps({
   firstScreen: {
     type: Boolean,
     required: true
+  },
+  isFocused: {
+    // Spatial-nav (remote control) focus cursor, e.g. from `useSpatialZone`.
+    type: Boolean,
+    default: false
   },
   layout: {
     type: String,

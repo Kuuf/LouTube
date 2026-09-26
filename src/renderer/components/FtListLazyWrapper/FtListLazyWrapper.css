@@ -14,3 +14,9 @@
   opacity: 0;
   transition: 0.01s;
 }
+
+.spatialNavFocused {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+  border-radius: 12px;
+}
