@@ -3,6 +3,8 @@ import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
 import ProfileSettings from '../views/ProfileSettings/ProfileSettings.vue'
 import TV from '../views/TV/TV.vue'
+import TVSearch from '../views/TV/TVSearch.vue'
+import TVProfiles from '../views/TV/TVProfiles.vue'
 import Trending from '../views/Trending/Trending.vue'
 import Popular from '../views/Popular/Popular.vue'
 import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
@@ -34,6 +36,22 @@ const router = createRouter({
         title: 'TV'
       },
       component: TV
+    },
+    {
+      path: '/tv/search/:query?',
+      name: 'tvSearch',
+      meta: {
+        title: 'Search'
+      },
+      component: TVSearch
+    },
+    {
+      path: '/tv/profiles',
+      name: 'tvProfiles',
+      meta: {
+        title: 'Profile Settings'
+      },
+      component: TVProfiles
     },
     {
       path: '/subscriptions',

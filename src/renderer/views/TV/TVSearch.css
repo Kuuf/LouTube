@@ -1,0 +1,36 @@
+.searchBar {
+  box-sizing: border-box;
+  margin-block: 16px 0;
+  padding-block: 16px;
+
+  /* Edge to edge like the video lists, see videoLists.css */
+  padding-inline: 32px;
+}
+
+/* FtInput's search styling was made for the (removed) top nav: here the
+   component is exactly the bar (no bottom margin, no space held for the
+   clear button), and its buttons are centered on it */
+.searchBar :deep(.ft-input-component) {
+  padding-inline-start: 0;
+}
+
+.searchBar :deep(.ft-input) {
+  margin-block-end: 0;
+  padding-inline-start: 46px;
+}
+
+.searchBar :deep(.inputWrapper) {
+  display: block;
+}
+
+.searchBar :deep(.clearInputTextButton),
+.searchBar :deep(.inputAction) {
+  inset-block-start: 50%;
+  translate: 0 -50%;
+}
+
+/* Focus outline follows the bar's corners */
+.searchBar :deep(.ft-input-component[data-spatial-nav-focused]) {
+  border-radius: 5px;
+}
+

@@ -1,0 +1,26 @@
+h2 {
+  text-align: center;
+}
+
+.profileList {
+  max-inline-size: 1000px;
+  margin-block: 0 10px;
+  margin-inline: auto;
+}
+
+.activeProfile {
+  background-color: var(--primary-text-color);
+  color: var(--card-bg-color);
+}
+
+.card {
+  inline-size: 85%;
+  margin-block: 16px 15px;
+  margin-inline: auto;
+}
+
+@media only screen and (width <= 680px) {
+  .card {
+    inline-size: 90%;
+  }
+}

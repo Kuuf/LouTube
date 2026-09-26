@@ -1,17 +1,10 @@
 <template>
   <div>
-    <div
-      ref="iconButton"
+    <RouterLink
       class="colorOption"
-      :title="$t('Profile.Toggle Profile List')"
+      :title="$t('Profile.Profile Select')"
       :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
-      tabindex="0"
-      role="button"
-      :aria-expanded="profileListShown"
-      :aria-controls="id + 'list'"
-      @click="toggleProfileList"
-      @mousedown="handleIconMouseDown"
-      @keydown.enter.space.prevent="toggleProfileList"
+      :to="{ name: 'tvProfiles' }"
     >
       <div
         class="initial"
@@ -19,80 +12,16 @@
       >
         {{ activeProfileInitial }}
       </div>
-    </div>
-    <FtCard
-      v-show="profileListShown"
-      :id="id + 'list'"
-      ref="profileListRef"
-      class="profileList"
-      tabindex="-1"
-      @focusout="handleProfileListFocusOut"
-      @keydown.esc.stop="handleProfileListEscape"
-    >
-      <h3
-        :id="id + 'title'"
-        class="profileListTitle"
-      >
-        {{ $t("Profile.Profile Select") }}
-      </h3>
-      <FtIconButton
-        class="profileSettings"
-        :icon="['fas', 'sliders-h']"
-        :title="$t('Profile.Go To Profile Manager')"
-        @click="openProfileSettings"
-      />
-      <div
-        class="profileWrapper"
-        role="listbox"
-        :aria-labelledby="id + 'title'"
-      >
-        <div
-          v-for="profile in profileList"
-          :key="profile._id"
-          class="profile"
-          :aria-labelledby="id + profile._id"
-          :aria-selected="isActiveProfile(profile)"
-          tabindex="0"
-          role="option"
-          :data-profile-id="profile._id"
-          @click="setActiveProfile"
-          @keydown.enter.prevent="setActiveProfile"
-        >
-          <div
-            class="colorOption"
-            :style="{ background: profile.bgColor, color: profile.textColor }"
-          >
-            <div
-              class="initial"
-              dir="auto"
-            >
-              {{ profileInitials[profile._id] }}
-            </div>
-          </div>
-          <p
-            :id="id + profile._id"
-            class="profileName"
-            dir="auto"
-          >
-            {{ translateProfileName(profile) }}
-          </p>
-        </div>
-      </div>
-    </FtCard>
+    </RouterLink>
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, ref, useId, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
-
-import FtCard from '../ft-card/ft-card.vue'
-import FtIconButton from '../FtIconButton/FtIconButton.vue'
 
 import store from '../../store/index'
 
-import { showToast } from '../../helpers/utils'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { getFirstCharacter } from '../../helpers/strings'
 
@@ -102,120 +31,19 @@ import { getFirstCharacter } from '../../helpers/strings'
  * @property {string} name
  * @property {string} bgColor
  * @property {string} textColor
- * @property {object[]} subscriptions
- * @property {string} subscriptions[].id
- * @property {string|undefined} subscriptions[].name
- * @property {string|undefined} subscriptions[].thumbnail
  */
 
 const { locale, t } = useI18n()
 
-const id = useId()
-
-const profileListShown = ref(false)
-let mouseDownOnIcon = false
-
-/** @type {import('vue').ComputedRef<Profile[]>} */
-const profileList = computed(() => store.getters.getProfileList)
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => store.getters.getActiveProfile)
 
 const activeProfileInitial = computed(() => {
-  return activeProfile.value?.name
-    ? getFirstCharacter(translateProfileName(activeProfile.value), locale.value)
-    : ''
+  if (!activeProfile.value?.name) { return '' }
+
+  const name = activeProfile.value._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : activeProfile.value.name
+  return getFirstCharacter(name, locale.value)
 })
-
-/** @type {import('vue').ComputedRef<Record<Profile['_id'], string>>} */
-const profileInitials = computed(() => {
-  const locale_ = locale.value
-
-  return profileList.value.reduce((initials, profile) => {
-    initials[profile._id] = profile?.name
-      ? getFirstCharacter(translateProfileName(profile), locale_)
-      : ''
-
-    return initials
-  }, {})
-})
-
-/**
- * @param {Profile} profile
- */
-function isActiveProfile(profile) {
-  return profile._id === activeProfile.value._id
-}
-
-const profileListRef = useTemplateRef('profileListRef')
-
-function toggleProfileList() {
-  profileListShown.value = !profileListShown.value
-
-  if (profileListShown.value) {
-    // wait until the profile list is visible
-    // then focus it so we can hide it automatically when it loses focus
-    nextTick(() => {
-      profileListRef.value?.$el?.focus()
-    })
-  }
-}
-
-const router = useRouter()
-
-function openProfileSettings() {
-  router.push({ path: '/settings/profile' })
-  profileListShown.value = false
-}
-
-function handleIconMouseDown() {
-  if (profileListShown.value) {
-    mouseDownOnIcon = true
-  }
-}
-
-function handleProfileListFocusOut() {
-  if (mouseDownOnIcon) {
-    mouseDownOnIcon = false
-  } else if (!profileListRef.value?.$el.matches(':focus-within')) {
-    profileListShown.value = false
-  }
-}
-
-const iconButton = useTemplateRef('iconButton')
-
-function handleProfileListEscape() {
-  iconButton.value?.focus()
-  // handleProfileListFocusOut will hide the dropdown for us
-}
-
-/**
- * @param {MouseEvent | KeyboardEvent} event
- */
-function setActiveProfile(event) {
-  /** @type {string} */
-  const profileId = event.currentTarget.dataset.profileId
-
-  if (activeProfile.value._id !== profileId) {
-    const targetProfile = profileList.value.find((x) => {
-      return x._id === profileId
-    })
-
-    if (targetProfile) {
-      store.commit('setActiveProfile', profileId)
-
-      showToast(t('Profile.{profile} is now the active profile', { profile: translateProfileName(targetProfile) }))
-    }
-  }
-
-  profileListShown.value = false
-}
-
-/**
- * @param {Profile} profile
- */
-function translateProfileName(profile) {
-  return profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
-}
 </script>
 
 <style scoped src="./FtProfileSelector.css" />
