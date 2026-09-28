@@ -6,7 +6,7 @@ An open source YouTube player for Android TV, built with privacy in mind.
 </h2>
 
 > [!WARNING]
-> This shamelessly vibe-coded piece of garbage brings FreeTube to Android TV. It looks nice, but use at your own discretion!
+> This shamefully vibe-coded piece of garbage brings FreeTube to Android TV. It looks nice, but use at your own discretion!
 >
 > This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, use [FreeTube](https://github.com/FreeTubeApp/FreeTube) or [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova) instead.
 
