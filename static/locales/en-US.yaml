@@ -145,8 +145,6 @@ Channels:
   Count: '{number} channel(s) found.'
   Empty: Your channel list is currently empty.
   Unsubscribe Prompt: Are you sure you want to unsubscribe from "{channelName}"?
-TV:
-  TV: TV
 Trending:
   Trending: Trending
   Gaming: Gaming

@@ -13,6 +13,7 @@
       :data="video"
       appearance="result"
       force-list-type="grid"
+      :initial-visible-state="true"
       data-spatial-nav-item
       :use-channels-hidden-preference="true"
       @pause-player="pausePlayer"
