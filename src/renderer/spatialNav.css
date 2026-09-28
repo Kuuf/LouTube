@@ -41,15 +41,22 @@
   border-radius: var(--radius-md);
 }
 
-/* List item cards (videos, shorts, playlists, channels, Up Next): a white
-   border, slightly larger and above their neighbours. Scaled with transform,
-   so the list doesn't reflow. */
+/* List item cards (videos, shorts, playlists, channels, Up Next): on the
+   lighter focus background, with a white border, slightly larger and above
+   their neighbours, lifted by a drop shadow. Scaled with transform, so the
+   list doesn't reflow. */
 [data-spatial-nav-focused][data-spatial-nav-item] {
   position: relative;
   z-index: 1;
   transform: scale(1.06);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 12px 32px rgb(0 0 0 / 50%);
+}
+
+/* Watched cards paint the page background, which would hide the focus one */
+[data-spatial-nav-focused][data-spatial-nav-item] .ft-list-item.watched {
   background-color: transparent;
-  box-shadow: 0 0 0 3px #fff;
 }
 
 @media (prefers-reduced-motion: reduce) {
