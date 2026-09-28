@@ -24,7 +24,7 @@
 .premiereDate {
   align-items: center;
   background-color: rgb(0 0 0 / 80%);
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   inset-block-end: 12px;
   color: #fff;
   display: flex;
@@ -274,7 +274,7 @@
     opacity: 1;
     outline: 3px solid #fff;
     outline-offset: 6px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
   }
 
   .infoArea,

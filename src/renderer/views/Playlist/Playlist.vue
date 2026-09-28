@@ -9,10 +9,37 @@
     }"
     class="playlistPage"
   >
-    <FtLoader
+    <template
       v-if="isLoading"
-      :fullscreen="true"
-    />
+    >
+      <!-- Shaped like PlaylistInfo's header and the video list -->
+      <div
+        class="playlistInfoContainer"
+        aria-busy="true"
+      >
+        <div
+          class="skeletonInfo"
+          aria-hidden="true"
+        >
+          <div class="skeleton skeletonThumbnail" />
+          <div class="skeletonStats">
+            <div class="skeleton skeletonText skeletonTitle" />
+            <div class="skeleton skeletonText skeletonMeta" />
+            <div class="skeleton skeletonText skeletonMeta" />
+          </div>
+          <div class="skeletonActions">
+            <div class="skeleton skeletonRound skeletonChannelAvatar" />
+            <div class="skeleton skeletonText skeletonChannelName" />
+          </div>
+        </div>
+      </div>
+      <FtCard class="playlistItemsCard">
+        <FtSkeletonList
+          :display="listType"
+          :count="8"
+        />
+      </FtCard>
+    </template>
     <template
       v-else
     >
@@ -172,12 +199,11 @@
                 />
               </FtFlexBox>
             </FtAutoLoadNextPageWrapper>
-            <div
+            <FtSkeletonList
               v-if="isLoadingMore"
-              class="loadNextPageWrapper"
-            >
-              <FtLoader />
-            </div>
+              :display="listType"
+              :count="3"
+            />
           </AutoScrollWrapper>
           <FtFlexBox
             v-else
@@ -204,7 +230,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch 
 import { useI18n } from 'vue-i18n'
 import { isNavigationFailure, NavigationFailureType, onBeforeRouteLeave, useRoute, useRouter } from 'vue-router'
 
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import PlaylistInfo from '../../components/PlaylistInfo/PlaylistInfo.vue'
 import FtListVideoNumbered from '../../components/FtListVideoNumbered/FtListVideoNumbered.vue'

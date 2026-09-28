@@ -1,11 +1,6 @@
 <template>
   <div ref="tvPageRoot">
-    <FtLoader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <FtCard
-      v-else
       class="card"
     >
       <h2>
@@ -16,8 +11,11 @@
         />
         <bdi>{{ hashtag }}</bdi>
       </h2>
+      <FtSkeletonList
+        v-if="isLoading"
+      />
       <FtElementList
-        v-if="videos.length > 0"
+        v-else-if="videos.length > 0"
         :data="videos"
       />
       <FtFlexBox
@@ -31,7 +29,7 @@
       </FtFlexBox>
 
       <FtAutoLoadNextPageWrapper
-        v-if="showFetchMoreButton"
+        v-if="!isLoading && showFetchMoreButton"
         @load-next-page="handleFetchMore"
       >
         <div
@@ -53,7 +51,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import store from '../../store/index'
 import { useRoute } from 'vue-router'

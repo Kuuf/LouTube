@@ -8,15 +8,15 @@
       noSidebar: !theatrePossible
     }"
   >
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <div
-      v-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
+      v-if="isLoading || isFamilyFriendly || !showFamilyFriendlyOnly"
       class="videoArea"
     >
       <div class="videoAreaMargin">
+        <!-- Loading: the empty (black) player with the spinner in it -->
+        <ft-loader
+          v-if="isLoading"
+        />
         <ft-shaka-video-player
           v-if="!isLoading && (!isUpcoming || playabilityStatus === 'OK') && !errorMessage"
           ref="player"

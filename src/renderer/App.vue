@@ -715,4 +715,5 @@ function handleDragStart(event) {
 <style src="./themes.css" />
 <style src="./spatialNav.css" />
 <style src="./videoLists.css" />
+<style src="./skeleton.css" />
 <style scoped src="./App.css" />

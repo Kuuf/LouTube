@@ -32,8 +32,54 @@
   margin-block-end: 10px;
 }
 
-.elementListLoading {
-  margin-block-start: 200px;
+/* Loading: shaped like ChannelDetails (banner, avatar and name, tabs) */
+.skeletonBanner {
+  block-size: 13vw;
+  min-block-size: 110px;
+  max-block-size: 32vh;
+  inline-size: 100%;
+
+  /* Full bleed like the banner */
+  border-radius: 0;
+}
+
+.skeletonInfo {
+  display: flex;
+  align-items: center;
+  margin-block-start: 10px;
+  padding-inline: 32px;
+}
+
+.skeletonAvatar {
+  flex: none;
+  block-size: 100px;
+  inline-size: 100px;
+}
+
+.skeletonLines {
+  flex: 1;
+  padding-inline-start: 1em;
+}
+
+.skeletonName {
+  font-size: 25px;
+  inline-size: min(300px, 40%);
+}
+
+.skeletonSubCount {
+  inline-size: min(150px, 20%);
+}
+
+.skeletonTabs {
+  display: flex;
+  gap: 32px;
+  padding-block: calc(0.3em + 15px);
+  padding-inline: 47px;
+}
+
+.skeletonTab {
+  font-size: 15px;
+  inline-size: 70px;
 }
 
 .message {

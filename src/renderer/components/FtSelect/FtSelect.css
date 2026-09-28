@@ -36,7 +36,7 @@
   block-size: 45px;
   padding-inline-start: 1rem;
   font-size: 16px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   border: 0;
 }
 

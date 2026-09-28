@@ -6,8 +6,9 @@
       :title="title"
       @click="refresh"
     />
-    <FtLoader
+    <FtSkeletonList
       v-if="isLoading"
+      :type="isCommunity ? 'post' : 'video'"
     />
     <template
       v-else
@@ -80,8 +81,8 @@ import FtButton from '../FtButton/FtButton.vue'
 import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtLoader from '../FtLoader/FtLoader.vue'
 import FtRefreshWidget from '../FtRefreshWidget/FtRefreshWidget.vue'
+import FtSkeletonList from '../FtSkeletonList/FtSkeletonList.vue'
 
 import store from '../../store/index'
 

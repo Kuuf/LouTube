@@ -1,11 +1,6 @@
 <template>
   <div ref="tvPageRoot">
-    <ft-loader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <ft-card
-      v-else
       class="card"
     >
       <h2>
@@ -21,7 +16,11 @@
         :title="$t('Most Popular')"
         @click="fetchPopularInfo"
       />
+      <FtSkeletonList
+        v-if="isLoading"
+      />
       <ft-element-list
+        v-else
         :data="shownResults"
       />
     </ft-card>
@@ -32,10 +31,10 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, onBeforeUnmount, onMounted, ref, shallowRef } from 'vue'
 
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtRefreshWidget from '../../components/FtRefreshWidget/FtRefreshWidget.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import store from '../../store/index'
 
 import { getInvidiousPopularFeed } from '../../helpers/api/invidious'

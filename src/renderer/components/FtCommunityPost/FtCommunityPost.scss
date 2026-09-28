@@ -80,7 +80,7 @@
   }
 
   .likeBar {
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     block-size: 8px;
     margin-block-end: 4px;
   }

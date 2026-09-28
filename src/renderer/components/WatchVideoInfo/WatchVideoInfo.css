@@ -24,7 +24,7 @@
 
 .unlistedBadge {
   background-color: var(--secondary-card-bg-color);
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   display: inline;
   padding-inline: 5px;
   padding-block: 2px;
@@ -72,7 +72,7 @@
 }
 
 .likeBar {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   block-size: 8px;
   margin-block-end: 4px;
 }

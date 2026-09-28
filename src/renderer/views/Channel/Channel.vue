@@ -3,10 +3,35 @@
     ref="channelRoot"
     class="channelPage"
   >
-    <FtLoader
+    <div
       v-if="isLoading && !errorMessage"
-      :fullscreen="true"
-    />
+      class="channelSkeleton"
+      aria-busy="true"
+    >
+      <div
+        class="skeletonHeader"
+        aria-hidden="true"
+      >
+        <div class="skeleton skeletonBanner" />
+        <div class="skeletonInfo">
+          <div class="skeleton skeletonRound skeletonAvatar" />
+          <div class="skeletonLines">
+            <div class="skeleton skeletonText skeletonName" />
+            <div class="skeleton skeletonText skeletonSubCount" />
+          </div>
+        </div>
+        <div class="skeletonTabs">
+          <div
+            v-for="index in 5"
+            :key="index"
+            class="skeleton skeletonText skeletonTab"
+          />
+        </div>
+      </div>
+      <FtCard class="card">
+        <FtSkeletonList />
+      </FtCard>
+    </div>
     <ChannelDetails
       v-else-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       :id="id"
@@ -91,8 +116,9 @@
           @change="playlistSortBy = $event"
         />
       </div>
-      <FtLoader
+      <FtSkeletonList
         v-if="isCurrentTabLoading"
+        :type="currentTabSkeletonType"
       />
       <div
         v-if="currentTab !== 'about' && !isElementListLoading"
@@ -288,7 +314,7 @@ import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrappe
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 
@@ -357,6 +383,21 @@ const currentTab = ref('videos')
 
 const isCurrentTabLoading = computed(() => {
   return currentTab.value === 'search' ? isSearchTabLoading.value : isElementListLoading.value
+})
+
+/** @type {import('vue').ComputedRef<'video' | 'playlist' | 'post'>} */
+const currentTabSkeletonType = computed(() => {
+  switch (currentTab.value) {
+    case 'playlists':
+    case 'podcasts':
+    case 'releases':
+    case 'courses':
+      return 'playlist'
+    case 'community':
+      return 'post'
+    default:
+      return 'video'
+  }
 })
 
 const id = ref('')

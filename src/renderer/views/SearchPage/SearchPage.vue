@@ -1,11 +1,6 @@
 <template>
   <div>
-    <FtLoader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <FtCard
-      v-else
       class="card"
     >
       <h2>
@@ -15,11 +10,15 @@
         />
         {{ t("Search Filters.Search Results") }}
       </h2>
+      <FtSkeletonList
+        v-if="isLoading"
+      />
       <FtElementList
+        v-else
         :data="shownResults"
       />
       <FtAutoLoadNextPageWrapper
-        v-if="!isNextPageLoading"
+        v-if="!isLoading && !isNextPageLoading"
         @load-next-page="nextPage"
       >
         <div
@@ -42,10 +41,10 @@ import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 
 import store from '../../store'
 
