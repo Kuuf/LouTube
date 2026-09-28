@@ -3437,6 +3437,7 @@ export default defineComponent({
       pause,
       showControls,
       areControlsShown,
+      changeVolume,
       closeMenus,
       togglePlayback,
       getCurrentTime,

@@ -7,6 +7,10 @@ import { focusableGrid, gridFromElements, ITEM_ATTRIBUTE, navState } from '../..
 const DIRECTION_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 
 const BIG_PLAY_BUTTON = '.shaka-big-buttons-container .shaka-play-button'
+const MUTE_BUTTON = '.shaka-mute-button'
+/** Set on shaka's volume bar (container) while the volume is being set */
+const VOLUME_OPEN_CLASS = 'tvVolumeOpen'
+const VOLUME_STEP = 0.05
 const BAR_PLAY_BUTTON = '.shaka-controls-button-panel .shaka-play-button'
 
 /** The settings (gear) menu and its submenus (quality, speed, captions, ...) */
@@ -25,6 +29,8 @@ const SETTINGS_MENUS = '.shaka-overflow-menu, .shaka-settings-menu'
  *   play/pause button over the video, where Left/Right seek too. Down goes
  *   to the control bar (Left/Right between its buttons), Down again scrolls
  *   to the Up Next videos, Up from their first row comes back.
+ * - Volume: Enter on the mute button opens the volume bar, Left/Right (or
+ *   Up/Down) set the volume, Enter closes it again.
  * - Settings (gear) menu: its own zone while open, one list. Up/Down between
  *   its items, Enter on one expands its options (focus on the chosen one),
  *   Enter on an option picks it. Left collapses the options, or closes the
@@ -66,11 +72,57 @@ export function useTvWatch() {
     },
     onKeyDown: handlePlayerKey,
     onSelect: (_position, control) => {
+      if (control?.matches(MUTE_BUTTON)) {
+        openVolume(control)
+        return
+      }
+
       control?.click()
       // The gear opens the settings menu
       requestAnimationFrame(focusOpenMenu)
     },
   })
+
+  /** @type {HTMLElement | null} shaka's volume bar (container), while open */
+  let volumeContainer = null
+
+  /**
+   * @param {Element} muteButton
+   */
+  function openVolume(muteButton) {
+    // The volume bar follows the mute button, on its own or with it in a
+    // mute + volume container, depending on the controls layout
+    const sibling = muteButton.nextElementSibling
+    volumeContainer = sibling?.classList.contains('shaka-volume-bar-container')
+      ? /** @type {HTMLElement} */ (sibling)
+      : muteButton.closest('.shaka-mute-volume-container')?.querySelector('.shaka-volume-bar-container') ?? null
+
+    volumeContainer?.classList.add(VOLUME_OPEN_CLASS)
+    player.value?.showControls()
+  }
+
+  function closeVolume() {
+    volumeContainer?.classList.remove(VOLUME_OPEN_CLASS)
+    volumeContainer = null
+  }
+
+  /**
+   * While the volume bar is open, all remote keys are for it
+   * @param {KeyboardEvent} event
+   * @param {any} player_
+   */
+  function handleVolumeKey(event, player_) {
+    event.preventDefault()
+    player_.showControls()
+
+    if (event.key === 'Enter') {
+      closeVolume()
+    } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+      player_.changeVolume(VOLUME_STEP)
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+      player_.changeVolume(-VOLUME_STEP)
+    }
+  }
 
   /** @returns {HTMLElement | undefined} the settings menu, if open */
   function openMenu() {
@@ -201,6 +253,11 @@ export function useTvWatch() {
     }
 
     awaitingPlayer = false
+
+    if (volumeContainer?.isConnected) {
+      handleVolumeKey(event, player_)
+      return true
+    }
 
     if (player_.areControlsShown()) {
       // Keep them up while the remote is in use

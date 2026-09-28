@@ -250,6 +250,16 @@
     outline-offset: -3px;
   }
 
+  // Volume bar opened with the remote (useTvWatch.js): kept expanded, which
+  // shaka otherwise only does on hover, and outlined as the thing in use
+  .videoPlayer :deep(.shaka-volume-bar-container.tvVolumeOpen) {
+    inline-size: 100px;
+    opacity: 1;
+    outline: 3px solid #fff;
+    outline-offset: 6px;
+    border-radius: 4px;
+  }
+
   // Settings menu items: shaka's menu styles hide the focus outline, and a
   // full-width highlight reads better in a list anyway
   .videoPlayer :deep(.shaka-overflow-menu button[data-spatial-nav-focused]) {
