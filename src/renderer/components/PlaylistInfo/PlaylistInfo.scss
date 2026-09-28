@@ -144,6 +144,81 @@
   }
 }
 
+/*
+  TV header: thumbnail on the left (it links to the first video, i.e. play
+  all), large title, muted details, description, then channel and buttons.
+  The buttons are neutral instead of accent (blue) colored, destructive ones
+  stay red.
+*/
+.base {
+  display: grid;
+  grid-template:
+    'thumbnail stats' auto
+    'thumbnail description' auto
+    'thumbnail actions' 1fr / minmax(240px, 400px) 1fr;
+  gap: 12px 32px;
+
+  .playlistThumbnail {
+    grid-area: thumbnail;
+
+    img {
+      display: block;
+      border-radius: 8px;
+    }
+  }
+
+  .playlistStats {
+    grid-area: stats;
+  }
+
+  .playlistTitle {
+    margin-block: 0 8px;
+    font-size: 32px;
+    font-weight: bold;
+  }
+
+  .playlistStats p {
+    color: var(--tertiary-text-color);
+    line-height: 1.5;
+  }
+
+  .playlistDescription,
+  .descriptionInput {
+    grid-area: description;
+    margin: 0;
+  }
+
+  .playlistInfoSeparator {
+    display: none;
+  }
+
+  .channelShareWrapper {
+    grid-area: actions;
+    align-self: end;
+    align-items: center;
+  }
+
+  .channelName {
+    font-weight: normal;
+  }
+
+  :deep(.iconButton:is(.secondary, .base-no-default, .base)) {
+    background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+    color: var(--primary-text-color);
+
+    &:not(.disabled):is(:hover, :focus-visible, .pressed) {
+      background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent);
+    }
+  }
+
+  @media only screen and (width <= 800px) {
+    grid-template:
+      'stats' auto
+      'description' auto
+      'actions' auto / 1fr;
+  }
+}
+
 @media only screen and (width <= 1250px) {
   :deep(.sharePlaylistIcon .iconDropdown) {
     inset-inline: auto;

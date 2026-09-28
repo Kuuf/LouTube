@@ -1,48 +1,50 @@
-.shelfContainer {
-  margin-block-start: 0.5em;
-  max-inline-size: 85vw;
+.shelfContainer + .shelfContainer {
+  margin-block-start: 40px;
+}
+
+/* Title on the left, "View Playlist" on the right */
+.shelfHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-block: 0 16px;
 }
 
 .shelfTitle {
-  font-size: 24px;
-  cursor: pointer;
+  margin: 0;
+  font-size: 22px;
+  font-weight: bold;
 
   /* Prevents overflow for long values */
-  max-inline-size: 100%;
+  min-inline-size: 0;
   overflow-wrap: anywhere;
 }
 
-.shelfTitle::marker {
-  font-size: 20px;
-  color: var(--accent-color);
-}
-
-.shelfUnderline {
-  border-color: var(--primary-color);
-}
-
-.playAllSpan {
-  font-size: 18px;
-  margin-inline-start: 10px;
-}
-
+/* Neutral pill, from the theme's text color like the other secondary buttons */
 .playAllLink {
-  font-style: italic;
-  padding-block: 5px;
-  padding-inline: 7px;
-  border-radius: 10px;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  padding-block: 8px;
+  padding-inline: 16px;
+  border-radius: 999px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  color: var(--primary-text-color);
+  font-size: 14px;
   text-decoration: none;
+  transition: background-color 150ms ease-out;
 }
 
 .playAllLink:hover {
-  background-color: var(--bg-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent);
 }
 
 .shelfSubtitle {
-  font-style: italic;
+  margin-block: -8px 16px;
   color: var(--tertiary-text-color);
 
   /* Prevents overflow for long values */
-  max-inline-size: 100%;
   overflow-wrap: anywhere;
 }

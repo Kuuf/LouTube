@@ -1,30 +1,73 @@
 /* Remote-control focus cursor, set by helpers/spatialNav/NavManager.js on the
-   focused cell of the active zone (right before scrolling it into view). */
+   focused cell of the active zone (right before scrolling it into view).
+   Two styles:
+   - Visual elements (list item cards, anything with an image like avatars
+     and thumbnails, profile bubbles, color swatches, and anything marked
+     data-spatial-nav-visual, e.g. a colored avatar): a background that
+     contrasts with the page, from the theme's text color (darker on light
+     themes, lighter on dark ones), on a rounded shape.
+   - Everything else, text based (buttons, tabs, links, menu entries,
+     settings rows, player controls): the theme's text and background colors
+     swapped, like native TV UIs (white with dark text on dark themes). */
 [data-spatial-nav-focused] {
-  outline: 3px solid #fff;
-  outline-offset: 2px;
-  border-radius: 12px;
-
-  /* Keep the outline clear of the viewport edge when scrolled into view */
+  /* Keep it clear of the viewport edge when scrolled into view */
   scroll-margin: 8px;
 }
 
-/* List item cards (videos, channels, playlists) are rounded. Focused, they
-   also get a background that contrasts with the page, from the theme's text
-   color: darker on light themes, lighter on dark ones. The box-shadow extends
-   it (and the outline follows) a little past the item, within the grid gap. */
+/* List item cards are always rounded, so the focus background fits them */
 [data-spatial-nav-item] {
   border-radius: 8px;
-  transition:
-    background-color 150ms ease-out,
-    box-shadow 150ms ease-out;
 }
 
-[data-spatial-nav-item][data-spatial-nav-focused] {
-  --focus-background: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+[data-spatial-nav-item],
+[data-spatial-nav-focused] {
+  transition:
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    color 150ms ease-out;
+}
 
+/* Visual elements. The box-shadow extends the background a little past the
+   element (within the grid gap), so it frames images instead of only
+   showing behind them. */
+[data-spatial-nav-focused]:is([data-spatial-nav-item], [data-spatial-nav-visual], :has(img), .bubblePadding, .colorOption) {
+  --focus-background: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+
+  outline: none;
   background-color: var(--focus-background);
   box-shadow: 0 0 0 4px var(--focus-background);
-  outline-offset: 4px;
   border-radius: 8px;
+}
+
+/* Text based elements. !important, as components set their own colors, some
+   inline (FtButton), and the focus state has to win. Children follow the
+   swapped text color. */
+[data-spatial-nav-focused]:not([data-spatial-nav-item], [data-spatial-nav-visual], :has(img), .bubblePadding, .colorOption) {
+  outline: none;
+  background-color: var(--primary-text-color) !important;
+  color: var(--bg-color) !important;
+}
+
+[data-spatial-nav-focused]:not([data-spatial-nav-item], [data-spatial-nav-visual], :has(img), .bubblePadding, .colorOption) * {
+  color: inherit !important;
+}
+
+/* Rounded, unless the element has its own shape (circle buttons): no
+   specificity, so any border-radius of the element wins */
+:where([data-spatial-nav-focused]) {
+  border-radius: 8px;
+}
+
+/* Toggle switches (FtToggleSwitch): the focus stop is their invisible
+   checkbox, so the whole switch row takes the swapped colors instead,
+   extended a little around it by the box-shadow without moving anything */
+.switch-ctn > .switch-input[data-spatial-nav-focused] {
+  background-color: transparent !important;
+}
+
+.switch-ctn:has(> .switch-input[data-spatial-nav-focused]) {
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  box-shadow: 0 0 0 6px var(--primary-text-color);
+  border-radius: 4px;
 }

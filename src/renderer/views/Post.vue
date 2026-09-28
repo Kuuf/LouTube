@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtLoader v-if="isLoading" />
     <template
       v-else
@@ -41,6 +41,9 @@ import store from '../store/index'
 import { getInvidiousCommunityPost } from '../helpers/api/invidious'
 import { getLocalCommunityPost } from '../helpers/api/local'
 import { copyToClipboard, showToast } from '../helpers/utils'
+import { useTvPage } from '../composables/useTvPage'
+
+useTvPage('page-post', { startOn: 'first' })
 
 const { t } = useI18n()
 

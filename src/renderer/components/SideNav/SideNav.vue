@@ -196,25 +196,30 @@
         </p>
       </router-link>
       <hr>
+      <!-- The active profile: its avatar and name -->
       <router-link
         class="navOption mobileShow"
         role="button"
         to="/tv/profiles"
-        :title="$t('Profile.Profile Settings')"
+        :title="activeProfileName"
+        data-spatial-nav-visual
       >
         <div
           class="thumbnailContainer"
         >
-          <FontAwesomeIcon
-            :icon="['fas', 'circle-user']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
+          <div
+            class="profileAvatar"
+            :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
+            dir="auto"
+          >
+            {{ activeProfileInitial }}
+          </div>
         </div>
         <p
           class="navLabel"
+          dir="auto"
         >
-          {{ $t("Profile.Profile Settings") }}
+          {{ activeProfileName }}
         </p>
       </router-link>
       <router-link
@@ -259,6 +264,31 @@
           {{ $t("About.About") }}
         </p>
       </router-link>
+      <!-- New version available: opens its release notes (App.vue) -->
+      <a
+        v-if="updateVersion"
+        class="navOption mobileShow updateOption"
+        role="button"
+        tabindex="0"
+        :title="$t('Version {versionNumber} is now available!  Click for more details', { versionNumber: updateVersion })"
+        @click="emit('show-update')"
+        @keydown.enter.space.prevent="emit('show-update')"
+      >
+        <div
+          class="thumbnailContainer"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'download']"
+            class="navIcon"
+            :class="applyNavIconExpand"
+          />
+        </div>
+        <p
+          class="navLabel"
+        >
+          {{ $t("Update Available") }}
+        </p>
+      </a>
       <a
         v-if="usingAndroid && !usingRelease"
         class="navOption mobileHidden"
@@ -343,9 +373,20 @@ import store from '../../store/index'
 
 import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
-import { KeyboardShortcuts } from '../../../constants'
+import { KeyboardShortcuts, MAIN_PROFILE_ID } from '../../../constants'
+import { getFirstCharacter } from '../../helpers/strings'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
+
+defineProps({
+  /** Version of an available update, shown as a nav item, or null */
+  updateVersion: {
+    type: String,
+    default: null
+  }
+})
+
+const emit = defineEmits(['show-update'])
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -378,6 +419,15 @@ const currentInvidiousInstanceUrl = computed(() => {
 /** @type {import('vue').ComputedRef<object>} */
 const activeProfile = computed(() => {
   return store.getters.getActiveProfile
+})
+
+/** The main profile's name is translated, as elsewhere */
+const activeProfileName = computed(() => {
+  return activeProfile.value._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : activeProfile.value.name
+})
+
+const activeProfileInitial = computed(() => {
+  return activeProfileName.value ? getFirstCharacter(activeProfileName.value, locale.value) : ''
 })
 
 const activeSubscriptions = computed(() => {

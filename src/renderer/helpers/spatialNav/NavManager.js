@@ -122,7 +122,7 @@ export function gridFromElements(elements) {
 }
 
 /** Everything a user can act on, for zones built from a whole form/page. */
-const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]'
+const FOCUSABLE_SELECTOR = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"], [role="tab"]'
 
 /**
  * Grid of every visible focusable control in `container`, e.g. for a zone
@@ -142,6 +142,33 @@ export function focusableGrid(container, excludeSelector) {
     .filter(element => !element.querySelector(FOCUSABLE_SELECTOR) && !(excludeSelector && element.matches(excludeSelector)))
 
   return gridFromElements(focusables)
+}
+
+/**
+ * Grid of a whole page: its list items (videos, channels, playlists) as one
+ * stop each, plus every other visible focusable control outside of them
+ * (tabs, inputs, selects, buttons, links), in document order and grouped
+ * into rows by position. Only the innermost of nested controls is kept.
+ *
+ * @param {Element | null | undefined} container
+ * @param {string} [excludeSelector] - skip controls matching this
+ * @returns {Element[][]}
+ */
+export function pageGrid(container, excludeSelector) {
+  if (!container) { return [] }
+
+  const items = [...container.querySelectorAll(`[${ITEM_ATTRIBUTE}]`)]
+  const controls = [...container.querySelectorAll(FOCUSABLE_SELECTOR)]
+    .filter(element =>
+      !element.closest(`[${ITEM_ATTRIBUTE}]`) &&
+      !element.querySelector(FOCUSABLE_SELECTOR) &&
+      !(excludeSelector && element.matches(excludeSelector))
+    )
+
+  const cells = [...items, ...controls]
+    .sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1)
+
+  return gridFromElements(cells)
 }
 
 /**
@@ -323,6 +350,7 @@ function setPosition(zoneId, grid, pos) {
   const cell = grid[pos.row]?.[pos.col]
   if (cell instanceof Element) {
     markFocusedElement(cell)
+    releaseDomFocus(cell)
     scrollIntoViewAnimated(cell)
   } else {
     markFocusedElement(null)
@@ -442,7 +470,7 @@ function refocusIfRemoved(zoneId, cell) {
   })
 }
 
-const CLICK_TARGET_SELECTOR = 'a[href], button, [role="button"], [role="option"], input[type="checkbox"], input[type="radio"]'
+const CLICK_TARGET_SELECTOR = 'a[href], button, [role="button"], [role="option"], [role="tab"], input[type="checkbox"], input[type="radio"]'
 
 /**
  * Activates the focused cell of the active zone, as if it was clicked.
@@ -486,6 +514,7 @@ export function handleSelect() {
     const target = cell.matches(CLICK_TARGET_SELECTOR) ? cell : cell.querySelector(CLICK_TARGET_SELECTOR)
     if (target instanceof HTMLElement) {
       target.click()
+      releaseDomFocus(cell)
       refocusIfRemoved(zoneId, cell)
       return true
     }
@@ -499,6 +528,23 @@ const KEY_TO_DIRECTION = {
   ArrowDown: 'down',
   ArrowLeft: 'left',
   ArrowRight: 'right',
+}
+
+/**
+ * Components may put DOM focus on elements themselves (e.g. a tab focusing
+ * itself when chosen, for keyboard users). With the remote, that focus would
+ * linger (with its native outline) while the focus cursor moves on, so it is
+ * released. Kept: a text field, slider or select in the focused cell, which
+ * has DOM focus on purpose (typing, adjusting, picking).
+ *
+ * @param {Element} cell
+ */
+function releaseDomFocus(cell) {
+  const active = document.activeElement
+  if (!(active instanceof HTMLElement) || active === document.body) { return }
+  if (cell.contains(active) && (isTypingTarget(active) || active instanceof HTMLSelectElement)) { return }
+
+  active.blur()
 }
 
 /**
@@ -524,6 +570,11 @@ function isEditableInput(target) {
  */
 function onKeyDown(event) {
   if (navState.activeZoneId == null) { return }
+
+  // Prompts (FtPrompt) handle the keys themselves: their buttons have DOM
+  // focus, Left/Right move between them, Enter clicks, Escape/Back closes.
+  // Spatial nav would otherwise also act on the page behind them.
+  if (document.querySelector('.prompt')) { return }
 
   if (isTypingTarget(event.target)) {
     // Up/Down leave a text field (e.g. after closing the on-screen

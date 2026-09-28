@@ -173,9 +173,10 @@ $knob-inset: 2px;
     cursor: not-allowed;
   }
 
-  // The whole row shows the focus, see below
+  // The whole row shows the focus (see below): the checkbox covering it
+  // stays invisible, over the global focus style (spatialNav.css)
   &[data-spatial-nav-focused] {
-    outline: none;
+    background-color: transparent !important;
   }
 }
 
@@ -229,10 +230,15 @@ $knob-inset: 2px;
   }
 }
 
+// Focused row: text and background colors swapped, like other text based
+// elements (spatialNav.css)
 .settingsSection :deep(.switch-ctn:has(> .switch-input[data-spatial-nav-focused])) {
-  background-color: var(--card-bg-color);
-  box-shadow: inset 0 0 0 3px #fff;
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
   border-radius: $row-radius;
+
+  // Settings rows are padded already: no extension around them (spatialNav.css)
+  box-shadow: none;
 }
 
 // Tooltips sit beside the label, above the row-covering checkbox

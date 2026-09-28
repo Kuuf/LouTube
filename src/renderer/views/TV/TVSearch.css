@@ -29,8 +29,18 @@
   translate: 0 -50%;
 }
 
-/* Focus outline follows the bar's corners */
+/* Focused, the whole bar takes the swapped colors (spatialNav.css): the
+   input's own background gives way to it, with the bar's corners */
 .searchBar :deep(.ft-input-component[data-spatial-nav-focused]) {
   border-radius: 5px;
+}
+
+.searchBar :deep(.ft-input-component[data-spatial-nav-focused] .ft-input) {
+  background-color: transparent;
+}
+
+.searchBar :deep(.ft-input-component[data-spatial-nav-focused] .ft-input::placeholder) {
+  color: inherit;
+  opacity: 0.6;
 }
 

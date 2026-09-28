@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div
+    ref="channelRoot"
+    class="channelPage"
+  >
     <FtLoader
       v-if="isLoading && !errorMessage"
       :fullscreen="true"
@@ -7,6 +10,7 @@
     <ChannelDetails
       v-else-if="(isFamilyFriendly || !showFamilyFriendlyOnly)"
       :id="id"
+      ref="channelHeader"
       :name="channelName"
       :banner-url="bannerUrl"
       :has-error-message="!!errorMessage"
@@ -25,6 +29,7 @@
     />
     <FtCard
       v-if="!isLoading && !errorMessage && (isFamilyFriendly || !showFamilyFriendlyOnly)"
+      ref="channelContent"
       class="card"
     >
       <ChannelAbout
@@ -298,6 +303,7 @@ import {
   removeFromArrayIfExists
 } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
+import { useTvChannel } from './useTvChannel'
 import {
   getInvidiousChannelLive,
   getInvidiousChannelPlaylists,
@@ -332,6 +338,8 @@ import {
 const { t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+
+useTvChannel()
 
 let skipRouteChangeWatcherOnce = false
 let autoRefreshOnSortByChangeEnabled = false

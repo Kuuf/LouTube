@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtCard class="card">
       <h2>
         <FontAwesomeIcon
@@ -136,6 +136,9 @@ import SubscriptionsShorts from '../../components/SubscriptionsShorts.vue'
 import SubscriptionsPosts from '../../components/SubscriptionPosts/SubscriptionsPosts.vue'
 
 import store from '../../store/index'
+import { useTvPage } from '../../composables/useTvPage'
+
+useTvPage('page-subscriptions')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {

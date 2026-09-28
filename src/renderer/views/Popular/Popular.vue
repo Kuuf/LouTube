@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <ft-loader
       v-if="isLoading"
       :fullscreen="true"
@@ -42,6 +42,9 @@ import { getInvidiousPopularFeed } from '../../helpers/api/invidious'
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import { KeyboardShortcuts } from '../../../constants'
+import { useTvPage } from '../../composables/useTvPage'
+
+useTvPage('page-popular')
 
 const { t } = useI18n()
 

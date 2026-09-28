@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <ft-card class="card">
       <h2>
         <FontAwesomeIcon
@@ -95,6 +95,11 @@ import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/loca
 import { ctrlFHandler, debounce } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
+import { useTvPage } from '../../composables/useTvPage'
+
+// One stop per channel (its avatar), plus its unsubscribe button: the name
+// links to the same channel
+useTvPage('page-subscribed-channels', { startOn: 'first', exclude: '.channel .channelName' })
 
 const route = useRoute()
 const router = useRouter()

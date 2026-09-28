@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
-import ProfileSettings from '../views/ProfileSettings/ProfileSettings.vue'
 import TV from '../views/TV/TV.vue'
 import TVSearch from '../views/TV/TVSearch.vue'
 import TVProfiles from '../views/TV/TVProfiles.vue'
@@ -11,7 +10,6 @@ import UserPlaylists from '../views/UserPlaylists/UserPlaylists.vue'
 import History from '../views/History/History.vue'
 import Settings from '../views/Settings/Settings.vue'
 import About from '../views/About/About.vue'
-import SearchPage from '../views/SearchPage/SearchPage.vue'
 import Playlist from '../views/Playlist/Playlist.vue'
 import Channel from '../views/Channel/Channel.vue'
 import Watch from '../views/Watch/Watch.vue'
@@ -119,20 +117,15 @@ const router = createRouter({
       },
       component: About
     },
+    // The TV pages embed these views (with remote navigation), links to the
+    // standalone ones still exist (e.g. YouTube search links, data import)
     {
       path: '/settings/profile',
-      name: 'profileSettings',
-      meta: {
-        title: 'Profile Settings'
-      },
-      component: ProfileSettings
+      redirect: '/tv/profiles'
     },
     {
       path: '/search/:query',
-      meta: {
-        title: 'Search Results'
-      },
-      component: SearchPage
+      redirect: to => ({ name: 'tvSearch', params: { query: to.params.query }, query: to.query })
     },
     {
       path: '/playlist/:id',

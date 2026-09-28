@@ -45,15 +45,28 @@
   -webkit-user-drag: none;
 }
 
-.navOption[data-spatial-nav-focused] {
-  outline: 3px solid #fff;
-  outline-offset: -3px;
-  border-radius: 12px;
-}
-
 .drawerScrim,
 .brand {
   display: none;
+}
+
+/* Active profile's avatar, in place of an icon */
+.profileAvatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 28px;
+  block-size: 28px;
+  margin-inline: auto;
+  border-radius: 50%;
+  font-size: 15px;
+  line-height: 1;
+  user-select: none;
+}
+
+/* New version available: accent colored to stand out */
+.updateOption {
+  color: var(--accent-color);
 }
 
 .channelLink {
@@ -347,29 +360,22 @@
     transition: opacity 300ms ease-out;
   }
 
+  /* 8px in from both sides of the rail/drawer, so the focus highlight
+     doesn't run edge to edge */
   .navOption,
   .navChannel {
     display: flex;
     align-items: center;
     min-block-size: 52px;
+    margin-block: 2px;
+    margin-inline: 8px;
     padding: 0;
   }
 
-  .navChannel[data-spatial-nav-focused] {
-    outline: 3px solid #fff;
-    outline-offset: -3px;
-    border-radius: 12px;
-  }
-
-  .drawerOpen .navOption[data-spatial-nav-focused],
-  .drawerOpen .navChannel[data-spatial-nav-focused] {
-    background-color: var(--side-nav-hover-color);
-    color: var(--side-nav-hover-text-color);
-  }
-
+  /* 64px + the 8px inset keeps the icons centered on the 80px rail */
   .navOption .thumbnailContainer,
   .navChannel .thumbnailContainer {
-    flex: 0 0 80px;
+    flex: 0 0 64px;
     margin-block: 0;
   }
 

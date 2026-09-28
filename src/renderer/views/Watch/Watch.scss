@@ -242,12 +242,29 @@
     margin: 0;
   }
 
-  // Focusing a player control scrolls all the way back up to the video. The
-  // outline goes inside the control: the control bar is at the bottom edge
-  // of the screen, which would cut off an outline around it.
+  // Focusing a player control scrolls all the way back up to the video
   .videoPlayer :deep([data-spatial-nav-focused]) {
     scroll-margin-block-start: 100vh;
-    outline-offset: -3px;
+  }
+
+  // Space under the control bar, so a focused control doesn't touch the
+  // bottom of the video, and between the progress bar and the buttons
+  // (16px instead of shaka's 4px). The settings menu and the gradient behind
+  // the controls move up/grow by the same amounts (+12px each).
+  .videoPlayer :deep(.shaka-bottom-controls) {
+    padding-block-end: 12px;
+  }
+
+  .videoPlayer :deep(.shaka-seek-bar-container) {
+    margin-block-end: 16px;
+  }
+
+  .videoPlayer :deep(:is(.shaka-overflow-menu, .shaka-settings-menu)) {
+    inset-block-end: 86px;
+  }
+
+  .videoPlayer :deep(.shaka-scrim-container) {
+    block-size: 85px;
   }
 
   // Volume bar opened with the remote (useTvWatch.js): kept expanded, which
@@ -258,15 +275,6 @@
     outline: 3px solid #fff;
     outline-offset: 6px;
     border-radius: 4px;
-  }
-
-  // Settings menu items: shaka's menu styles hide the focus outline, and a
-  // full-width highlight reads better in a list anyway
-  .videoPlayer :deep(.shaka-overflow-menu button[data-spatial-nav-focused]) {
-    background-color: rgb(255 255 255 / 20%);
-    box-shadow: inset 0 0 0 2px #fff;
-    border-radius: 4px;
-    outline: none;
   }
 
   .infoArea,

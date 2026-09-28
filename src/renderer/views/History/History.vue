@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtCard
       class="card"
     >
@@ -96,6 +96,9 @@ import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import store from '../../store'
 
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
+import { useTvPage } from '../../composables/useTvPage'
+
+useTvPage('page-history')
 
 const { t } = useI18n()
 const route = useRoute()

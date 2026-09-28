@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtLoader
       v-if="isLoading"
       :fullscreen="true"
@@ -62,7 +62,10 @@ import { copyToClipboard, showToast } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
 import { getHashtagInvidious } from '../../helpers/api/invidious'
 import { useI18n } from 'vue-i18n'
+import { useTvPage } from '../../composables/useTvPage'
 const { t } = useI18n()
+
+useTvPage('page-hashtag')
 
 const route = useRoute()
 

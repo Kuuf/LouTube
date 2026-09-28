@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtCard class="card">
       <h2>
         <FontAwesomeIcon
@@ -48,6 +48,9 @@ import { vSaferHtml } from '../../directives/vSaferHtml.js'
 
 import { ABOUT_BITCOIN_ADDRESS } from '../../../constants'
 import packageDetails from '../../../../package.json'
+import { useTvPage } from '../../composables/useTvPage'
+
+useTvPage('page-about', { startOn: 'first' })
 
 const { t } = useI18n()
 

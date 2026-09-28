@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="playlistRoot"
     :class="{
       [listType]: true,
       playlistInEditMode,
@@ -16,6 +17,7 @@
       v-else
     >
       <div
+        ref="playlistHeader"
         class="playlistInfoContainer"
         :class="{
           promptOpen,
@@ -42,7 +44,7 @@
           :more-video-data-available="moreVideoDataAvailable"
           :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
           :search-query-text="searchQueryTextRequested"
-          :theme="listType === 'list' ? 'base' : 'top-bar'"
+          theme="base"
           class="playlistInfo"
           @dragstart.prevent
           @enter-edit-mode="playlistInEditMode = true"
@@ -54,6 +56,7 @@
       </div>
 
       <FtCard
+        ref="playlistItemsCard"
         class="playlistItemsCard"
       >
         <FtFlexBox
@@ -129,6 +132,7 @@
                 v-for="(item, index) in visiblePlaylistItems"
                 :key="`${item.videoId}-${item.playlistItemId || index}`"
                 class="playlistItem"
+                data-spatial-nav-item
                 :data="item"
                 :playlist-id="playlistId"
                 :playlist-type="infoSource"
@@ -230,10 +234,13 @@ import {
 import { invidiousGetPlaylistInfo, youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getSortedPlaylistItems, videoDurationPresent, videoDurationWithFallback, SORT_BY_VALUES } from '../../helpers/playlists'
 import { MOBILE_WIDTH_THRESHOLD, PLAYLIST_HEIGHT_FORCE_LIST_THRESHOLD } from '../../../constants'
+import { useTvPlaylist } from './useTvPlaylist'
 
 const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
+
+useTvPlaylist()
 
 const isLoading = ref(true)
 const playlistTitle = ref('')

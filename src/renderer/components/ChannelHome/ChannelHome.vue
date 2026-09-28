@@ -5,48 +5,39 @@
       :key="index"
       class="shelfContainer"
     >
-      <details
-        open
-      >
-        <summary
+      <div class="shelfHeader">
+        <h2
           class="shelfTitle"
-        >
-          <bdi>
-            {{ shelf.title }}
-          </bdi>
-          <span
-            v-if="shelf.playlistId"
-            class="playAllSpan"
-          >
-            <router-link
-              class="playAllLink"
-              :to="{
-                path: `/playlist/${shelf.playlistId}`
-              }"
-            >
-              <FontAwesomeIcon
-                class="thumbnail"
-                :icon="['fas', 'list']"
-              />
-              {{ $t('Channel.Home.View Playlist') }}
-            </router-link>
-          </span>
-          <hr class="shelfUnderline">
-        </summary>
-        <p
-          v-if="shelf.subtitle"
-          class="shelfSubtitle"
           dir="auto"
         >
-          {{ shelf.subtitle }}
-        </p>
-        <FtElementList
-          :data="shelf.content"
-          :use-channels-hidden-preference="false"
-          :display="shelf.isCommunity ? 'list' : ''"
-          :render-all-items-lazily="index > 2"
-        />
-      </details>
+          {{ shelf.title }}
+        </h2>
+        <router-link
+          v-if="shelf.playlistId"
+          class="playAllLink"
+          :to="{
+            path: `/playlist/${shelf.playlistId}`
+          }"
+        >
+          <FontAwesomeIcon
+            :icon="['fas', 'list']"
+          />
+          {{ $t('Channel.Home.View Playlist') }}
+        </router-link>
+      </div>
+      <p
+        v-if="shelf.subtitle"
+        class="shelfSubtitle"
+        dir="auto"
+      >
+        {{ shelf.subtitle }}
+      </p>
+      <FtElementList
+        :data="shelf.content"
+        :use-channels-hidden-preference="false"
+        :display="shelf.isCommunity ? 'list' : ''"
+        :render-all-items-lazily="index > 2"
+      />
     </div>
   </div>
 </template>

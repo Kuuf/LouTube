@@ -1,14 +1,26 @@
-.card {
-  position: relative;
-  inline-size: 85%;
-  margin-block: 0 20px;
-  margin-inline: auto;
-  box-sizing: border-box;
+/* The banner starts at the top of the screen: cancels the top margins of
+   this page's root and of the app's main area (both .routerView, 18px each) */
+.channelPage.routerView {
+  margin-block-start: -18px;
 }
 
-.channelDetails {
+/* Edge to edge on the page background like the video lists (videoLists.css),
+   (as .ft-card to win over FtCard's own background) */
+.ft-card.card {
+  position: relative;
+  inline-size: auto;
+  margin-block: 0 20px;
+  margin-inline: 0;
+  padding-inline: 32px;
+  box-sizing: border-box;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* The banner runs full bleed, ChannelDetails pads the info below it */
+.ft-card.channelDetails {
   padding: 0;
-  max-inline-size: 92vw;
+  max-inline-size: none;
 }
 
 .select-container {

@@ -12,23 +12,14 @@
   >
     <SideNav
       :inert="isAnyPromptOpen"
+      :update-version="showUpdatesBanner ? latestVersionNumber : null"
+      @show-update="showReleaseNotes = true"
     />
     <FtFlexBox
       class="flexBox routerView"
       role="main"
       :inert="isAnyPromptOpen"
     >
-      <div
-        v-if="showUpdatesBanner"
-        class="banner-wrapper"
-      >
-        <FtNotificationBanner
-          class="banner"
-          :message="updateBannerMessage"
-          role="link"
-          @click="handleUpdateBannerClick"
-        />
-      </div>
       <RouterView
         v-slot="{ Component }"
         class="routerView"
@@ -111,7 +102,6 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import SideNav from './components/SideNav/SideNav.vue'
-import FtNotificationBanner from './components/FtNotificationBanner/FtNotificationBanner.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'
@@ -289,12 +279,6 @@ const updateChangelog = ref('')
 /** @type {import('vue').ComputedRef<boolean>} */
 const checkForUpdates = computed(() => store.getters.getCheckForUpdates)
 
-const updateBannerMessage = computed(() => {
-  return t('Version {versionNumber} is now available!  Click for more details', {
-    versionNumber: latestVersionNumber.value
-  })
-})
-
 async function checkForNewUpdates() {
   if (!checkForUpdates.value) {
     return
@@ -312,17 +296,6 @@ async function checkForNewUpdates() {
 
 function toggleShowReleaseNotes() {
   showReleaseNotes.value = !showReleaseNotes.value
-}
-
-/**
- * @param {boolean} response
- */
-function handleUpdateBannerClick(response) {
-  if (response) {
-    showReleaseNotes.value = true
-  } else {
-    showUpdatesBanner.value = false
-  }
 }
 
 function openDownloadsPage() {
@@ -557,7 +530,8 @@ const windowTitle = computed(() => {
     !routePath.startsWith('/watch/') &&
     !routePath.startsWith('/hashtag/') &&
     !routePath.startsWith('/playlist/') &&
-    !routePath.startsWith('/search/')
+    !routePath.startsWith('/search/') &&
+    !routePath.startsWith('/tv/search/')
   ) {
     return translateWindowTitle(route.meta.title) ?? ''
   } else {

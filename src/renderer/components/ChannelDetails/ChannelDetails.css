@@ -15,10 +15,11 @@
 
 .infoContainer {
   position: relative;
-  background-color: var(--card-bg-color);
   margin-block-start: 10px;
   padding-block: 0;
-  padding-inline: 16px;
+
+  /* Lines up with the channel's video list */
+  padding-inline: 32px;
 }
 
 .info {

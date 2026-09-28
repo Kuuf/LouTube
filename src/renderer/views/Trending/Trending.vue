@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div ref="tvPageRoot">
     <FtCard
       class="card"
     >
@@ -114,6 +114,9 @@ import store from '../../store/index'
 import { copyToClipboard, getRelativeTimeFromDate, showToast } from '../../helpers/utils'
 import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
+import { useTvPage } from '../../composables/useTvPage'
+
+useTvPage('page-trending')
 
 const { t } = useI18n()
 
