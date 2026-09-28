@@ -328,5 +328,16 @@ export function useTvWatch() {
     }
   }
 
-  return { watchRoot, player, upNext, exitWatch }
+  /**
+   * The channel button in the control bar. A new history entry, so Back
+   * returns to the video.
+   * @param {string} channelId
+   */
+  function goToChannel(channelId) {
+    if (channelId) {
+      router.push(`/channel/${channelId}`)
+    }
+  }
+
+  return { watchRoot, player, upNext, exitWatch, goToChannel }
 }

@@ -7,6 +7,7 @@ import { KeyboardShortcuts } from '../../../constants'
 import { AudioTrackSelection } from './player-components/AudioTrackSelection'
 import { FullWindowButton } from './player-components/FullWindowButton'
 import { ExitWatchButton } from './player-components/ExitWatchButton'
+import { ChannelButton } from './player-components/ChannelButton'
 import { LegacyQualitySelection } from './player-components/LegacyQualitySelection'
 import { ScreenshotButton } from './player-components/ScreenshotButton'
 import { StatsButton } from './player-components/StatsButton'
@@ -172,6 +173,14 @@ export default defineComponent({
       type: Number,
       default: 0
     },
+    channelName: {
+      type: String,
+      default: ''
+    },
+    channelThumbnail: {
+      type: String,
+      default: ''
+    },
   },
   emits: [
     'error',
@@ -185,6 +194,7 @@ export default defineComponent({
     'skip-to-prev',
     'player-reload-requested',
     'exit-watch',
+    'go-to-channel',
   ],
   setup: function (props, { emit, expose }) {
     const { locale, t } = useI18n()
@@ -822,7 +832,8 @@ export default defineComponent({
         'mute',
         'volume',
         'time_and_duration',
-        'spacer'
+        'spacer',
+        'ft_channel'
       ]
 
       /** @type {shaka.extern.UIConfiguration} */
@@ -1890,6 +1901,23 @@ export default defineComponent({
       shakaControls.registerElement('ft_exit_watch', new ExitWatchButtonFactory())
     }
 
+    function registerChannelButton() {
+      events.addEventListener('goToChannel', () => {
+        emit('go-to-channel')
+      })
+
+      /**
+       * @implements {shaka.extern.IUIElement.Factory}
+       */
+      class ChannelButtonFactory {
+        create(rootElement, controls) {
+          return new ChannelButton(props.channelName, props.channelThumbnail, events, rootElement, controls)
+        }
+      }
+
+      shakaControls.registerElement('ft_channel', new ChannelButtonFactory())
+    }
+
     function registerFullWindowButton() {
       events.addEventListener('setFullWindow', (/** @type {CustomEvent} */ event) => {
         if (event.detail) {
@@ -2047,6 +2075,7 @@ export default defineComponent({
       shakaOverflowMenu.registerElement('ft_full_window', null)
 
       shakaControls.registerElement('ft_exit_watch', null)
+      shakaControls.registerElement('ft_channel', null)
 
       shakaControls.registerElement('ft_legacy_quality', null)
       shakaOverflowMenu.registerElement('ft_legacy_quality', null)
@@ -2876,6 +2905,7 @@ export default defineComponent({
       registerTheatreModeButton()
       registerFullWindowButton()
       registerExitWatchButton()
+      registerChannelButton()
       registerLegacyQualitySelection()
       registerStatsButton()
       registerSkipButtons()
