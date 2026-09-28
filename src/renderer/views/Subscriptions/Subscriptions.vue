@@ -1,13 +1,17 @@
 <template>
   <div ref="tvPageRoot">
     <FtCard class="card">
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'rss']"
-          class="subscriptionIcon"
-        />
-        {{ $t("Subscriptions.Subscriptions") }}
-      </h2>
+      <div class="pageHeader">
+        <h2>
+          <FontAwesomeIcon
+            :icon="['fas', 'rss']"
+            class="subscriptionIcon"
+          />
+          {{ $t("Subscriptions.Subscriptions") }}
+        </h2>
+        <!-- The tab's refresh widget (SubscriptionsTabUi) is teleported here -->
+        <div id="subscriptionsHeaderActions" />
+      </div>
       <FtFlexBox
         class="tabs"
         role="tablist"

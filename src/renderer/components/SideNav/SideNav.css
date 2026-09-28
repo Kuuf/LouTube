@@ -82,6 +82,12 @@
   transition: background 0.2s ease-in;
 }
 
+/* Same size as the text/icon entries' focus: no spread past the entry */
+.navOption[data-spatial-nav-focused],
+.navChannel[data-spatial-nav-focused] {
+  box-shadow: none;
+}
+
 .navOption:active,
 .navChannel:active {
   background-color: var(--side-nav-active-color);

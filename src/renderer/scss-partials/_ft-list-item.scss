@@ -57,6 +57,7 @@ $watched-transition-duration: 0.5s;
 
   &.watched {
     background-color: var(--bg-color);
+    border-radius: var(--radius-md);
 
     @include low-contrast-when-watched(var(--primary-text-color));
 
@@ -457,4 +458,13 @@ $watched-transition-duration: 0.5s;
   margin-block-end: inherit;
   font-size: inherit;
   font-weight: inherit;
+}
+
+// Long titles stop at 2 lines with an ellipsis, the full one is in the link's title
+.title > .h3Title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }

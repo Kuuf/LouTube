@@ -1,11 +1,17 @@
 <template>
   <div>
-    <FtRefreshWidget
-      :disable-refresh="isLoading || !activeProfileHasSubscriptions"
-      :last-refresh-timestamp="lastRefreshTimestamp"
-      :title="title"
-      @click="refresh"
-    />
+    <!-- On the page heading's row (Subscriptions.vue) -->
+    <Teleport
+      defer
+      to="#subscriptionsHeaderActions"
+    >
+      <FtRefreshWidget
+        :disable-refresh="isLoading || !activeProfileHasSubscriptions"
+        :last-refresh-timestamp="lastRefreshTimestamp"
+        :title="title"
+        @click="refresh"
+      />
+    </Teleport>
     <FtSkeletonList
       v-if="isLoading"
       :type="isCommunity ? 'post' : 'video'"

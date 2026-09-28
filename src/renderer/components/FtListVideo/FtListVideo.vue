@@ -151,6 +151,7 @@
       <RouterLink
         class="title"
         :to="watchVideoRouterLink"
+        :title="displayTitle"
         @click="handleWatchPageLinkClick"
       >
         <h3

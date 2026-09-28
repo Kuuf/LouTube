@@ -3,19 +3,21 @@
     <FtCard
       class="card"
     >
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'fire']"
-          class="trendingIcon"
+      <div class="pageHeader">
+        <h2>
+          <FontAwesomeIcon
+            :icon="['fas', 'fire']"
+            class="trendingIcon"
+          />
+          {{ $t("Trending.Trending") }}
+        </h2>
+        <FtRefreshWidget
+          :disable-refresh="isLoading[currentTab]"
+          :last-refresh-timestamp="lastTrendingRefreshTimestamp"
+          :title="$t('Trending.Trending')"
+          @click="getTrendingInfo(true)"
         />
-        {{ $t("Trending.Trending") }}
-      </h2>
-      <FtRefreshWidget
-        :disable-refresh="isLoading[currentTab]"
-        :last-refresh-timestamp="lastTrendingRefreshTimestamp"
-        :title="$t('Trending.Trending')"
-        @click="getTrendingInfo(true)"
-      />
+      </div>
       <FtFlexBox
         class="trendingInfoTabs"
         role="tablist"

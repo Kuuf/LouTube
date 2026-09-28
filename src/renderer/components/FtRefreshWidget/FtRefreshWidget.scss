@@ -1,10 +1,9 @@
-/* A row at the top of the feed's card (there is no top nav to pin it under) */
+/* On the page heading's row (.pageHeader), pushed to its end */
 .floatingRefreshSection {
   display: flex;
   align-items: center;
   gap: 8px;
   justify-content: flex-end;
-  margin-block: 0 12px;
 }
 
 .lastRefreshTimestamp {

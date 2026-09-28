@@ -3,19 +3,21 @@
     <ft-card
       class="card"
     >
-      <h2>
-        <FontAwesomeIcon
-          :icon="['fas', 'users']"
-          class="headingIcon"
+      <div class="pageHeader">
+        <h2>
+          <FontAwesomeIcon
+            :icon="['fas', 'users']"
+            class="headingIcon"
+          />
+          {{ $t("Most Popular") }}
+        </h2>
+        <ft-refresh-widget
+          :disable-refresh="isLoading"
+          :last-refresh-timestamp="lastPopularRefreshTimestamp"
+          :title="$t('Most Popular')"
+          @click="fetchPopularInfo"
         />
-        {{ $t("Most Popular") }}
-      </h2>
-      <ft-refresh-widget
-        :disable-refresh="isLoading"
-        :last-refresh-timestamp="lastPopularRefreshTimestamp"
-        :title="$t('Most Popular')"
-        @click="fetchPopularInfo"
-      />
+      </div>
       <FtSkeletonList
         v-if="isLoading"
       />

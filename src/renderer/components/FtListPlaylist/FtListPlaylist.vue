@@ -37,6 +37,7 @@
       <RouterLink
         class="title"
         :to="playlistPageLinkTo"
+        :title="titleForDisplay"
       >
         <h3
           class="h3Title"
