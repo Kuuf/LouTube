@@ -82,7 +82,7 @@
   place-self: flex-start start;
   padding-block: 3px;
   padding-inline: 4px;
-  border-radius: 5px;
+  border-radius: var(--radius-sm);
   background-color: var(--accent-color);
   color: var(--text-with-accent-color);
 }

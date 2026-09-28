@@ -54,8 +54,12 @@
           />
         </div>
       </div>
+      <FtSkeletonList
+        v-if="!playlistsReady"
+        type="playlist"
+      />
       <FtFlexBox
-        v-if="fullData.length === 0"
+        v-else-if="fullData.length === 0"
       >
         <p class="message">
           {{ $t("User Playlists['You have no playlists. Click on the create new playlist button to create a new one.']") }}
@@ -107,6 +111,7 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
@@ -171,6 +176,9 @@ const sortByNames = computed(() => {
 
 /** @type {import('vue').ComputedRef<'name_ascending' | 'name_descending' | 'latest_created_first' | 'earliest_created_first' | 'latest_updated_first' | 'earliest_updated_first' | 'latest_played_first' | 'earliest_played_first'>} */
 const sortBy = computed(() => store.getters.getUserPlaylistsSortBy)
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const playlistsReady = computed(() => store.getters.getPlaylistsReady)
 
 const sortByIcon = computed(() => getIconForSortPreference(sortBy.value))
 

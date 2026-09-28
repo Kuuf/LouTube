@@ -1,0 +1,147 @@
+/* Sizes follow the real list items (scss-partials/_ft-list-item.scss), so
+   nothing moves when they replace the skeleton */
+.item {
+  box-sizing: border-box;
+  padding: 6px;
+}
+
+.short {
+  inline-size: 55%;
+}
+
+.meta {
+  inline-size: 40%;
+}
+
+/* Videos and playlists */
+
+.item.grid {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 230px;
+  padding-block-end: 20px;
+}
+
+.thumbnail {
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+}
+
+.grid .thumbnail {
+  margin-block-end: 12px;
+}
+
+.grid .title {
+  font-size: 18px;
+}
+
+.grid .meta {
+  font-size: 13px;
+  margin-block-start: 8px;
+}
+
+.item.list:not(.post, .comment) {
+  display: grid;
+  grid-template-columns: min(336px, 25vw) 1fr;
+  align-items: start;
+  column-gap: 20px;
+}
+
+.list .title {
+  font-size: 20px;
+}
+
+.list .meta {
+  font-size: 14px;
+  margin-block-start: 5px;
+}
+
+/* Channels */
+
+.channel.grid {
+  align-items: center;
+}
+
+.channel .avatar {
+  block-size: 130px;
+  inline-size: 130px;
+  max-inline-size: 25vw;
+  max-block-size: 25vw;
+}
+
+.channel.grid .info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  inline-size: 100%;
+  margin-block-start: 12px;
+}
+
+.channel .name {
+  inline-size: 50%;
+}
+
+.channel .button {
+  block-size: 36px;
+  inline-size: 120px;
+  margin-block-start: 8px;
+}
+
+/* Comments (FtComment) */
+
+.comment {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.comment .avatar {
+  flex: none;
+  block-size: 60px;
+  inline-size: 60px;
+}
+
+.comment .info {
+  flex: 1;
+}
+
+.comment .name {
+  inline-size: min(160px, 30%);
+}
+
+/* Community posts */
+
+.post {
+  margin-inline: auto;
+  inline-size: 40%;
+  font-size: 16px;
+}
+
+@media screen and (width <= 768px) {
+  .post {
+    inline-size: 100%;
+  }
+}
+
+.author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-block-end: 8px;
+}
+
+.post .avatar {
+  block-size: 55px;
+  inline-size: 55px;
+}
+
+.post .name {
+  inline-size: 30%;
+}
+
+.postImage {
+  aspect-ratio: 16 / 9;
+  inline-size: 100%;
+  margin-block-start: 12px;
+}

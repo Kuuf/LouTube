@@ -1,6 +1,12 @@
 <template>
   <div ref="tvPageRoot">
-    <FtLoader v-if="isLoading" />
+    <FtCard v-if="isLoading">
+      <FtSkeletonList
+        class="skeletonOnCard"
+        type="post"
+        :count="1"
+      />
+    </FtCard>
     <template
       v-else
     >
@@ -33,7 +39,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../components/ft-card/ft-card.vue'
 import FtCommunityPost from '../components/FtCommunityPost/FtCommunityPost.vue'
-import FtLoader from '../components/FtLoader/FtLoader.vue'
+import FtSkeletonList from '../components/FtSkeletonList/FtSkeletonList.vue'
 import CommentSection from '../components/CommentSection/CommentSection.vue'
 
 import store from '../store/index'

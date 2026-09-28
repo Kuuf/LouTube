@@ -125,7 +125,7 @@
   The (invisible) checkbox covers the whole row: clicking anywhere toggles,
   and it is the row's spatial-nav stop, so the row gets the focus highlight.
 */
-$row-radius: 12px;
+$row-radius: var(--radius-lg);
 $switch-width: 51px;
 $switch-height: 31px;
 $knob-size: 27px;
@@ -195,7 +195,7 @@ $knob-inset: 2px;
     inset-inline: auto 0;
     inline-size: $switch-width;
     block-size: $switch-height;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background-color: rgb(120 120 128 / 36%);
     transition: background-color 0.25s ease;
   }

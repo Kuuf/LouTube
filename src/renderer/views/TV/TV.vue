@@ -1,11 +1,6 @@
 <template>
   <div>
-    <FtLoader
-      v-if="isLoading"
-      :fullscreen="true"
-    />
     <FtCard
-      v-else
       ref="card"
       class="card"
     >
@@ -16,7 +11,14 @@
         />
         {{ $t("TV.TV") }}
       </h2>
+      <FtSkeletonList
+        v-if="isLoading"
+        display="grid"
+        :columns="3"
+        :count="9"
+      />
       <FtElementList
+        v-else
         :data="shownResults"
         display="grid"
         :columns="3"
@@ -31,8 +33,8 @@ import { computed, nextTick, onMounted, ref, shallowRef, useTemplateRef } from '
 import { useI18n } from 'vue-i18n'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
-import FtLoader from '../../components/FtLoader/FtLoader.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
+import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 
 import store from '../../store/index'
 

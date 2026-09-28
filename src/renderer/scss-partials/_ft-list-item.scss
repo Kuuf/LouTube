@@ -77,7 +77,7 @@ $watched-transition-duration: 0.5s;
     display: grid;
 
     /* Rounded, clipping the image and the overlays at its edges */
-    border-radius: 4px;
+    border-radius: var(--radius-md);
     overflow: hidden;
 
     .thumbnailLink,
@@ -122,7 +122,7 @@ $watched-transition-duration: 0.5s;
     .videoDuration {
       place-self: flex-end end;
       background-color: var(--card-bg-color);
-      border-radius: 5px;
+      border-radius: var(--radius-sm);
       color: var(--primary-text-color);
       font-size: 15px;
       line-height: 1.2;
@@ -207,7 +207,7 @@ $watched-transition-duration: 0.5s;
       text-align: center;
 
       .channelImage {
-        border-radius: 50%;
+        border-radius: var(--radius-round);
         block-size: 130px;
       }
 
@@ -372,6 +372,13 @@ $watched-transition-duration: 0.5s;
     .channelThumbnail {
       // Using padding not margin to avoid being able to drag on empty space
       padding-block-end: 12px;
+
+      // The padding is inside the box, so clip the rounded corners at the
+      // image's bottom edge instead of below the padding
+      &.videoThumbnail {
+        border-radius: 0;
+        clip-path: inset(0 0 12px round var(--radius-md));
+      }
 
       .thumbnailImage {
         // Ensure placeholder image displayed at same aspect ratio as most other images

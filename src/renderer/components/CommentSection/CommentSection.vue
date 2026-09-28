@@ -95,8 +95,11 @@
     >
       {{ $t("Comments.Load More Comments") }}
     </h4>
-    <FtLoader
+    <FtSkeletonList
       v-if="isLoading"
+      class="skeletonOnCard"
+      type="comment"
+      :count="3"
     />
     <div
       v-observe-visibility="observeVisibilityOptions"
@@ -114,7 +117,7 @@ import { useI18n } from 'vue-i18n'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtComment from '../FtComment/FtComment.vue'
-import FtLoader from '../FtLoader/FtLoader.vue'
+import FtSkeletonList from '../FtSkeletonList/FtSkeletonList.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'

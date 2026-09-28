@@ -14,6 +14,14 @@ body {
   --accent-color-opacity3: rgb(var(--accent-color-rgb) / 16%);
   --accent-color-opacity4: rgb(var(--accent-color-rgb) / 24%);
 
+  /* Corner radii. Thumbnails, list items and the focus background share
+     --radius-md so they line up; loading skeletons use the same values. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+  --radius-round: 50%;
+
   /* divider */
 
   --primary-input-color: rgb(0 0 0 / 50%);

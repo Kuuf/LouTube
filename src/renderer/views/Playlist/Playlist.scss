@@ -101,9 +101,60 @@
   transform: translate(calc(10% * var(--horizontal-directionality-coefficient)));
 }
 
-.loadNextPageWrapper {
-  /* about the same height as the button */
-  max-block-size: 7vh;
+/* Loading: shaped like PlaylistInfo's TV header (theme="base") */
+.skeletonInfo {
+  display: grid;
+  grid-template:
+    'thumbnail stats' auto
+    'thumbnail actions' 1fr / minmax(240px, 400px) 1fr;
+  gap: 12px 32px;
+
+  @media only screen and (width <= 800px) {
+    grid-template:
+      'stats' auto
+      'actions' auto / 1fr;
+  }
+}
+
+.skeletonThumbnail {
+  grid-area: thumbnail;
+  aspect-ratio: 16 / 9;
+
+  @media only screen and (width <= 800px) {
+    display: none;
+  }
+}
+
+.skeletonStats {
+  grid-area: stats;
+  font-size: 15px;
+}
+
+.skeletonTitle {
+  font-size: 32px;
+  inline-size: min(420px, 70%);
+  margin-block-end: 16px;
+}
+
+.skeletonMeta {
+  inline-size: min(220px, 40%);
+}
+
+.skeletonActions {
+  grid-area: actions;
+  align-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skeletonChannelAvatar {
+  block-size: 40px;
+  inline-size: 40px;
+}
+
+.skeletonChannelName {
+  inline-size: 140px;
 }
 
 .sortSelect {

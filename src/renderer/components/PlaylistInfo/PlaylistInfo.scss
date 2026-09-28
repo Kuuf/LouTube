@@ -62,7 +62,7 @@
 }
 
 .channelThumbnail {
-  border-radius: 200px;
+  border-radius: var(--radius-round);
   float: inline-start;
   inline-size: 40px;
 }
@@ -163,7 +163,7 @@
 
     img {
       display: block;
-      border-radius: 8px;
+      border-radius: var(--radius-md);
     }
   }
 

@@ -36,7 +36,7 @@
 .thumbnail {
   inline-size: 100px;
   block-size: 100px;
-  border-radius: 200px;
+  border-radius: var(--radius-round);
   object-fit: cover;
 }
 
