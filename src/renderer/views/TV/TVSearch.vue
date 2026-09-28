@@ -79,11 +79,13 @@ function focusResults({ resetPosition = false } = {}) {
 onMounted(() => {
   resultsObserver.observe(results.value, { childList: true, subtree: true })
 
-  // Coming back from a video lands on the results, a fresh visit on the bar
+  // Coming back from a video lands on the results. A fresh visit focuses the
+  // input itself, ready to type (opens the on-screen keyboard on Android TV).
   if (query.value !== '') {
     focusResults()
   } else {
     searchBarZone.activate()
+    searchInput.value?.focus()
   }
 })
 
