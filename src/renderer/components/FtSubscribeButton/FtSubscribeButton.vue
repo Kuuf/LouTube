@@ -135,7 +135,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
+import { activateZone, navState } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
 
@@ -325,7 +325,11 @@ const profileZoneId = `subscribe-profiles-${id}`
 /** The zone with the remote's focus before the dropdown took it */
 let returnZoneId = null
 
-const profileZone = useSpatialZone(profileZoneId, () => gridFromElements(profileDropdown.value?.querySelectorAll('.profile') ?? []), {
+// Every profile is always shown, one per row. Not `gridFromElements`: it skips
+// transparent elements, which the profiles are while they animate in, and the
+// zone activates as the dropdown opens (the focus would land nowhere, e.g.
+// behind the unsubscribe prompt, and stay there)
+const profileZone = useSpatialZone(profileZoneId, () => [...(profileDropdown.value?.querySelectorAll('.profile') ?? [])].map(profile => [profile]), {
   onKeyDown: handleProfileZoneKey,
   onSelect: (_position, cell) => {
     const profile = profileDisplayList.value[Number(cell?.dataset.index)]
