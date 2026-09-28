@@ -211,12 +211,33 @@
   font-size: 32px;
 }
 
+:deep(.shaka-controls-button-panel > .ft-channel-button) {
+  align-items: center;
+  border-radius: 24px;
+  display: flex;
+  gap: 10px;
+  inline-size: auto;
+  max-inline-size: 320px;
+  padding-block: 0;
+  padding-inline: 8px 16px;
+}
+
+:deep(.ft-channel-button-name) {
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: normal;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 :deep(.ft-channel-button-avatar) {
   display: block;
   inline-size: 32px;
   block-size: 32px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .ftVideoPlayer:fullscreen :deep(.theatre-button),

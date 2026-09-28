@@ -3,9 +3,9 @@ import shaka from 'shaka-player'
 import { PlayerIcons } from '../../../../constants'
 
 /**
- * Opens the channel of the current video: its avatar in the control bar, so
- * the channel can be reached with the remote from the full screen TV watch
- * view.
+ * Opens the channel of the current video: its avatar and name in the control
+ * bar, so the channel can be reached with the remote from the full screen TV
+ * watch view.
  */
 export class ChannelButton extends shaka.ui.Element {
   /**
@@ -20,7 +20,7 @@ export class ChannelButton extends shaka.ui.Element {
 
     /** @private */
     this.button_ = document.createElement('button')
-    this.button_.classList.add('ft-channel-button', 'shaka-tooltip')
+    this.button_.classList.add('ft-channel-button')
     this.button_.ariaLabel = channelName
 
     if (channelThumbnail) {
@@ -33,6 +33,13 @@ export class ChannelButton extends shaka.ui.Element {
     } else {
       /** @private */
       this.icon_ = new shaka.ui.Icon(this.button_, PlayerIcons.ACCOUNT_CIRCLE_FILLED)
+    }
+
+    if (channelName) {
+      const name = document.createElement('span')
+      name.classList.add('ft-channel-button-name')
+      name.textContent = channelName
+      this.button_.appendChild(name)
     }
 
     this.parent.appendChild(this.button_)
