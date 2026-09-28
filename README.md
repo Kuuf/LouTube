@@ -1,44 +1,32 @@
 <p align="center" >
- <img src="https://docs.freetubeapp.io/images/logoColor.png" width=500 align="center" alt="FreeTube Logo">
+ <img src="./src/renderer/assets/img/loutube-logo.png" width=250 align="center" alt="LouTube Logo">
 </p>
 <h2 align='center'>
-An open source YouTube player built with privacy in mind.
+An open source YouTube player for Android TV, built with privacy in mind.
 </h2>
 
-<p align='center'>
-  <a href='https://github.com/MarmadileManteater/FreeTubeCordova/actions/workflows/buildCordova.yml'>
-    <img alt='Build Status' src='https://github.com/MarmadileManteater/FreeTubeCordova/actions/workflows/buildCordova.yml/badge.svg'>
-  </a>
-  <a href="https://apt.izzysoft.de/fdroid/index/apk/io.freetubeapp.freetube">
-    <img alt='izzyondroid version' src="https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/io.freetubeapp.freetube">
-  </a>
-<a href="https://hosted.weblate.org/engage/free-tube/">
-<img src="https://hosted.weblate.org/widgets/free-tube/-/svg-badge.svg" alt="Translation status" />
-</a>
-</p>
+> [!WARNING]
+> This vibe-coded piece of garbage brings FreeTube to Android TV. It looks nice, but use at your own discretion!
+>
+> This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, use [FreeTube](https://github.com/FreeTubeApp/FreeTube) or [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova) instead.
+
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-to-build-and-test">Building and testing</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#donations">Donate</a> &bull; <a href="#license">License</a></p>
 <p align="center"><a href="https://freetubeapp.io/">Website</a> &bull; <a href="https://blog.freetubeapp.io/">Blog</a> &bull; <a href="https://docs.freetubeapp.io/">Documentation</a> &bull; <a href="https://docs.freetubeapp.io/faq/">FAQ</a> &bull; <a href="https://github.com/FreeTubeApp/FreeTube/discussions">Discussions</a></p>
 <hr>
 
 FreeTube Android TV is an open source YouTube player built with privacy in mind. Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
-Available as an APK and as a PWA (progressive web app). FreeTube Android is a fork of [FreeTube](https://www.github.com/FreeTubeApp).
+It is a fork of [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova), which is itself a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube).
 
 > [!NOTE]
-> FreeTube Android is currently in Beta. While it should work well for most users, there are still bugs and missing features that need to be addressed.
+> The UI was redone to be TV remote friendly. Everything can be reached with the D-pad and the OK/Back buttons: spatial navigation between pages, a side navigation drawer, a full screen player with remote controls (seek, volume, settings menu and a button to jump to the video's channel), Up Next videos below the player, iOS-style settings, and an Android TV launcher banner.
 
-<p align='center'>
-  <a href='https://apt.izzysoft.de/fdroid/index/apk/io.freetubeapp.freetube'>
-    <img height='100' alt='Get it on IzzyOnDroid' src='https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png'>
-  </a>
-</p>
-
-<p align="center"><a href="https://github.com/MarmadileManteater/FreeTubeCordova/releases">Download FreeTube Android</a></p>
+<p align="center"><a href="https://github.com/Kuuf/FreeTubeAndroidTV/releases">Download FreeTube Android TV</a></p>
 
 <hr>
 
 ## How does it work?
-The APK uses a built in extractor to grab and serve data / videos, and can optionally use the [Invidious API](https://github.com/iv-org/invidious). The PWA *only* uses the Invidious API. No official YouTube APIs are used to obtain data. Your subscriptions and history are stored locally on your device and are never sent out.
+The APK uses a built in extractor to grab and serve data / videos, and can optionally use the [Invidious API](https://github.com/iv-org/invidious). No official YouTube APIs are used to obtain data. Your subscriptions and history are stored locally on your device and are never sent out.
 
 ## Features
 * Watch videos without ads
@@ -51,87 +39,64 @@ The APK uses a built in extractor to grab and serve data / videos, and can optio
 * YouTube Trending
 * YouTube Chapters
 * Most popular videos page based on the set Invidious instance
-* SponsorBlock 
+* SponsorBlock
 * Full Theme support
-* Keyboard shortcuts
 * Option to show only family friendly content
 * Show/hide functionality or elements within the app using the distraction free settings
+* TV remote navigation across the whole app
+* Full screen player with remote controls, including volume and a channel button
 
 Go to [FreeTube's Documentation](https://docs.freetubeapp.io/) if you'd like to know more about how to operate FreeTube and its features.
 
 ## Screenshots
-<img alt="watching video" src="./metadata/en-US/images/phoneScreenshots/1.png" width=300> <img alt="trending videos" src="./metadata/en-US/images/phoneScreenshots/2.png" width=300> <img alt="subscription feed" src="./metadata/en-US/images/phoneScreenshots/3.png" width=300>
-
-
-### Automated Builds (Nightly / Weekly)
-Builds are automatically created from changes to our development branch via [GitHub Actions](https://github.com/MarmadileManteater/FreeTubeCordova/actions/workflows/buildCordova.yml).
-
-The first build with a green check mark is the latest build. You will need to have a GitHub account to download these builds.
+<img alt="TV home page" src="./metadata/en-US/images/tvScreenshots/1.png" width=400> <img alt="watching a video with the player controls open" src="./metadata/en-US/images/tvScreenshots/2.png" width=400> <img alt="channel page" src="./metadata/en-US/images/tvScreenshots/3.png" width=400>
 
 ## How to build and test
 ### Commands for the APK
 ```bash
 # 📦 Packs the project using `webpack.android.config.js`
-yarn pack:android
-# 🤖 Packs the botguard script
-yarn pack:botGuardScript:android
+pnpm pack:android
 # 🚧 for development
-yarn pack:android:dev
+pnpm pack:android:dev
 ```
 
 > These commands only build the assets necessary for the project located in `android/` to be built. In order to obtain a complete build, you will need to build the project located in `android/` with `gradle`.
+
 ### Commands for the PWA
+Inherited from FreeTube Android and not tested on this fork.
 ```bash
 # 🐛 Debugs the project using `webpack.web.config.js`
-yarn dev:web
-# 📦 Packs the project using `webpack.web.config.js` 
-yarn pack:web
+pnpm dev:web
+# 📦 Packs the project using `webpack.web.config.js`
+pnpm pack:web
 ```
 
-### Commands for the PWA Docker Image
-```bash
-# 💨 Creates and runs the image locally. Add `--platform=linux/arm64` to docker build for ARM64 devices including Apple Silicon
-docker build -t freetubecordova . # Warning, might take a while on Apple Silicon
-docker run --name ftcordova -d -p 8080:80 freetubecordova
-
-# ⬇ Pulls the latest from the Github Container Registry (ghcr.io)
-docker pull ghcr.io/marmadilemanteater/freetubecordova:latest
-# 👟 Runs the image from ghcr.io
-docker run --name ftcordova -d -p 8080:80 ghcr.io/marmadilemanteater/freetubecordova:latest
-```
 ## Contributing
 
-**NOTICE: MOST CHANGES SHOULD PROBABLY BE MADE TO [UPSTREAM](https://www.github.com/freetubeapp/freetube) UNLESS DIRECTLY RELATED TO CORDOVA CODE OR WORKFLOWS.**
+**NOTICE: THIS FORK IS NOT MAINTAINED. MOST CHANGES SHOULD BE MADE TO [FREETUBE](https://www.github.com/freetubeapp/freetube) OR [FREETUBE ANDROID](https://github.com/MarmadileManteater/FreeTubeCordova).**
 
-If you like to get your hands dirty and want to contribute, we would love to
-have your help.  Send a pull request and someone will review your code. Please
-follow the [Contribution
-Guidelines](https://github.com/MarmadileManteater/FreeTubeCordova/blob/development/CONTRIBUTING.md)
-before sending your pull request.
-
+Pull requests are welcome, but there is no promise that anyone will review them.
 
 ## Localization
 <a href="https://hosted.weblate.org/engage/free-tube/">
 <img src="https://hosted.weblate.org/widgets/free-tube/-/287x66-grey.png" alt="Translation status" />
 </a>
 
-If you'd like to localize FreeTube Android, please send submissions to [FreeTube's weblate](https://hosted.weblate.org/engage/free-tube/).
+If you'd like to localize FreeTube, please send submissions to [FreeTube's weblate](https://hosted.weblate.org/engage/free-tube/).
 
 ## Contact
-If you ever have any questions, feel free to make an issue here on GitHub. 
+If you have questions, you can make an issue here on GitHub, but it may never be answered.
 
 ## Donations
-If you enjoy using FreeTube Android, you're welcome to leave a donation using the following methods to support development and maintenance.  
-* [Liberapay](https://liberapay.com/MarmadileManteater) _(goes to creator of FreeTubeAndroid)_
-* Bitcoin Address: `1Lih7Ho5gnxb1CwPD4o59ss78pwo2T91eS` _(goes to upstream maintainers)_
-
-While your donations are much appreciated, only donate if you really want to. Donations are no strings attached and do not come with the expectation of having your requests fulfilled.
+This fork does not take donations. If you enjoy using it, consider supporting the projects it is built on:
+* [Liberapay](https://liberapay.com/MarmadileManteater) _(goes to creator of FreeTube Android)_
+* Bitcoin Address: `1Lih7Ho5gnxb1CwPD4o59ss78pwo2T91eS` _(goes to upstream FreeTube maintainers)_
 
 ## License
-[![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)  
+[![GNU AGPLv3 Image](https://www.gnu.org/graphics/agplv3-155x51.png)](https://www.gnu.org/licenses/agpl-3.0.html)
 
 FreeTube is Free Software: You can use, study share and improve it at your
 will. Specifically you can redistribute and/or modify it under the terms of the
 [GNU Affero General Public License](https://www.gnu.org/licenses/agpl-3.0.html) as
 published by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.  
+(at your option) any later version.
