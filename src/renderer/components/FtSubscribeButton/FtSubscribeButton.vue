@@ -39,61 +39,92 @@
         @click="toggleProfileDropdown"
       >
         <FontAwesomeIcon
-          :icon="isProfileDropdownOpen ? ['fas', 'angle-up'] : ['fas', 'angle-down']"
+          :icon="['fas', 'angle-down']"
+          class="dropdownChevron"
         />
       </FtButton>
     </div>
-    <div
-      v-if="isProfileDropdownOpen"
-      tabindex="-1"
-      class="profileDropdown"
+    <Transition
+      name="profileDropdown"
+      @after-leave="handleDropdownClosed"
     >
-      <ul
-        class="profileList"
+      <div
+        v-if="isProfileDropdownOpen"
+        ref="profileDropdown"
+        tabindex="-1"
+        class="profileDropdown"
       >
-        <li
-          v-for="(profile, index) in profileDisplayList"
-          :key="index"
-          class="profile"
-          :class="{
-            subscribed: isProfileSubscribed(profile)
-          }"
-          :aria-labelledby="id + '-' + index"
-          :aria-selected="isActiveProfile(profile)"
-          :aria-checked="isProfileSubscribed(profile)"
-          tabindex="0"
-          role="checkbox"
-          @click.stop.prevent="handleSubscription(profile)"
-          @keydown.space.stop.prevent="handleSubscription(profile)"
+        <p class="profileDropdownHeading">
+          {{ $t('Profile.Subscribe in profiles') }}
+        </p>
+        <ul
+          class="profileList"
         >
-          <div
-            class="colorOption"
-            :style="{ background: profile.bgColor, color: profile.textColor }"
+          <li
+            v-for="(profile, index) in profileDisplayList"
+            :key="profile._id"
+            class="profile"
+            :class="{
+              subscribed: isProfileSubscribed(profile)
+            }"
+            :data-index="index"
+            :style="{ '--index': index }"
+            data-spatial-nav-visual
+            :aria-labelledby="id + '-' + index"
+            :aria-selected="isActiveProfile(profile)"
+            :aria-checked="isProfileSubscribed(profile)"
+            tabindex="0"
+            role="checkbox"
+            @click.stop.prevent="handleSubscription(profile)"
+            @keydown.enter.space.stop.prevent="handleSubscription(profile)"
           >
             <div
-              class="initial"
-              dir="auto"
+              class="colorOption"
+              :style="{ background: profile.bgColor, color: profile.textColor }"
             >
-              {{ isProfileSubscribed(profile) ? $t('checkmark') : profileInitials[profile._id] }}
+              <div
+                class="initial"
+                dir="auto"
+              >
+                {{ profileInitials[profile._id] }}
+              </div>
             </div>
-          </div>
-          <p
-            :id="id + '-' + index"
-            class="profileName"
-            dir="auto"
-          >
-            {{ profile.name }}
-          </p>
-        </li>
-      </ul>
-    </div>
+            <div class="profileText">
+              <p
+                :id="id + '-' + index"
+                class="profileName"
+                dir="auto"
+              >
+                {{ profileName(profile) }}
+              </p>
+              <p
+                v-if="isProfileSubscribed(profile)"
+                class="profileStatus"
+              >
+                {{ $t('Profile.Subscribed') }}
+              </p>
+            </div>
+            <span
+              class="checkIndicator"
+              aria-hidden="true"
+            >
+              <FontAwesomeIcon
+                :icon="['fas', 'check']"
+                class="checkIcon"
+              />
+            </span>
+          </li>
+        </ul>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, ref, shallowRef, useId, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+import android from 'android'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -103,6 +134,8 @@ import store from '../../store/index'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
+import { useSpatialZone } from '../../composables/useSpatialZone'
+import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
 
@@ -159,19 +192,29 @@ const activeProfile = computed(() => {
   return store.getters.getActiveProfile
 })
 
+// A stable order (not moving profiles around when (un)subscribed), so the
+// remote's focus stays on the profile just toggled
 const profileDisplayList = computed(() => [
   profileList.value[0],
   ...(activeProfile.value._id !== MAIN_PROFILE_ID ? [activeProfile.value] : []),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && !isProfileSubscribed(profile)),
-  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile) && isProfileSubscribed(profile))
+  ...profileList.value.filter((profile, i) => i !== 0 && !isActiveProfile(profile))
 ])
+
+/**
+ * The main profile's name is translated, as elsewhere
+ * @param {Profile} profile
+ */
+function profileName(profile) {
+  return profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
+}
 
 const profileInitials = computed(() => {
   const locale_ = locale.value
 
   return profileList.value.reduce((accumulator, profile) => {
-    accumulator[profile._id] = profile.name
-      ? getFirstCharacter(profile.name, locale_)
+    const name = profileName(profile)
+    accumulator[profile._id] = name
+      ? getFirstCharacter(name, locale_)
       : ''
 
     return accumulator
@@ -245,9 +288,26 @@ function handleSubscription(profile) {
 }
 
 const subscribeButton = useTemplateRef('subscribeButton')
+const profileDropdown = useTemplateRef('profileDropdown')
 
-function handleProfileDropdownFocusOut() {
-  if (subscribeButton.value && !subscribeButton.value.matches(':focus-within')) {
+/**
+ * Keyboard focus moving elsewhere closes the dropdown. Focus simply being
+ * dropped (no new target, e.g. released by the remote's spatial nav) doesn't.
+ * @param {FocusEvent} event
+ */
+function handleProfileDropdownFocusOut(event) {
+  const target = event.relatedTarget
+  if (target instanceof Node && subscribeButton.value && !subscribeButton.value.contains(target)) {
+    isProfileDropdownOpen.value = false
+  }
+}
+
+/**
+ * Clicking/tapping outside closes the dropdown
+ * @param {PointerEvent} event
+ */
+function handleOutsidePointerDown(event) {
+  if (subscribeButton.value && !subscribeButton.value.contains(/** @type {Node} */ (event.target))) {
     isProfileDropdownOpen.value = false
   }
 }
@@ -256,12 +316,122 @@ function toggleProfileDropdown() {
   isProfileDropdownOpen.value = !isProfileDropdownOpen.value
 }
 
+// Remote control (spatial nav): while open, the dropdown is a zone of its
+// own, one profile per row. Enter toggles the focused profile, Left, Up from
+// the first profile, Escape or the Back button close it, and focus goes back
+// to where it was (the subscribe button or the dropdown toggle).
+const profileZoneId = `subscribe-profiles-${id}`
+
+/** The zone with the remote's focus before the dropdown took it */
+let returnZoneId = null
+
+const profileZone = useSpatialZone(profileZoneId, () => gridFromElements(profileDropdown.value?.querySelectorAll('.profile') ?? []), {
+  onKeyDown: handleProfileZoneKey,
+  onSelect: (_position, cell) => {
+    const profile = profileDisplayList.value[Number(cell?.dataset.index)]
+    if (profile) {
+      handleSubscription(profile)
+    }
+  },
+})
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean} handled here instead of by spatial nav
+ */
+function handleProfileZoneKey(event) {
+  // Closing (fading out): the focus returns once it's gone
+  if (!isProfileDropdownOpen.value) {
+    event.preventDefault()
+    return true
+  }
+
+  const row = navState.lastPosition.get(profileZoneId)?.row ?? 0
+  const lastRow = profileDisplayList.value.length - 1
+
+  if (event.key === 'Escape' || event.key === 'ArrowLeft' || (event.key === 'ArrowUp' && row === 0)) {
+    event.preventDefault()
+    isProfileDropdownOpen.value = false
+    return true
+  }
+
+  // Dead ends: nothing else to go to (not scrolling the page either)
+  if (event.key === 'ArrowRight' || (event.key === 'ArrowDown' && row >= lastRow)) {
+    event.preventDefault()
+    return true
+  }
+
+  return false
+}
+
+function handleDropdownClosed() {
+  if (returnZoneId !== null && profileZone.isActive.value) {
+    activateZone(returnZoneId)
+  }
+  returnZoneId = null
+}
+
+/** Android's Back button closes the dropdown (not the unsubscribe prompt over it) */
+function handleExitPrompt() {
+  if (showUnsubscribePopupForProfile.value === null) {
+    isProfileDropdownOpen.value = false
+  }
+}
+
+watch(isProfileDropdownOpen, async (open) => {
+  if (open) {
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true)
+    if (process.env.IS_ANDROID) {
+      android.enterPromptMode()
+      window.addEventListener('exit-prompt', handleExitPrompt)
+    }
+  } else {
+    document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+    if (process.env.IS_ANDROID) {
+      android.exitPromptMode()
+      window.removeEventListener('exit-prompt', handleExitPrompt)
+    }
+  }
+
+  // Only when the remote is in use (some zone has the focus)
+  const activeZoneId = navState.activeZoneId
+  if (!open || activeZoneId === null || activeZoneId === profileZoneId) { return }
+
+  returnZoneId = activeZoneId
+  await nextTick()
+
+  // On the first profile not subscribed to yet, likely the one to add next
+  const row = profileDisplayList.value.findIndex(profile => !isProfileSubscribed(profile))
+  navState.lastPosition.set(profileZoneId, { row: Math.max(row, 0), col: 0 })
+  profileZone.activate()
+})
+
+onBeforeUnmount(() => {
+  if (isProfileDropdownOpen.value) {
+    document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+    if (process.env.IS_ANDROID) {
+      android.exitPromptMode()
+      window.removeEventListener('exit-prompt', handleExitPrompt)
+    }
+  }
+})
+
 /**
  * @param {'yes' | 'no' | null} value
  */
 function handleUnsubscribeConfirmation(value) {
   const profile = showUnsubscribePopupForProfile.value
   showUnsubscribePopupForProfile.value = null
+
+  // The prompt leaves Android's prompt mode when it closes, the dropdown
+  // still needs it (Back closing the dropdown)
+  if (process.env.IS_ANDROID) {
+    nextTick(() => {
+      if (isProfileDropdownOpen.value) {
+        android.enterPromptMode()
+      }
+    })
+  }
 
   if (value === 'yes') {
     handleUnsubscription(profile)
