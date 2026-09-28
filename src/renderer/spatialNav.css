@@ -18,14 +18,12 @@
     color 150ms ease-out;
 }
 
-/* List item cards are always rounded, so the focus background fits them.
-   They also grow when focused (see below). */
+/* List item cards are always rounded, so the focus background fits them */
 [data-spatial-nav-item] {
   border-radius: var(--radius-md);
   transition:
-    transform 180ms cubic-bezier(0.2, 0, 0, 1),
     background-color 150ms ease-out,
-    box-shadow 180ms ease-out,
+    box-shadow 150ms ease-out,
     color 150ms ease-out;
 }
 
@@ -42,13 +40,11 @@
 }
 
 /* List item cards (videos, shorts, playlists, channels, Up Next): on the
-   lighter focus background, with a white border, slightly larger and above
-   their neighbours, lifted by a drop shadow. Scaled with transform, so the
-   list doesn't reflow. */
+   lighter focus background, with a white border, lifted above their
+   neighbours by a drop shadow */
 [data-spatial-nav-focused][data-spatial-nav-item] {
   position: relative;
   z-index: 1;
-  transform: scale(1.06);
   box-shadow:
     0 0 0 3px #fff,
     0 12px 32px rgb(0 0 0 / 50%);
@@ -57,12 +53,6 @@
 /* Watched cards paint the page background, which would hide the focus one */
 [data-spatial-nav-focused][data-spatial-nav-item] .ft-list-item.watched {
   background-color: transparent;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-spatial-nav-item] {
-    transition-duration: 0ms;
-  }
 }
 
 /* Text based elements. !important, as components set their own colors, some
