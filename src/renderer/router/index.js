@@ -1,7 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import Subscriptions from '../views/Subscriptions/Subscriptions.vue'
 import SubscribedChannels from '../views/SubscribedChannels/SubscribedChannels.vue'
-import TV from '../views/TV/TV.vue'
 import TVSearch from '../views/TV/TVSearch.vue'
 import TVProfiles from '../views/TV/TVProfiles.vue'
 import Trending from '../views/Trending/Trending.vue'
@@ -28,12 +27,9 @@ const router = createRouter({
       component: Subscriptions
     },
     {
+      // Old landing page, saved settings may still point here
       path: '/tv',
-      name: 'tv',
-      meta: {
-        title: 'TV'
-      },
-      component: TV
+      redirect: '/subscriptions'
     },
     {
       path: '/tv/search/:query?',

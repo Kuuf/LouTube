@@ -47,27 +47,6 @@
       <router-link
         class="navOption mobileShow"
         role="button"
-        to="/tv"
-        :title="$t('TV.TV')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'tv']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("TV.TV") }}
-        </p>
-      </router-link>
-      <router-link
-        class="navOption mobileShow"
-        role="button"
         to="/subscriptions"
         :title="$t('Subscriptions.Subscriptions')"
       >
@@ -591,7 +570,7 @@ watch(() => focusedPosition.value?.row, () => {
 })
 
 // Entering the side nav from a page lands on that page's link: the one
-// with the longest path matching the route (/tv/search/foo is Search, not TV).
+// with the longest path matching the route.
 function syncPositionToRoute() {
   if (isActive.value) { return }
 
