@@ -21,7 +21,7 @@ It is a fork of [FreeTube Android](https://github.com/MarmadileManteater/FreeTub
 > [!NOTE]
 > The UI was redone to be TV remote friendly. Everything can be reached with the D-pad and the OK/Back buttons: spatial navigation between pages, a side navigation drawer, a full screen player with remote controls (seek, volume, settings menu and a button to jump to the video's channel), Up Next videos below the player, iOS-style settings, and an Android TV launcher banner.
 
-<p align="center"><a href="https://github.com/Kuuf/FreeTubeAndroidTV/releases">Download FreeTube Android TV</a></p>
+<p align="center"><a href="https://github.com/Kuuf/LouTube/releases">Download FreeTube Android TV</a></p>
 
 <hr>
 
