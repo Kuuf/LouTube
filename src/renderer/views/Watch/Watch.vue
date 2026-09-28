@@ -45,6 +45,8 @@
           :start-in-pip="startNextVideoInPip"
           :current-playback-rate="currentPlaybackRate"
           :delay-load-until-unix="adEndTimeUnixMs"
+          :channel-name="channelName"
+          :channel-thumbnail="channelThumbnail"
           class="videoPlayer"
           @error="handlePlayerError"
           @loaded="handleVideoLoaded"
@@ -57,6 +59,7 @@
           @skip-to-prev="handleSkipToPrev"
           @player-reload-requested="onPlayerReloadRequested"
           @exit-watch="exitWatch"
+          @go-to-channel="goToChannel(channelId)"
         />
         <div
           v-if="!isLoading && (isUpcoming || errorMessage)"

@@ -211,6 +211,14 @@
   font-size: 32px;
 }
 
+:deep(.ft-channel-button-avatar) {
+  display: block;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .ftVideoPlayer:fullscreen :deep(.theatre-button),
 .ftVideoPlayer:fullscreen :deep(.full-window-button),
 .fullWindow :deep(.theatre-button) {
