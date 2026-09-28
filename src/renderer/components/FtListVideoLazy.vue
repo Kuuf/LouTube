@@ -114,9 +114,6 @@ const props = defineProps({
   }
 })
 
-const visible = ref(props.initialVisibleState)
-const display = ref('block')
-
 const channelsHidden = computed(() => {
   // Some component users like channel view will have this disabled
   if (!props.useChannelsHiddenPreference) { return [] }
@@ -148,6 +145,10 @@ const shouldBeVisible = computed(() => {
     (lowerCaseTitle && forbiddenTitles.value.some((text) => lowerCaseTitle.includes(text))) ||
     (hideChannelsBasedOnText.value && lowerCaseAuthor && forbiddenTitles.value.some((text) => lowerCaseAuthor.includes(text))))
 })
+
+// Rendered right away when initially visible, unless filtered out
+const visible = ref(props.initialVisibleState && shouldBeVisible.value)
+const display = ref(props.initialVisibleState && !shouldBeVisible.value ? 'none' : 'block')
 
 /**
  * @param {boolean} isVisible
