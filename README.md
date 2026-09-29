@@ -8,7 +8,7 @@ An open source YouTube player for Android TV, built with privacy in mind.
 > [!WARNING]
 > This shamefully vibe-coded piece of garbage brings FreeTube to Android TV. It looks nice, but use at your own discretion!
 >
-> This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, use [FreeTube](https://github.com/FreeTubeApp/FreeTube) or [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova) instead.
+> This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, please use and support [FreeTube](https://github.com/FreeTubeApp/FreeTube) and [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova) instead.
 >
 > I'm only maintaining this README in case someone else wanders upon this and wants to use it. GitHub won't let me private this repo so I figured I would make it somewhat usable if someone found this useful. This is currently being maintained by me only for personal use.
 >
@@ -19,13 +19,13 @@ An open source YouTube player for Android TV, built with privacy in mind.
 <p align="center"><a href="https://freetubeapp.io/">Website</a> &bull; <a href="https://blog.freetubeapp.io/">Blog</a> &bull; <a href="https://docs.freetubeapp.io/">Documentation</a> &bull; <a href="https://docs.freetubeapp.io/faq/">FAQ</a> &bull; <a href="https://github.com/FreeTubeApp/FreeTube/discussions">Discussions</a></p>
 <hr>
 
-FreeTubeAndroidTV is an open source YouTube player built with TV and privacy in mind. Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
+LouTube is an open source YouTube player built with TV and privacy in mind. Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
 It is a fork of [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova), which is itself a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube).
 
 > [!NOTE]
 > The UI was redone to be TV remote friendly. Everything can be reached with the D-pad and the OK/Back buttons: spatial navigation between pages, a side navigation drawer, a full screen player with remote controls (seek, volume, settings menu and a button to jump to the video's channel), Up Next videos below the player, iOS-style settings, and an Android TV launcher banner.
 
-<p align="center"><a href="https://github.com/Kuuf/FreeTubeAndroidTV/releases">Download FreeTubeAndroidTV</a></p>
+<p align="center"><a href="https://github.com/Kuuf/LouTube/releases">Download LouTube</a></p>
 
 <hr>
 
