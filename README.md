@@ -8,11 +8,11 @@ An open source YouTube player for Android TV, built with privacy in mind.
 > [!WARNING]
 > This shamefully vibe-coded piece of garbage brings FreeTube to Android TV. It looks nice, but use at your own discretion!
 >
-> This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, please use and support [FreeTube](https://github.com/FreeTubeApp/FreeTube) and [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova) instead.
+> This project **is not maintained and will likely never be maintained**. Issues and pull requests may go unanswered. If you want something dependable, please use and support [FreeTube](https://github.com/FreeTubeApp/FreeTube) and [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeAndroid) instead.
 >
 > I'm only maintaining this README in case someone else wanders upon this and wants to use it. GitHub won't let me private this repo so I figured I would make it somewhat usable if someone found this useful. This is currently being maintained by me only for personal use.
 >
-> If however you are interested in this project and would find it useful, please let me know and I'll consider re working it using actually good coding practices.
+> If however you are interested in this project and would find it useful, please let me know and I'll consider re working it using actually good coding practices, or better yet raising a PR in the OG FreeTube repo for a TV mode.
 
 <hr>
 <p align="center"><a href="#screenshots">Screenshots</a> &bull; <a href="#how-does-it-work">How does it work?</a> &bull; <a href="#features">Features</a> &bull; <a href="#how-to-build-and-test">Building and testing</a> &bull; <a href="#contributing">Contributing</a> &bull; <a href="#localization">Localization</a> &bull; <a href="#contact">Contact</a> &bull; <a href="#donations">Donate</a> &bull; <a href="#license">License</a></p>
@@ -20,7 +20,7 @@ An open source YouTube player for Android TV, built with privacy in mind.
 <hr>
 
 LouTube is an open source YouTube player built with TV and privacy in mind. Use YouTube without advertisements and prevent Google from tracking you with their cookies and JavaScript.
-It is a fork of [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeCordova), which is itself a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube).
+It is a fork of [FreeTube Android](https://github.com/MarmadileManteater/FreeTubeAndroid), which is itself a fork of [FreeTube](https://github.com/FreeTubeApp/FreeTube).
 
 > [!NOTE]
 > The UI was redone to be TV remote friendly. Everything can be reached with the D-pad and the OK/Back buttons: spatial navigation between pages, a side navigation drawer, a full screen player with remote controls (seek, volume, settings menu and a button to jump to the video's channel), Up Next videos below the player, iOS-style settings, and an Android TV launcher banner.
