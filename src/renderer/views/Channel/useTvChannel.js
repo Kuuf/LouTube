@@ -27,7 +27,8 @@ const TAB_BAR_TOP_PADDING = 16
 /**
  * Remote control (spatial nav) for the channel page: the header (subscribe,
  * tabs, channel search) and the current tab's content below it. Focus starts
- * on the selected tab once the channel has loaded. Focusing a tab selects it. Left from either leaves to
+ * on the selected tab once the channel has loaded. Focusing a tab or a sort
+ * order selects it. Left from either leaves to
  * the side nav.
  *
  * Template refs to bind: `channelRoot` (the page's root element),
@@ -65,10 +66,28 @@ export function useTvChannel() {
   // In the content's first rows, the tab bar goes to the top of the screen
   // (past the banner and channel info) as long as the focused cell still
   // fits under it. Further down, the focus scroll's "nearest" takes over.
-  watch(contentZone.focusedPosition, (position) => {
+  watch(contentZone.focusedPosition, (position, previousPosition) => {
     if (position == null) { return }
 
-    const cell = contentGrid()[position.row]?.[position.col]
+    const grid = contentGrid()
+    const cell = grid[position.row]?.[position.col]
+
+    // Like the tabs, focusing a sort order selects it. Entering the content
+    // on another one than the selected (the position remembered from another
+    // tab) moves the focus to the selected one instead of changing the order.
+    if (cell instanceof Element && cell.matches('.sortTab:not(.selectedSortTab)')) {
+      const selected = cell.parentElement.querySelector('.selectedSortTab')
+      const col = grid[position.row].indexOf(selected)
+
+      if (previousPosition == null && col !== -1) {
+        navState.lastPosition.set('channel-content', { row: position.row, col })
+        contentZone.activate()
+        return
+      }
+
+      cell.click()
+    }
+
     // A tab rather than their row, which has padding of its own
     const tabBar = channelHeader.value?.$el.querySelector('.tab')
     if (!(cell instanceof Element) || !tabBar) { return }

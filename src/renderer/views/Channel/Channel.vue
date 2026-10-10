@@ -516,6 +516,16 @@ const tabInfoValues = computed(() => {
   return values
 })
 
+// Changing the sort order empties the list while the new one loads: the sort
+// buttons stay meanwhile, so the remote's focus on them isn't lost
+const keepSortOptions = ref(false)
+
+watch(isElementListLoading, (isLoading) => {
+  if (!isLoading) {
+    keepSortOptions.value = false
+  }
+})
+
 /** The current tab's sort order, `null` on tabs without one */
 const currentSortBy = computed({
   get() {
@@ -528,6 +538,10 @@ const currentSortBy = computed({
     }
   },
   set(value) {
+    if (value === currentSortBy.value) { return }
+
+    keepSortOptions.value = true
+
     switch (currentTab.value) {
       case 'videos': videoSortBy.value = value; break
       case 'shorts': shortSortBy.value = value; break
@@ -546,16 +560,16 @@ const sortOptions = computed(() => {
   let visible
   switch (currentTab.value) {
     case 'videos':
-      visible = showVideoSortBy.value && (showFetchMoreButton.value || filteredVideos.value.length > 1)
+      visible = showVideoSortBy.value && (keepSortOptions.value || showFetchMoreButton.value || filteredVideos.value.length > 1)
       break
     case 'shorts':
-      visible = !hideChannelShorts.value && showShortSortBy.value && (showFetchMoreButton.value || filteredShorts.value.length > 1)
+      visible = !hideChannelShorts.value && showShortSortBy.value && (keepSortOptions.value || showFetchMoreButton.value || filteredShorts.value.length > 1)
       break
     case 'live':
-      visible = !hideLiveStreams.value && showLiveSortBy.value && (showFetchMoreButton.value || filteredLive.value.length > 1)
+      visible = !hideLiveStreams.value && showLiveSortBy.value && (keepSortOptions.value || showFetchMoreButton.value || filteredLive.value.length > 1)
       break
     case 'playlists':
-      if (hideChannelPlaylists.value || !showPlaylistSortBy.value || latestPlaylists.value.length === 0) { return [] }
+      if (hideChannelPlaylists.value || !showPlaylistSortBy.value || (latestPlaylists.value.length === 0 && !keepSortOptions.value)) { return [] }
 
       return [
         { value: 'newest', label: t('Channel.Playlists.Sort Types.Newest') },
