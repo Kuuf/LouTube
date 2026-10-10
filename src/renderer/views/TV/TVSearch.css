@@ -11,3 +11,13 @@
 .searchBar :deep(.ft-input) {
   margin-block-end: 0;
 }
+
+/* Shown under the bar until something is searched */
+.flair {
+  display: block;
+  inline-size: min(560px, 60%);
+  margin-block: 12vh 0;
+  margin-inline: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+}

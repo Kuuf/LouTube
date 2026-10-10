@@ -4,18 +4,26 @@
       <FtSearchInput
         ref="searchInput"
         :placeholder="t('Search Bar.Search')"
-        :value="query"
+        :value="typedText"
+        @input="handleInput"
         @search="search"
       />
     </div>
     <div ref="results">
       <SearchPage v-if="query !== ''" />
     </div>
+    <!-- Nothing searched yet: the app's flair under the bar -->
+    <img
+      v-if="query === ''"
+      class="flair"
+      src="../../assets/img/search_flair.png"
+      alt=""
+    >
   </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -34,6 +42,43 @@ const results = useTemplateRef('results')
 
 /** @type {import('vue').ComputedRef<string>} */
 const query = computed(() => route.params.query ?? '')
+
+// What is in the field, which can be ahead of the searched query: the search
+// follows the typing after a pause, with the focus staying in the field.
+// Enter searches right away and moves on to the results.
+const AUTO_SEARCH_DELAY_MS = 2000
+
+const typedText = ref(query.value)
+let autoSearchTimeout = 0
+
+// Another query from elsewhere (going back, a link): shown in the field,
+// unless it is what was typed (the query is the trimmed text)
+watch(query, (newQuery) => {
+  if (typedText.value.trim() !== newQuery) {
+    typedText.value = newQuery
+  }
+})
+
+/**
+ * @param {string} text
+ */
+function handleInput(text) {
+  typedText.value = text
+
+  clearTimeout(autoSearchTimeout)
+  autoSearchTimeout = setTimeout(autoSearch, AUTO_SEARCH_DELAY_MS)
+}
+
+/** Searches for what is typed, without leaving the field. Nothing typed: back to no search. */
+function autoSearch() {
+  const trimmedText = typedText.value.trim()
+  if (trimmedText === query.value) { return }
+
+  // Replacing: one history entry for the search page, not one per pause
+  router.replace(trimmedText === ''
+    ? { name: 'tvSearch' }
+    : { name: 'tvSearch', params: { query: trimmedText } })
+}
 
 // Two spatial-nav zones: the search bar on top, the results grid below it.
 // The bar's cell is its text field, which is ready to type into as soon as
@@ -90,6 +135,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   resultsObserver.disconnect()
+  clearTimeout(autoSearchTimeout)
 })
 
 /**
@@ -99,6 +145,7 @@ async function search(newQuery) {
   const trimmedQuery = newQuery.trim()
   if (trimmedQuery === '') { return }
 
+  clearTimeout(autoSearchTimeout)
   searchInput.value?.blur()
   await router.push({ name: 'tvSearch', params: { query: trimmedQuery } })
   await nextTick()
