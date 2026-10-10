@@ -63,6 +63,11 @@
 
   /* Full bleed like the banner */
   border-radius: 0;
+
+  /* Fades into the page like the banner does (ChannelDetails.css, the same
+     stops), so the avatar and name skeletons over its lower part don't show
+     through a solid block */
+  mask-image: linear-gradient(to bottom, #000 0%, rgb(0 0 0 / 45%) 55%, transparent 100%);
 }
 
 .skeletonInfo {
