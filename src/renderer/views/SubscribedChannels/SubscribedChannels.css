@@ -1,31 +1,58 @@
-.card {
-  inline-size: 85%;
+/* On the page background, like the video lists (as .ft-card to win over
+   FtCard's own background) */
+.ft-card.card {
+  inline-size: auto;
   margin-block: 0 60px;
-  margin-inline: auto;
+  margin-inline: 0;
+  padding-inline: 32px;
+  box-sizing: border-box;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .message {
   color: var(--tertiary-text-color);
 }
 
-.count {
-  margin-block-start: 1rem;
-}
-
 .channels {
   inline-size: 100%;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 2.5rem;
-  margin-block-start: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-block-start: 1.25rem;
 }
 
+/* A channel: a rounded square with its picture, name and subscribe button */
 .channel {
   display: flex;
   flex-direction: column;
   align-items: center;
-  row-gap: 0.75rem;
-  padding: 0.5rem;
+  row-gap: 16px;
+  box-sizing: border-box;
+  padding-block: 28px 20px;
+  padding-inline: 16px;
+  border-radius: 20px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+
+  /* The focus ring, shown by its color */
+  outline: 3px solid transparent;
+  outline-offset: -3px;
+  transition:
+    background-color 150ms ease-out,
+    outline-color 150ms ease-out;
+}
+
+/* Remote focus on the channel (its picture is the stop): the whole card
+   lights up with a ring, instead of a highlight around the picture only
+   (spatialNav.css) */
+.channel:has(.thumbnailContainer[data-spatial-nav-focused]) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  outline-color: var(--primary-text-color);
+}
+
+.thumbnailContainer[data-spatial-nav-focused] {
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .thumbnailContainer {
@@ -36,14 +63,15 @@
 }
 
 .channelThumbnail {
-  block-size: 120px;
+  block-size: 132px;
   border-radius: var(--radius-round);
 }
 
 .channelName {
   flex-grow: 1;
   color: inherit;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
+  font-weight: 500;
   text-decoration: none;
   text-align: center;
   overflow: hidden;
@@ -51,8 +79,8 @@
   overflow-wrap: break-word;
   inline-size: 100%;
   display: -webkit-box;
-  line-clamp: 3;
-  -webkit-line-clamp: 3;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   padding-block: 0;
   padding-inline: 4px;
@@ -62,10 +90,8 @@
   flex-grow: 0;
   display: flex;
   align-items: center;
-}
-
-.unsubscribeContainer .btn {
-  block-size: 80%;
+  justify-content: center;
+  inline-size: 100%;
 }
 
 .headingIcon {
@@ -73,12 +99,13 @@
 }
 
 @media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
+  .ft-card.card {
+    padding-inline: 12px;
   }
 
   .channels {
-    gap: 1.5rem;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 
   .channelThumbnail {
