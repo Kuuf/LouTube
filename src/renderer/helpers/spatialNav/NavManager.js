@@ -252,6 +252,7 @@ function findNext(grid, pos, direction) {
 }
 
 const SCROLL_DURATION_MS = 180
+const SCROLL_MAX_DURATION_MS = 650
 
 /** @type {WeakMap<Element, number>} running scroll animation frame per scroller */
 const scrollAnimations = new WeakMap()
@@ -316,8 +317,13 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
 
   const startTime = performance.now()
 
+  // Longer when it goes further than one screen (e.g. back to the top of a
+  // page), which otherwise passes too fast to be seen as movement
+  const extraDistance = Math.max(Math.abs(target - start) - window.innerHeight, 0)
+  const duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS)
+
   const step = (now) => {
-    const progress = Math.min((now - startTime) / SCROLL_DURATION_MS, 1)
+    const progress = Math.min((now - startTime) / duration, 1)
     const eased = 1 - (1 - progress) ** 3 // ease-out cubic
 
     scroller.scrollTop = start + (target - start) * eased
