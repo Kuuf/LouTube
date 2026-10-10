@@ -324,7 +324,8 @@ export function scrollToViewTopAnimated(element, offset = 0) {
   const scroller = getScrollParent(element)
   const viewTop = scroller === document.scrollingElement ? 0 : scroller.getBoundingClientRect().top
 
-  animateScrollBy(scroller, element.getBoundingClientRect().top - viewTop - offset)
+  // Twice as long as the focus scroll: the whole page moves, not just a row
+  animateScrollBy(scroller, element.getBoundingClientRect().top - viewTop - offset, undefined, 2)
 }
 
 /**
@@ -332,8 +333,9 @@ export function scrollToViewTopAnimated(element, offset = 0) {
  * @param {number} delta
  * @param {() => void} [onEnd] - not called when there is nothing to scroll,
  *   nor when another scroll replaces this one
+ * @param {number} [durationFactor] - multiplies the animation's duration
  */
-function animateScrollBy(scroller, delta, onEnd) {
+function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
   if (Math.abs(delta) < 1) { return }
 
   const start = scroller.scrollTop
@@ -355,7 +357,7 @@ function animateScrollBy(scroller, delta, onEnd) {
   // Longer when it goes further than one screen (e.g. back to the top of a
   // page), which otherwise passes too fast to be seen as movement
   const extraDistance = Math.max(Math.abs(target - start) - window.innerHeight, 0)
-  let duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS)
+  let duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS) * durationFactor
 
   // Back to the very top of the page: twice as long, a calmer return
   if (target === 0) {
