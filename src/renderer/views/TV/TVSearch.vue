@@ -12,13 +12,20 @@
     <div ref="results">
       <SearchPage v-if="query !== ''" />
     </div>
-    <!-- Nothing searched yet: the app's flair fills the screen behind the bar -->
-    <img
+    <!-- Nothing searched yet: the mascot and an invitation under the bar -->
+    <div
       v-if="query === ''"
-      class="flair"
-      src="../../assets/img/search_flair_crazy.png"
-      alt=""
+      class="emptySearch"
     >
+      <img
+        class="mascot"
+        src="../../assets/img/search_mascot.png"
+        alt=""
+      >
+      <p class="emptySearchText">
+        {{ t('Search Bar.Search for anything') }}
+      </p>
+    </div>
   </div>
 </template>
 
