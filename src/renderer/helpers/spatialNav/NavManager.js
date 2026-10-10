@@ -315,7 +315,10 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
     return
   }
 
-  const startTime = performance.now()
+  // Taken from the first frame: frame timestamps can run ahead of
+  // `performance.now()` by more than the whole duration (seen in Electron),
+  // which would end the animation on its first frame
+  let startTime = null
 
   // Longer when it goes further than one screen (e.g. back to the top of a
   // page), which otherwise passes too fast to be seen as movement
@@ -323,6 +326,8 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
   const duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS)
 
   const step = (now) => {
+    startTime ??= now
+
     const progress = Math.min((now - startTime) / duration, 1)
     const eased = 1 - (1 - progress) ** 3 // ease-out cubic
 
