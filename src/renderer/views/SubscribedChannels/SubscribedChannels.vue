@@ -27,17 +27,24 @@
         </p>
       </ft-flex-box>
       <template v-else>
-        <ft-flex-box class="channels">
+        <ft-flex-box
+          ref="channelsRef"
+          class="channels"
+        >
           <div
             v-for="channel in channelList"
             :key="channel.id"
             class="channel"
+            :class="{ expanded: expandedChannelId === channel.id }"
+            :style="{ '--action-count': actionCount }"
+            data-spatial-nav-item
           >
-            <component
-              :is="enableChannelLinks ? 'router-link' : 'span'"
-              tabindex="-1"
-              class="thumbnailContainer"
-              :to="`/channel/${channel.id}`"
+            <button
+              class="channelMain"
+              type="button"
+              :aria-expanded="expandedChannelId === channel.id"
+              :aria-label="channel.name"
+              @click="toggleExpanded(channel.id)"
             >
               <img
                 v-if="channel.thumbnail != null"
@@ -51,27 +58,34 @@
                 class="channelThumbnail"
                 :icon="['fas', 'circle-user']"
               />
-            </component>
-            <component
-              :is="enableChannelLinks ? 'router-link' : 'span'"
-              class="channelName"
-              dir="auto"
-              :title="channel.name"
-              :to="`/channel/${channel.id}`"
-            >
-              {{ channel.name }}
-            </component>
+            </button>
             <div
-              v-if="!hideUnsubscribeButton"
-              class="unsubscribeContainer"
+              v-if="expandedChannelId === channel.id"
+              class="channelActions"
             >
+              <FtButton
+                v-if="enableChannelLinks"
+                :label="$t('Channels.Go To Channel')"
+                :background-color="ACTION_BUTTON_COLOR"
+                text-color="var(--primary-text-color)"
+                @click="goToChannel(channel.id)"
+              />
               <ft-subscribe-button
+                v-if="!hideUnsubscribeButton"
                 :channel-id="channel.id"
                 :channel-name="channel.name"
                 :channel-thumbnail="channel.thumbnail"
+                :hide-profile-dropdown-toggle="true"
                 :open-dropdown-on-subscribe="false"
               />
             </div>
+            <span
+              class="channelName"
+              dir="auto"
+              :title="channel.name"
+            >
+              {{ channel.name }}
+            </span>
           </div>
         </ft-flex-box>
       </template>
@@ -81,10 +95,11 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, onBeforeUnmount, ref, watch, useTemplateRef } from 'vue'
+import { computed, nextTick, onMounted, onBeforeUnmount, ref, watch, useTemplateRef } from 'vue'
 import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtInput from '../../components/FtInput/FtInput.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
@@ -93,11 +108,16 @@ import { ctrlFHandler, debounce } from '../../helpers/utils'
 import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { useTvPage } from '../../composables/useTvPage'
+import { useSpatialZone } from '../../composables/useSpatialZone'
+import { activateZone, navState } from '../../helpers/spatialNav/NavManager'
 
-// One stop per channel (its avatar), plus its unsubscribe button: the name
-// links to the same channel
-// Each card has its picture and, under it, its subscribe buttons: rows by position
-useTvPage('page-subscribed-channels', { startOn: 'first', exclude: '.channel .channelName', sortByPosition: true })
+import android from 'android'
+
+// One stop per channel: its card (a list item). Pressing it expands the
+// card, which then shows its actions, see below.
+const PAGE_ZONE_ID = 'page-subscribed-channels'
+
+useTvPage(PAGE_ZONE_ID, { startOn: 'first' })
 
 const route = useRoute()
 const router = useRouter()
@@ -295,6 +315,131 @@ onBeforeUnmount(() => {
 })
 
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
+
+// A pressed channel card grows over its neighbours and shows its actions
+// under the picture: going to the channel, and unsubscribing.
+const ACTION_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 14%, transparent)'
+
+/** @type {import('vue').Ref<string | null>} */
+const expandedChannelId = ref(null)
+
+/** How many actions a card shows, for the room they take (SubscribedChannels.css) */
+const actionCount = computed(() => (enableChannelLinks.value ? 1 : 0) + (hideUnsubscribeButton.value ? 0 : 1))
+
+/**
+ * @param {string} channelId
+ */
+function toggleExpanded(channelId) {
+  expandedChannelId.value = expandedChannelId.value === channelId || actionCount.value === 0 ? null : channelId
+}
+
+function collapse() {
+  expandedChannelId.value = null
+}
+
+/**
+ * @param {string} channelId
+ */
+function goToChannel(channelId) {
+  router.push(`/channel/${channelId}`)
+}
+
+// Remote control (spatial nav): while a card is expanded, its actions are a
+// zone of their own, one per row. Left, Right, Up from the first action,
+// Escape or the Back button collapse the card, and focus returns to it.
+const ACTIONS_ZONE_ID = 'subscribed-channel-actions'
+const channelsRef = useTemplateRef('channelsRef')
+
+/** @returns {Element | null} */
+function expandedCard() {
+  return channelsRef.value?.$el.querySelector('.channel.expanded') ?? null
+}
+
+function actionsGrid() {
+  return [...(expandedCard()?.querySelectorAll('.channelActions .btn') ?? [])].map(button => [button])
+}
+
+const actionsZone = useSpatialZone(ACTIONS_ZONE_ID, actionsGrid, {
+  onKeyDown: (event) => {
+    // The unsubscribe prompt over the card handles its own keys
+    if (store.getters.isAnyPromptOpen) { return true }
+
+    const row = navState.lastPosition.get(ACTIONS_ZONE_ID)?.row ?? 0
+
+    if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowRight' || (event.key === 'ArrowUp' && row === 0)) {
+      event.preventDefault()
+      collapse()
+      return true
+    }
+
+    // Dead end: nothing below the last action
+    if (event.key === 'ArrowDown' && row >= actionsGrid().length - 1) {
+      event.preventDefault()
+      return true
+    }
+
+    return false
+  },
+})
+
+/**
+ * Clicking/tapping outside the expanded card collapses it
+ * @param {PointerEvent} event
+ */
+function handleOutsidePointerDown(event) {
+  const card = expandedCard()
+  if (card && !card.contains(/** @type {Node} */ (event.target)) && !store.getters.isAnyPromptOpen) {
+    collapse()
+  }
+}
+
+function removeExpandedListeners() {
+  document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+
+  if (process.env.IS_ANDROID) {
+    android.exitPromptMode()
+    window.removeEventListener('exit-prompt', collapse)
+  }
+}
+
+watch(expandedChannelId, async (channelId, previousChannelId) => {
+  if (channelId != null && previousChannelId == null) {
+    document.addEventListener('pointerdown', handleOutsidePointerDown, true)
+
+    // Android's Back button collapses the card
+    if (process.env.IS_ANDROID) {
+      android.enterPromptMode()
+      window.addEventListener('exit-prompt', collapse)
+    }
+  } else if (channelId == null) {
+    removeExpandedListeners()
+  }
+
+  // Only when the remote is in use (some zone has the focus)
+  if (navState.activeZoneId === null) { return }
+
+  await nextTick()
+
+  if (channelId != null) {
+    navState.lastPosition.set(ACTIONS_ZONE_ID, { row: 0, col: 0 })
+    actionsZone.activate()
+  } else if (actionsZone.isActive.value) {
+    activateZone(PAGE_ZONE_ID)
+  }
+})
+
+// The expanded channel is gone (unsubscribed, or filtered out by a search)
+watch(channelList, (channels) => {
+  if (expandedChannelId.value != null && !channels.some(channel => channel.id === expandedChannelId.value)) {
+    collapse()
+  }
+})
+
+onBeforeUnmount(() => {
+  if (expandedChannelId.value != null) {
+    removeExpandedListeners()
+  }
+})
 
 </script>
 <style scoped src="./SubscribedChannels.css" />

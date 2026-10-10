@@ -22,8 +22,14 @@
   margin-block-start: 1.25rem;
 }
 
-/* A channel: a rounded square with its picture, name and subscribe button */
+/* A channel: a rounded square with its picture and name. It is the remote's
+   stop (a list item, so it gets their focus look, spatialNav.css). */
 .channel {
+  /* The room the actions of an expanded card take: each 44px, 8px between
+     them, and one more row gap of the card */
+  --actions-size: calc(var(--action-count, 2) * 52px + 8px);
+
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -33,38 +39,82 @@
   padding-inline: 16px;
   border-radius: 20px;
   background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
-
-  /* The focus ring, shown by its color */
-  outline: 3px solid transparent;
-  outline-offset: -3px;
   transition:
+    transform 220ms cubic-bezier(0.2, 0, 0, 1.2),
     background-color 150ms ease-out,
-    outline-color 150ms ease-out;
+    box-shadow 200ms ease-out;
 }
 
-/* Remote focus on the channel (its picture is the stop): the whole card
-   lights up with a ring, instead of a highlight around the picture only
-   (spatialNav.css) */
-.channel:has(.thumbnailContainer[data-spatial-nav-focused]) {
-  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
-  outline-color: var(--primary-text-color);
+/* Rounder than other list items */
+.channel[data-spatial-nav-focused] {
+  border-radius: 20px;
 }
 
-.thumbnailContainer[data-spatial-nav-focused] {
-  background-color: transparent;
-  box-shadow: none;
+/* Pressed: the card grows over its neighbours and shows its actions under
+   the picture. The negative margin takes the actions' height back, so the
+   grid around it doesn't move. */
+.channel.expanded {
+  z-index: 5;
+  margin-block-end: calc(-1 * var(--actions-size));
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, var(--bg-color));
+  box-shadow:
+    0 0 0 3px var(--primary-text-color),
+    0 20px 48px rgb(0 0 0 / 60%);
+  transform: scale(1.08);
 }
 
-.thumbnailContainer {
-  flex-grow: 0;
+.channelMain {
   display: flex;
-  align-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background-color: transparent;
   color: inherit;
+  cursor: pointer;
 }
 
 .channelThumbnail {
+  inline-size: 132px;
   block-size: 132px;
   border-radius: var(--radius-round);
+  object-fit: cover;
+}
+
+.channelActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  inline-size: 100%;
+  animation: actions-in 200ms ease-out both;
+}
+
+@keyframes actions-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* Both actions the same: full width pills (FtSubscribeButton wraps its
+   button in a list with margins of its own) */
+.channelActions :deep(.ftSubscribeButton) {
+  inline-size: 100%;
+}
+
+.channelActions :deep(.buttonList) {
+  margin: 0;
+}
+
+.channelActions :deep(.btn) {
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 44px;
+  margin: 0;
+  padding-block: 0;
+  border-color: transparent !important;
+  border-radius: var(--radius-pill);
+  box-shadow: none;
 }
 
 .channelName {
@@ -72,7 +122,6 @@
   color: inherit;
   font-size: 1.15rem;
   font-weight: 500;
-  text-decoration: none;
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -84,14 +133,6 @@
   -webkit-box-orient: vertical;
   padding-block: 0;
   padding-inline: 4px;
-}
-
-.unsubscribeContainer {
-  flex-grow: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 100%;
 }
 
 .headingIcon {
@@ -109,6 +150,17 @@
   }
 
   .channelThumbnail {
+    inline-size: 80px;
     block-size: 80px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .channel {
+    transition-duration: 0ms;
+  }
+
+  .channelActions {
+    animation: none;
   }
 }

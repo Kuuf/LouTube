@@ -34,14 +34,13 @@ const ITEM_WAIT_MS = 2000
  * @param {'item' | 'first'} [options.startOn]
  * @param {string} [options.exclude] - more controls to skip, on top of
  *   DEFAULT_EXCLUDE
- * @param {boolean} [options.sortByPosition] - see `pageGrid`
  */
-export function useTvPage(zoneId, { startOn = 'item', exclude, sortByPosition = false } = {}) {
+export function useTvPage(zoneId, { startOn = 'item', exclude } = {}) {
   const root = useTemplateRef('tvPageRoot')
   const excludeSelector = exclude ? `${DEFAULT_EXCLUDE}, ${exclude}` : DEFAULT_EXCLUDE
 
   function grid() {
-    return pageGrid(root.value, excludeSelector, sortByPosition)
+    return pageGrid(root.value, excludeSelector)
   }
 
   let usedRemote = false
