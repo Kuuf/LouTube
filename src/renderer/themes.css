@@ -199,16 +199,16 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --secondary-text-color: #ddd;
   --tertiary-text-color: #999;
   --title-color: #eee;
-  --bg-color: #212121;
+  --bg-color: #0f0f0f;
   --favorite-icon-color: #0f0;
-  --card-bg-color: #303030;
+  --card-bg-color: #1a1a1a;
   --secondary-card-bg-color: rgb(0 0 0 / 75%);
-  --scrollbar-color: #414141;
-  --scrollbar-color-hover: #757575;
-  --side-nav-color: #262626;
-  --side-nav-hover-color: #212121;
-  --side-nav-active-color: #303030;
-  --search-bar-color: #262626;
+  --scrollbar-color: #2e2e2e;
+  --scrollbar-color-hover: #555;
+  --side-nav-color: #141414;
+  --side-nav-hover-color: #222;
+  --side-nav-active-color: #2a2a2a;
+  --search-bar-color: #181818;
 }
 
 .black {

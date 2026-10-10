@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { gridFromElements, ITEM_ATTRIBUTE, navState } from '../../helpers/spatialNav/NavManager'
@@ -25,7 +25,7 @@ const CONTENT_CONTROLS = [
 /**
  * Remote control (spatial nav) for the channel page: the header (subscribe,
  * tabs, channel search) and the current tab's content below it. Focus starts
- * on the selected tab once the channel has loaded. Left from either leaves to
+ * on the selected tab once the channel has loaded. Focusing a tab selects it. Left from either leaves to
  * the side nav.
  *
  * Template refs to bind: `channelRoot` (the page's root element),
@@ -54,6 +54,16 @@ export function useTvChannel() {
       up: 'channel-header',
       left: 'sidebar',
     },
+  })
+
+  // Focusing a tab opens it, no Enter needed
+  watch(headerZone.focusedPosition, (position) => {
+    if (position == null) { return }
+
+    const cell = headerGrid()[position.row]?.[position.col]
+    if (cell?.matches('[role="tab"]:not(.selectedTab)')) {
+      cell.click()
+    }
   })
 
   // The channel loads after the page: focus the header once it is there, on

@@ -1,9 +1,17 @@
 .bannerContainer {
+  position: relative;
   background: center / cover no-repeat var(--banner-url, transparent);
-  block-size: 13vw;
-  min-block-size: 110px;
-  max-block-size: 32vh;
+  block-size: 50vh;
   inline-size: 100%;
+}
+
+/* Fades the banner into the page below it */
+.bannerContainer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 45%, var(--bg-color) 100%);
+  pointer-events: none;
 }
 
 .bannerContainer.default {
@@ -15,7 +23,9 @@
 
 .infoContainer {
   position: relative;
-  margin-block-start: 10px;
+
+  /* Over the faded bottom of the banner */
+  margin-block-start: -70px;
   padding-block: 0;
 
   /* Lines up with the channel's video list */
@@ -78,7 +88,8 @@
   block-size: auto;
   justify-content: unset;
   gap: 32px;
-  padding-block: 0.3em;
+  align-items: center;
+  padding-block: 16px;
   padding-inline: 0;
   flex-wrap: nowrap;
 }
@@ -87,27 +98,31 @@
   display: flex;
   flex: 0 1 66%;
   flex-wrap: wrap;
+  gap: 12px;
 }
 
 .tab {
-  padding: 15px;
-  font-size: 15px;
+  padding-block: 14px;
+  padding-inline: 32px;
+  font-size: 28px;
   cursor: pointer;
-  align-self: flex-end;
+  align-self: center;
   text-align: center;
   color: var(--tertiary-text-color);
-  border-block-end: 3px solid transparent;
+  border-radius: var(--radius-pill);
 }
 
 .tab:focus-visible,
 .tab:hover:not(.selectedTab) {
   font-weight: bold;
-  border-block-end: 3px solid var(--tertiary-text-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
 }
 
+/* Same swapped colors as the remote focus (spatialNav.css): focusing a tab
+   selects it, and it stays marked while the focus is in its content */
 .selectedTab {
-  color: var(--primary-text-color);
-  border-block-end: 3px solid var(--primary-color);
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
   font-weight: bold;
   box-sizing: border-box;
 }
