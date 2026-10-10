@@ -98,20 +98,6 @@
   min-inline-size: 0;
   flex-wrap: wrap;
   gap: 12px;
-
-  /* A little smaller while the remote's focus is elsewhere, growing back to
-     full size with the focus on a tab. Scaled, so nothing around it moves. */
-  transform: scale(0.88);
-  transform-origin: left center;
-  transition: transform 220ms cubic-bezier(0.2, 0, 0, 1);
-}
-
-.tabs:dir(rtl) {
-  transform-origin: right center;
-}
-
-.tabs:has([data-spatial-nav-focused]) {
-  transform: scale(1);
 }
 
 .tab {
