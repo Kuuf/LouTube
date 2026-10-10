@@ -464,32 +464,10 @@
     flex: 0 0 auto;
     inline-size: 48px;
     margin-inline: 16px;
-    transition: opacity 100ms ease-in;
   }
 
-  /* Over the icon's place: the two swap as the drawer opens and closes */
-  .brandLogoFull {
-    position: absolute;
-    inset-block-start: 12px;
-    inset-inline-start: 16px;
-    inline-size: 200px;
-    opacity: 0;
-    translate: -12px;
-    transition:
-      opacity 100ms ease-in,
-      translate 100ms ease-in;
-  }
-
-  .drawerOpen .brandLogo {
-    opacity: 0;
-  }
-
-  .drawerOpen .brandLogoFull {
-    opacity: 1;
-    translate: 0;
-    transition:
-      opacity 200ms ease-out 80ms,
-      translate 300ms cubic-bezier(0.05, 0.7, 0.1, 1) 80ms;
+  .brandName {
+    font-weight: bold;
   }
 
   .navChannel {
@@ -498,6 +476,7 @@
 
   .navOption .navLabel,
   .navChannel .navLabel,
+  .brandName,
   .hiddenLabels .navOption .navLabel {
     display: block;
     flex: 1 1 0;
@@ -516,7 +495,8 @@
   }
 
   .drawerOpen .navOption .navLabel,
-  .drawerOpen .navChannel .navLabel {
+  .drawerOpen .navChannel .navLabel,
+  .drawerOpen .brandName {
     opacity: 1;
     translate: 0;
     transition:
@@ -526,7 +506,7 @@
 
   :global(body[dir='rtl']) .navOption .navLabel,
   :global(body[dir='rtl']) .navChannel .navLabel,
-  :global(body[dir='rtl']) .brandLogoFull {
+  :global(body[dir='rtl']) .brandName {
     translate: 12px;
   }
 }
@@ -537,8 +517,7 @@
   .sideNav .drawerScrim,
   .sideNav .navOption .navLabel,
   .sideNav .navChannel .navLabel,
-  .sideNav .brandLogo,
-  .sideNav .brandLogoFull {
+  .sideNav .brandName {
     transition: none;
   }
 }

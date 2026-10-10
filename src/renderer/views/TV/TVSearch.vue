@@ -13,18 +13,13 @@
       <SearchPage v-if="query !== ''" />
     </div>
     <!-- Nothing searched yet: the app's flair fills the screen behind the bar -->
-    <template v-if="query === ''">
-      <img
-        class="flair"
-        src="../../assets/img/tv-background-4k.png"
-        alt=""
-      >
-      <img
-        class="logo"
-        src="../../assets/img/loutube-logo-full.png"
-        alt=""
-      >
-    </template>
+    <!-- Nothing searched yet: the app's logo in the middle of the screen -->
+    <img
+      v-if="query === ''"
+      class="logo"
+      src="../../assets/img/loutube-logo-full.png"
+      alt=""
+    >
   </div>
 </template>
 
