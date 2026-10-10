@@ -117,7 +117,9 @@ import android from 'android'
 // card, which then shows its actions, see below.
 const PAGE_ZONE_ID = 'page-subscribed-channels'
 
-useTvPage(PAGE_ZONE_ID, { startOn: 'first' })
+// Starts on the first channel, not on the search field above them, which
+// takes the keyboard as soon as it is focused
+useTvPage(PAGE_ZONE_ID)
 
 const route = useRoute()
 const router = useRouter()

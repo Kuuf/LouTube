@@ -395,7 +395,17 @@ function setPosition(zoneId, grid, pos) {
   const cell = grid[pos.row]?.[pos.col]
   if (cell instanceof Element) {
     markFocusedElement(cell)
-    releaseDomFocus(cell)
+
+    // A text field (search, name, URL...) is ready to type into as soon as
+    // it has the focus, no Enter needed (opens the on-screen keyboard on
+    // Android TV). Up/Down leave it again, see `onKeyDown`. Sliders still
+    // need Enter: Left/Right would otherwise change them in passing.
+    if (isEditableInput(cell) && cell.type !== 'range' && !cell.disabled && !cell.readOnly) {
+      cell.focus({ preventScroll: true })
+    } else {
+      releaseDomFocus(cell)
+    }
+
     scrollIntoViewAnimated(cell)
   } else {
     markFocusedElement(null)
