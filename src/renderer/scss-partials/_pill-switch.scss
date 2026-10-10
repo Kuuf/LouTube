@@ -1,0 +1,115 @@
+/*
+  FtToggleSwitch as an iOS style row: the label on the left and a pill switch
+  on the right, in a full-width row. The (invisible) checkbox covers the
+  whole row: clicking anywhere toggles, and it is the row's spatial-nav stop,
+  so the row gets the focus highlight.
+
+  Include `rows` in the scoped selector of the component that holds the
+  switches (the settings sections, the playlists page). Their background and
+  how they group is up to that component.
+*/
+$row-radius: var(--radius-lg);
+$switch-width: 51px;
+$switch-height: 31px;
+$knob-size: 27px;
+$knob-inset: 2px;
+
+@mixin rows {
+  :deep(.switch-ctn) {
+    display: flex;
+    align-items: center;
+    min-block-size: 52px;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: 16px;
+    box-sizing: border-box;
+  }
+
+  :deep(.switch-input) {
+    inset: 0;
+    z-index: 1;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    transform: none;
+    border-radius: 0;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+
+    // The whole row shows the focus (see below): the checkbox covering it
+    // stays invisible, over the global focus style (spatialNav.css)
+    &[data-spatial-nav-focused] {
+      background-color: transparent !important;
+    }
+  }
+
+  :deep(.switch-label) {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 6px;
+    max-inline-size: none;
+    padding-block: 12px;
+    padding-inline: 0 calc(#{$switch-width} + 16px);
+    font-weight: normal;
+
+    // Track
+    &::before {
+      inset-inline: auto 0;
+      inline-size: $switch-width;
+      block-size: $switch-height;
+      border-radius: var(--radius-pill);
+      background-color: rgb(120 120 128 / 36%);
+      transition: background-color 0.25s ease;
+    }
+
+    // Knob
+    &::after {
+      inset-inline: auto calc(#{$switch-width} - #{$knob-size} - #{$knob-inset});
+      inline-size: $knob-size;
+      block-size: $knob-size;
+      background-color: #fff;
+      box-shadow: 0 3px 8px rgb(0 0 0 / 15%), 0 3px 1px rgb(0 0 0 / 6%);
+      transition: inset-inline-end 0.25s cubic-bezier(0.3, 1.3, 0.6, 1);
+    }
+  }
+
+  :deep(.switch-input:checked + .switch-label) {
+    &::before {
+      background-color: var(--accent-color);
+    }
+
+    &::after {
+      inset-inline-end: $knob-inset;
+      transform: translate(0, -50%);
+      background-color: #fff;
+    }
+  }
+
+  :deep(.switch-input:disabled + .switch-label) {
+    &::before,
+    &::after {
+      opacity: 0.5;
+    }
+  }
+
+  // Focused row: text and background colors swapped, like other text based
+  // elements (spatialNav.css)
+  :deep(.switch-ctn:has(> .switch-input[data-spatial-nav-focused])) {
+    background-color: var(--primary-text-color);
+    color: var(--bg-color);
+    border-radius: $row-radius;
+
+    // The rows are padded already: no extension around them (spatialNav.css)
+    box-shadow: none;
+  }
+
+  // Tooltips sit beside the label, above the row-covering checkbox
+  :deep(.switch-label .tooltip) {
+    position: relative;
+    z-index: 2;
+  }
+}

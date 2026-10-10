@@ -3,42 +3,34 @@
     <FtCard
       class="card"
     >
-      <div class="heading">
-        <h2 class="headingText">
+      <!-- Title, and the page's one action at the end of its row -->
+      <div class="pageHeader">
+        <h2>
           <FontAwesomeIcon
             :icon="['fas', 'bookmark']"
             class="headingIcon"
           />
           {{ $t("User Playlists.Your Playlists") }}
         </h2>
-        <FtIconButton
-          :title="$t('User Playlists.Create New Playlist')"
-          :icon="['fas', 'plus']"
-          theme="secondary"
+        <FtButton
           class="newPlaylistButton"
+          :label="$t('User Playlists.Create New Playlist')"
+          :icon="['fas', 'plus']"
+          :background-color="NEUTRAL_BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
           @click="createNewPlaylist"
         />
-        <div
-          v-if="fullData.length > 1"
-          class="searchInputsRow"
-        >
+      </div>
+      <template v-if="fullData.length > 1">
+        <!-- The search, with the sort order beside it -->
+        <div class="controls">
           <FtSearchInput
             ref="searchBar"
+            class="searchField"
             :placeholder="$t('User Playlists.Search bar placeholder')"
             :value="query"
             @input="handleQueryChange"
             @clear="() => handleQueryChange('')"
-          />
-        </div>
-        <div
-          v-if="fullData.length > 1"
-          class="optionsRow"
-        >
-          <FtToggleSwitch
-            :label="$t('User Playlists.Playlists with Matching Videos')"
-            :compact="true"
-            :default-value="doSearchPlaylistsWithMatchingVideos"
-            @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
           />
           <FtSelect
             class="sortSelect"
@@ -50,7 +42,14 @@
             @change="updateUserPlaylistsSortBy"
           />
         </div>
-      </div>
+        <FtToggleSwitch
+          class="matchingVideosToggle"
+          :label="$t('User Playlists.Playlists with Matching Videos')"
+          :compact="true"
+          :default-value="doSearchPlaylistsWithMatchingVideos"
+          @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
+        />
+      </template>
       <FtSkeletonList
         v-if="!playlistsReady"
         type="playlist"
@@ -84,8 +83,8 @@
         <FtFlexBox>
           <FtButton
             label="Load More"
-            background-color="var(--primary-color)"
-            text-color="var(--text-with-main-color)"
+            :background-color="NEUTRAL_BUTTON_COLOR"
+            text-color="var(--primary-text-color)"
             @click="increaseLimit"
           />
         </FtFlexBox>
@@ -105,7 +104,6 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
 import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
@@ -116,7 +114,10 @@ import store from '../../store/index'
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
 import { useTvPage } from '../../composables/useTvPage'
 
-useTvPage('page-user-playlists')
+useTvPage('page-user-playlists', { topOnFirstRow: true })
+
+/** A mild gray: the swapped colors are the remote focus (spatialNav.css) */
+const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const { locale, t } = useI18n()
 
@@ -433,4 +434,4 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<style scoped src="./UserPlaylists.css" />
+<style scoped lang="scss" src="./UserPlaylists.scss" />

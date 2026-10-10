@@ -627,6 +627,33 @@ function isTypingTarget(target) {
   return isEditableInput(target) || /** @type {HTMLElement} */ (target)?.tagName === 'TEXTAREA' || /** @type {HTMLElement} */ (target)?.isContentEditable === true
 }
 
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean} whether Left/Right was pressed in a text field whose
+ *   caret can't go further that way
+ */
+function isCaretAtEdge(event) {
+  const field = event.target
+  if ((event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') || !isEditableInput(field) || field.type === 'range') {
+    return false
+  }
+
+  let start, end
+  try {
+    start = field.selectionStart
+    end = field.selectionEnd
+  } catch {
+    // Some input types have no selection
+    return false
+  }
+
+  if (start == null || start !== end) { return false }
+
+  // Mirrored in right-to-left text
+  const forwards = (event.key === 'ArrowRight') !== (getComputedStyle(field).direction === 'rtl')
+  return forwards ? start === field.value.length : start === 0
+}
+
 const EDITABLE_INPUT_TYPES = new Set(['text', 'search', 'email', 'url', 'password', 'number', 'tel', 'range'])
 
 /**
@@ -656,6 +683,12 @@ function onKeyDown(event) {
       /** @type {HTMLElement} */ (event.target).blur()
       handleDirection(KEY_TO_DIRECTION[event.key])
       event.preventDefault()
+    } else if (isCaretAtEdge(event)) {
+      // Left with the caret at the start of a text field, Right with it at
+      // the end: nothing left to move through, so the focus moves on
+      if (handleDirection(KEY_TO_DIRECTION[event.key])) {
+        event.preventDefault()
+      }
     } else if (event.key === 'Enter' && /** @type {HTMLInputElement} */ (event.target).type === 'range') {
       // Enter confirms a slider value
       /** @type {HTMLElement} */ (event.target).blur()
