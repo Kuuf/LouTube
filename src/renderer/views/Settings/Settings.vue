@@ -1,19 +1,49 @@
 <template>
   <div class="settingsPage">
     <template v-if="unlocked">
-      <FtSettingsMenu
-        v-show="isInDesktopView || settingsSectionTypeOpenInMobile == null"
+      <nav
         ref="menuRef"
-        :settings-sections="settingsSectionComponents"
-        :active-section="activeSection"
-        @navigate-to-section="navigateToSection"
-      />
+        class="settingsNav"
+      >
+        <h2 class="navHeader">
+          <FontAwesomeIcon
+            :icon="['fas', 'sliders-h']"
+            class="headerIcon"
+          />
+          {{ t('Settings.Settings') }}
+        </h2>
+        <button
+          v-for="section in settingsSectionComponents"
+          :key="section.type"
+          class="navItem"
+          :class="{ active: section.type === activeSection }"
+          type="button"
+          :data-section="section.type"
+          :aria-current="section.type === activeSection"
+          @click="activeSection = section.type"
+        >
+          <FontAwesomeIcon
+            :icon="section.icon"
+            class="navIcon"
+            fixed-width
+          />
+          <span class="navLabel">{{ section.title }}</span>
+        </button>
+      </nav>
       <div
-        v-show="isInDesktopView || settingsSectionTypeOpenInMobile != null"
         ref="contentRef"
         class="settingsContent"
       >
-        <div class="switchRow">
+        <component
+          :is="activeSectionEntry.component"
+          :key="activeSectionEntry.type"
+          class="section"
+          :data-section="activeSectionEntry.type"
+        />
+        <div
+          v-if="activeSection === 'general'"
+          class="switchRow"
+        >
           <FtButton
             v-if="USING_ELECTRON"
             :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
@@ -27,17 +57,6 @@
             @change="updateSettingsSectionSortEnabled"
           />
         </div>
-        <div class="settingsSections">
-          <component
-            :is="section.component"
-            v-for="section in settingsSectionComponents"
-            :key="section.type"
-            ref="sectionRefs"
-            class="section"
-            :class="{ hideOnMobile: settingsSectionTypeOpenInMobile !== section.type }"
-            :data-section="section.type"
-          />
-        </div>
       </div>
     </template>
     <PasswordDialog
@@ -49,7 +68,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from 'vue'
+import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vue'
@@ -68,20 +87,17 @@ import PasswordSettings from '../../components/PasswordSettings/PasswordSettings
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
-import FtSettingsMenu from '../../components/FtSettingsMenu/FtSettingsMenu.vue'
 
 import store from '../../store/index'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { focusableGrid, navState } from '../../helpers/spatialNav/NavManager'
 
 const USING_ELECTRON = !!process.env.IS_ELECTRON
-const SETTINGS_MOBILE_WIDTH_THRESHOLD = 1015
 
 const { locale, t } = useI18n()
 
-const isInDesktopView = ref(true)
-const settingsSectionTypeOpenInMobile = ref(null)
-const activeSection = ref(null)
+// The section shown beside the nav, one at a time
+const activeSection = ref('general')
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
@@ -198,45 +214,25 @@ const settingsSectionComponents = computed(() => {
   return [generalSettingsEntry, ...settingsSections]
 })
 
-const unlocked = ref(store.getters.getSettingsPassword === '')
+const activeSectionEntry = computed(() => {
+  return settingsSectionComponents.value.find(section => section.type === activeSection.value) ?? settingsSectionComponents.value[0]
+})
 
-if (unlocked.value) {
-  onMounted(handleMounted)
-}
+// Each section starts from its top
+watch(activeSection, () => {
+  document.scrollingElement.scrollTop = 0
+})
+
+const unlocked = ref(store.getters.getSettingsPassword === '')
 
 function handleUnlock() {
   unlocked.value = true
 
+  // The nav only exists once unlocked
   nextTick(() => {
-    handleMounted()
+    menuZone.activate()
   })
 }
-
-const currentPath = ref(window.location.hash)
-
-function onPopState(_, forcedMobile = true) {
-  currentPath.value = window.location.hash
-  if (currentPath.value === '#/settings') {
-    returnToSettingsMenu()
-  } else {
-    const subPath = currentPath.value.split('#/settings#')[1]
-    if (subPath !== undefined) {
-      navigateToSection(subPath, forcedMobile)
-    }
-  }
-}
-
-function pushState(path) {
-  if (`#/settings${path}` !== window.location.hash) {
-    history.pushState({}, null, `#/settings${path}`)
-  }
-}
-
-onBeforeUnmount(() => {
-  document.removeEventListener('scroll', markScrolledToSectionAsActive)
-  window.removeEventListener('resize', handleResize)
-  window.removeEventListener('popstate', onPopState)
-})
 
 function showKeyboardShortcutPrompt() {
   store.dispatch('showKeyboardShortcutPrompt')
@@ -249,137 +245,61 @@ function updateSettingsSectionSortEnabled(value) {
   store.dispatch('updateSettingsSectionSortEnabled', value)
 }
 
-// Spatial-nav (remote control): the section menu on the left, and every
-// control of the sections on the right. Tooltip buttons are skipped, they
-// would add a stop to most rows.
+// Spatial-nav (remote control): the section nav on the left, one item per
+// row, and every control of the open section beside it. Focusing a nav item
+// opens its section right away, like the profile manager's nav
+// (TVProfileManage.vue). Tooltip buttons are skipped, they would add a stop
+// to most rows.
+const MENU_ZONE_ID = 'settings-menu'
+const CONTENT_ZONE_ID = 'settings-content'
+
+const menuRef = useTemplateRef('menuRef')
 const contentRef = useTemplateRef('contentRef')
 
-useSpatialZone('settings-menu', () => [...(menuRef.value?.$el.querySelectorAll('a.title') ?? [])].map(link => [link]), {
+function menuGrid() {
+  return [...(menuRef.value?.querySelectorAll('.navItem') ?? [])].map(item => [item])
+}
+
+function contentGrid() {
+  return focusableGrid(contentRef.value, '.tooltip *')
+}
+
+function activeSectionRow() {
+  return Math.max(settingsSectionComponents.value.findIndex(section => section.type === activeSection.value), 0)
+}
+
+// Registered before the zone's own mounted hook, which activates it
+onMounted(() => {
+  navState.lastPosition.set(MENU_ZONE_ID, { row: activeSectionRow(), col: 0 })
+})
+
+const menuZone = useSpatialZone(MENU_ZONE_ID, menuGrid, {
+  active: true,
   edges: {
     left: 'sidebar',
-    right: 'settings-content',
-  },
-  // Enter jumps into the chosen section
-  onSelect: (_position, link) => {
-    const sectionType = link.dataset.section
-    navigateToSection(sectionType)
-    nextTick(() => focusContentSection(sectionType))
+    // Nothing to move to in a section without controls
+    right: () => contentGrid().length > 0 ? CONTENT_ZONE_ID : null,
   },
 })
 
-const contentZone = useSpatialZone('settings-content', () => focusableGrid(contentRef.value, '.tooltip *'), {
-  active: true,
+watch(menuZone.focusedPosition, (position) => {
+  if (position == null) { return }
+
+  const sectionType = menuGrid()[position.row]?.[0]?.dataset.section
+  if (sectionType) {
+    activeSection.value = sectionType
+  }
+})
+
+useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
   edges: {
-    // Back to the menu, on the section currently scrolled to
+    // Back to the nav, on the section that is open
     left: () => {
-      const row = settingsSectionComponents.value.findIndex(section => section.type === activeSection.value)
-      if (row !== -1) {
-        navState.lastPosition.set('settings-menu', { row, col: 0 })
-      }
-      return 'settings-menu'
+      navState.lastPosition.set(MENU_ZONE_ID, { row: activeSectionRow(), col: 0 })
+      return MENU_ZONE_ID
     },
   },
 })
-
-/**
- * Focuses the first control of a section in the content zone.
- * @param {string} sectionType
- */
-function focusContentSection(sectionType) {
-  const row = focusableGrid(contentRef.value, '.tooltip *')
-    .findIndex(cells => cells[0].closest('[data-section]')?.dataset.section === sectionType)
-
-  if (row !== -1) {
-    navState.lastPosition.set('settings-content', { row, col: 0 })
-  }
-  contentZone.activate()
-}
-
-function handleMounted() {
-  handleResize()
-  window.addEventListener('resize', handleResize)
-  document.addEventListener('scroll', markScrolledToSectionAsActive)
-
-  // mark first section as active before any scrolling has taken place
-  activeSection.value = settingsSectionComponents.value[0].type
-
-  onPopState(undefined, true)
-  window.addEventListener('popstate', onPopState)
-}
-
-const sectionRefs = useTemplateRef('sectionRefs')
-
-/**
- * @param {string} sectionType
- */
-function navigateToSection(sectionType, forcedMobile = false) {
-  if (isInDesktopView.value) {
-    nextTick(() => {
-      const sectionElement = sectionRefs.value.find(sectionRef => {
-        return sectionRef.$el.dataset.section === sectionType
-      })?.$el
-      sectionElement.scrollIntoView()
-
-      const sectionHeading = sectionElement.firstChild.firstChild
-      sectionHeading.tabIndex = 0
-      sectionHeading.focus()
-      sectionHeading.tabIndex = -1
-    })
-  }
-
-  if ((!isInDesktopView.value) || forcedMobile) {
-    pushState(`#${sectionType}`)
-    settingsSectionTypeOpenInMobile.value = sectionType
-  }
-}
-
-const menuRef = useTemplateRef('menuRef')
-
-function returnToSettingsMenu() {
-  const openSection = settingsSectionTypeOpenInMobile.value
-  settingsSectionTypeOpenInMobile.value = null
-
-  // focus the corresponding Settings Menu title
-  nextTick(() => {
-    return menuRef.value?.focusLink(openSection)
-  })
-}
-
-/* Set the current section to be shown as active in the Settings Menu
-* if it is the lowest section within the top quarter of the viewport (25vh) */
-function markScrolledToSectionAsActive() {
-  if (!isInDesktopView.value) {
-    activeSection.value = null
-    return
-  }
-
-  const scrollY = window.scrollY + window.innerHeight / 4
-
-  for (const sectionRef of sectionRefs.value) {
-    const sectionElement = sectionRef.$el
-
-    const sectionHeight = sectionElement.offsetHeight
-    const sectionTop = sectionElement.offsetTop
-
-    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
-      activeSection.value = sectionElement.dataset.section
-      break
-    }
-  }
-}
-
-function handleResize() {
-  const wasNotInDesktopView = !isInDesktopView.value
-  isInDesktopView.value = window.innerWidth > SETTINGS_MOBILE_WIDTH_THRESHOLD
-
-  // navigate to section that was open in mobile or desktop view, if any
-  if (isInDesktopView.value && wasNotInDesktopView && settingsSectionTypeOpenInMobile.value != null) {
-    navigateToSection(settingsSectionTypeOpenInMobile.value)
-    settingsSectionTypeOpenInMobile.value = null
-  } else if (!isInDesktopView.value && !wasNotInDesktopView && activeSection.value) {
-    navigateToSection(activeSection.value)
-  }
-}
 </script>
 
 <style scoped src="./Settings.css" />

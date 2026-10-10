@@ -1,25 +1,123 @@
+/* The settings: a nav of their sections on the side, and the section it
+   selects beside it, like the profile manager (TVProfileManage.css) */
 .settingsPage {
   display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  box-sizing: border-box;
+
+  /* Clear of the side nav's fading edge (SideNav.css) */
+  padding-block: 24px 60px;
+  padding-inline: 48px 32px;
 }
 
-/* Clear of the side nav's fading edge (SideNav.css) */
-@media only screen and (width > 1015px) {
-  .settingsPage {
-    padding-inline-start: 48px;
-  }
+.settingsNav {
+  position: sticky;
+  inset-block-start: 24px;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  inline-size: 280px;
+
+  /* More sections than fit on a small screen: the nav scrolls by itself */
+  max-block-size: calc(100vh - 48px);
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
-.settingsSections,
-.switchRow {
-  overflow-x: hidden;
-  max-inline-size: 90%;
+.navHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-block: 0 16px;
+  padding-inline: 14px;
+  font-size: 26px;
+}
+
+.headerIcon {
+  color: var(--primary-color);
+}
+
+.navItem {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding-block: 11px;
+  padding-inline: 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--tertiary-text-color);
+  font: inherit;
+  font-size: 18px;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.navItem:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
+}
+
+/* The open section: dimmed, the remote focus has the swapped colors
+   (spatialNav.css), like the channel page's tabs */
+.navItem.active {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.navIcon {
+  flex: none;
+}
+
+.navLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.settingsContent {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 1100px;
+}
+
+/* The section fills the content column, without the card around it */
+.settingsContent :deep(.sectionBody) {
+  padding: 0;
+  background-color: transparent;
+}
+
+.settingsContent :deep(.sectionTitle) {
+  margin-block: 0 20px;
+  font-size: 28px;
+}
+
+/* Every button is a mild gray: the swapped colors are the remote focus
+   (spatialNav.css), which this leaves alone. !important over FtButton's
+   inline colors. */
+.settingsContent :deep(.btn) {
+  border-color: transparent !important;
+  box-shadow: none;
+}
+
+.settingsContent :deep(.btn:not([data-spatial-nav-focused])) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent) !important;
+  color: var(--primary-text-color) !important;
 }
 
 .switchRow {
   display: flex;
-  margin-inline-end: auto;
+  flex-wrap: wrap;
   align-items: center;
-  margin-block-end: 5px;
+  gap: 16px;
+  margin-block-start: 24px;
 }
 
 .settingsToggle {
@@ -27,133 +125,20 @@
   margin-block: 0;
 }
 
-.section {
-  /* enables anchor link clicks to land with the section title in the top quarter of the page */
-  scroll-margin-top: 24vh;
-}
-
 @media only screen and (width <= 1015px) {
-  .settingsMenu {
-    block-size: auto;
-    gap: 1em;
-
+  .settingsPage {
+    flex-direction: column;
+    gap: 24px;
+    padding-inline: 16px;
   }
 
-  .switchRow {
-    display: none;
-  }
-
-  .settingsSections {
-    overflow-y: hidden;
-  }
-
-  .switchRow,
-  .settingsSections {
+  .settingsNav {
+    position: static;
     inline-size: 100%;
-    max-inline-size: 100%;
-    box-sizing: border-box;
+    max-block-size: none;
   }
 
   .settingsContent {
     inline-size: 100%;
   }
-
-  .settingsSection {
-    inline-size: 100%;
-    max-inline-size: 100%;
-    display: block;
-  }
-
-  .hideOnMobile {
-    display: none;
-  }
-
-  .returnToMenuMobileIcon {
-    font-size: 2em;
-    inline-size: 1.5em;
-    block-size: 1.5em;
-    padding-inline-end: 0.5em;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
 }
-
-@media only screen and (width <= 680px) {
-  .settingsMenu {
-    margin: 0;
-    inline-size: 100%;
-    gap: 0;
-  }
-
-  :deep(.title) {
-    box-sizing: border-box;
-    inline-size: 100%;
-    padding-block: 0.5em;
-    border-block-end: 3px solid var(--side-nav-color);
-    max-inline-size: 100%;
-  }
-
-  :deep(.title):last-child {
-    border-block-end: none;
-  }
-}
-
-/*
-@media only screen and (width >= 1015px) {
-  .section + .section {
-    padding-block-start: 20px;
-  }
-
-  .settingsSections:last-child {
-    /* Add enough blank space to have the last setting section be active on the FtSettingsMenu when scrolled to *\/
-    margin-block-end: calc(76vh - 150px);
-  }
-}
-
-@media only screen and (width <= 1200px) {
-
-}
-
-@media only screen and (width <= 1015px) {
-  /* Needed to overcome routerView styling for margin-block *\/
-  .settingsPage.settingsPage {
-    margin-block: 0;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .switchRow,
-  .settingsSections {
-    margin-inline: auto;
-  }
-
-  .switchRow {
-    display: none;
-  }
-
-  .settingsSections {
-    overflow-y: hidden;
-    margin-block-end: 80px;
-  }
-
-  .hideOnMobile {
-    display: none;
-  }
-
-  .returnToMenuMobileButton {
-    margin-block-start: 20px;
-    background-color: transparent;
-    color: inherit;
-    cursor: pointer;
-    border-style: none;
-    font-size: 30px;
-    line-height: 1em;
-  }
-
-  .returnToMenuMobileIcon {
-    inline-size: 1em;
-  }
-}
-*/
