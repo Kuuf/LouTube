@@ -61,7 +61,45 @@ export function useTvChannel() {
       up: 'channel-header',
       left: 'sidebar',
     },
+    onKeyDown: handleContentKey,
   })
+
+  /**
+   * Between the sort buttons and the list under them, the column isn't
+   * kept: Down from any sort button goes to the first item of the row below,
+   * and Up into the sort buttons goes to the selected one (focusing another
+   * would select it, see below).
+   * @param {KeyboardEvent} event
+   * @returns {boolean} handled here instead of by spatial nav
+   */
+  function handleContentKey(event) {
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') { return false }
+
+    const position = navState.lastPosition.get('channel-content')
+    if (!position) { return false }
+
+    const grid = contentGrid()
+    const cell = grid[position.row]?.[position.col]
+    if (!(cell instanceof Element)) { return false }
+
+    let target = null
+
+    if (event.key === 'ArrowDown' && cell.matches('.sortTab') && grid[position.row + 1]) {
+      target = { row: position.row + 1, col: 0 }
+    } else if (event.key === 'ArrowUp' && !cell.matches('.sortTab') && position.row > 0) {
+      const col = grid[position.row - 1].findIndex(above => above.matches('.selectedSortTab'))
+      if (col !== -1) {
+        target = { row: position.row - 1, col }
+      }
+    }
+
+    if (!target) { return false }
+
+    event.preventDefault()
+    navState.lastPosition.set('channel-content', target)
+    contentZone.activate()
+    return true
+  }
 
   // On a list item (video, playlist, ...) of the content's first rows, the
   // tab bar goes to the top of the screen (past the banner and channel info)
