@@ -15,8 +15,8 @@
           hasProfileDropdownToggle: isProfileDropdownEnabled,
           dropdownOpened: isProfileDropdownOpen
         }"
-        background-color="var(--primary-color)"
-        text-color="var(--text-with-main-color)"
+        :background-color="isSubscribed ? SUBSCRIBED_BACKGROUND_COLOR : 'var(--primary-color)'"
+        :text-color="isSubscribed ? 'var(--primary-text-color)' : 'var(--text-with-main-color)'"
         @click="handleSubscription(activeProfile)"
       />
       <FtPrompt
@@ -33,8 +33,8 @@
         :title="isProfileDropdownOpen ? $t('Profile.Close Profile Dropdown') : $t('Profile.Open Profile Dropdown')"
         class="profileDropdownToggle"
         :class="{ dropdownOpened: isProfileDropdownOpen}"
-        background-color="var(--primary-color)"
-        text-color="var(--text-with-main-color)"
+        :background-color="TOGGLE_BACKGROUND_COLOR"
+        text-color="var(--primary-text-color)"
         :aria-expanded="isProfileDropdownOpen"
         @click="toggleProfileDropdown"
       >
@@ -226,8 +226,15 @@ const hideChannelSubscriptions = computed(() => {
   return store.getters.getHideChannelSubscriptions
 })
 
+// Subscribed ("Unsubscribe"): a mild white instead of the main color, the
+// profile dropdown's toggle a little darker
+const SUBSCRIBED_BACKGROUND_COLOR = 'color-mix(in srgb, var(--primary-text-color) 18%, transparent)'
+const TOGGLE_BACKGROUND_COLOR = 'color-mix(in srgb, var(--primary-text-color) 10%, transparent)'
+
+const isSubscribed = computed(() => isProfileSubscribed(activeProfile.value))
+
 const subscribedText = computed(() => {
-  let subscribedValue = (isProfileSubscribed(activeProfile.value) ? t('Channel.Unsubscribe') : t('Channel.Subscribe'))
+  let subscribedValue = (isSubscribed.value ? t('Channel.Unsubscribe') : t('Channel.Subscribe'))
   if (props.subscriptionCountText !== '' && !hideChannelSubscriptions.value) {
     subscribedValue += ' ' + props.subscriptionCountText
   }
