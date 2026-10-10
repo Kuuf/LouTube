@@ -63,9 +63,10 @@ export function useTvChannel() {
     },
   })
 
-  // In the content's first rows, the tab bar goes to the top of the screen
-  // (past the banner and channel info) as long as the focused cell still
-  // fits under it. Further down, the focus scroll's "nearest" takes over.
+  // On a list item (video, playlist, ...) of the content's first rows, the
+  // tab bar goes to the top of the screen (past the banner and channel info)
+  // as long as the item still fits under it. Further down, and on the sort
+  // buttons, the focus scroll's "nearest" applies.
   watch(contentZone.focusedPosition, (position, previousPosition) => {
     if (position == null) { return }
 
@@ -90,7 +91,7 @@ export function useTvChannel() {
 
     // A tab rather than their row, which has padding of its own
     const tabBar = channelHeader.value?.$el.querySelector('.tab')
-    if (!(cell instanceof Element) || !tabBar) { return }
+    if (!(cell instanceof Element) || !cell.matches(`[${ITEM_ATTRIBUTE}]`) || !tabBar) { return }
 
     const tabBarTop = tabBar.getBoundingClientRect().top - TAB_BAR_TOP_PADDING
     if (cell.getBoundingClientRect().bottom - tabBarTop <= window.innerHeight - TAB_BAR_TOP_PADDING) {
