@@ -374,6 +374,8 @@
     inset-block: 0;
     inset-inline-start: 0;
     z-index: 1;
+    display: flex;
+    flex-direction: column;
     inline-size: 80px;
     overflow: hidden auto;
     transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
@@ -421,10 +423,31 @@
     margin-block: 0;
   }
 
-  /* Logo on top, always shown, the name beside it only in the open drawer */
+  /* The entries are centered vertically on the screen: the panel (.inner)
+     is a column, with the free space split above the first entry and below the
+     last one (auto margins, so a list taller than the screen still scrolls
+     from its top). */
+  .inner > .navOption,
+  .inner > hr {
+    flex: none;
+  }
+
+  .inner > .brand + .navOption {
+    margin-block-start: auto;
+  }
+
+  .inner > :last-child {
+    margin-block-end: auto;
+  }
+
+  /* Logo on top, always shown, the name beside it only in the open drawer.
+     Out of the flow, so it doesn't push the entries off center. */
   .brand {
     --label-font-size: 22px;
 
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
     display: flex;
     align-items: center;
     min-block-size: 72px;

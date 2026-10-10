@@ -269,47 +269,6 @@
           {{ $t("Log Viewer.Console Log") }}
         </p>
       </a>
-      <hr>
-      <div
-        v-if="!hideActiveSubscriptions"
-        class="mobileHidden"
-      >
-        <component
-          :is="enableChannelLinks ? 'router-link' : 'span'"
-          v-for="channel in activeSubscriptions"
-          :key="channel.id"
-          :to="`/channel/${channel.id}`"
-          :class="enableChannelLinks ? '' : 'disabledIcon'"
-          class="navChannel channelLink mobileHidden"
-          :title="channel.name"
-          role="button"
-        >
-          <div
-            class="thumbnailContainer"
-          >
-            <img
-              v-if="channel.thumbnail != null"
-              class="channelThumbnail"
-              height="35"
-              width="35"
-              loading="lazy"
-              :src="channel.thumbnail"
-              alt=""
-            >
-            <FontAwesomeIcon
-              v-else
-              class="channelThumbnail noThumbnail"
-              :icon="['fas', 'circle-user']"
-            />
-          </div>
-          <p
-            class="navLabel"
-            dir="auto"
-          >
-            {{ channel.name }}
-          </p>
-        </component>
-      </div>
     </div>
   </FtFlexBox>
 </template>
@@ -325,8 +284,7 @@ import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
 
 import store from '../../store/index'
 
-import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
-import { deepCopy, localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
+import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils'
 import { KeyboardShortcuts, MAIN_PROFILE_ID } from '../../../constants'
 import { getFirstCharacter } from '../../helpers/strings'
 import { useSpatialZone } from '../../composables/useSpatialZone'
@@ -355,11 +313,6 @@ const backendPreference = computed(() => {
   return store.getters.getBackendPreference
 })
 
-/** @type {import('vue').ComputedRef<string>} */
-const currentInvidiousInstanceUrl = computed(() => {
-  return store.getters.getCurrentInvidiousInstanceUrl
-})
-
 /** @type {import('vue').ComputedRef<object>} */
 const activeProfile = computed(() => {
   return store.getters.getActiveProfile
@@ -372,32 +325,6 @@ const activeProfileName = computed(() => {
 
 const activeProfileInitial = computed(() => {
   return activeProfileName.value ? getFirstCharacter(activeProfileName.value, locale.value) : ''
-})
-
-const activeSubscriptions = computed(() => {
-  /** @type {any[]} */
-  const subscriptions = deepCopy(activeProfile.value.subscriptions)
-
-  subscriptions.forEach(channel => {
-    // Change thumbnail size to 35x35, as that's the size we display it
-    // so we don't need to download a bigger image (the default is 176x176)
-    channel.thumbnail = channel.thumbnail?.replace(/=s\d+/, '=s35')
-  })
-
-  const locale_ = locale.value
-  subscriptions.sort((a, b) => {
-    return a.name?.toLowerCase().localeCompare(b.name?.toLowerCase(), locale_)
-  })
-
-  if (backendPreference.value === 'invidious') {
-    const instanceUrl = currentInvidiousInstanceUrl.value
-
-    subscriptions.forEach((channel) => {
-      channel.thumbnail = youtubeImageUrlToInvidious(channel.thumbnail, instanceUrl)
-    })
-  }
-
-  return subscriptions
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -413,11 +340,6 @@ const hidePlaylists = computed(() => {
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideTrendingVideos = computed(() => {
   return store.getters.getHideTrendingVideos
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideActiveSubscriptions = computed(() => {
-  return store.getters.getHideActiveSubscriptions
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */
@@ -462,16 +384,13 @@ const showLogViewer = () => {
   store.dispatch('showLogViewer')
 }
 
-const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
-
 // Spatial-nav (remote control) zone for the side nav: every rendered
-// top-level link and subscribed channel link, in display order, so links
-// shown or hidden by settings (Trending, Popular, Playlists, ...) are always
-// in sync. Channels without a link (channel links disabled) are skipped.
+// top-level link, in display order, so links shown or hidden by settings
+// (Trending, Popular, Playlists, ...) are always in sync.
 const inner = useTemplateRef('inner')
 
 function sidebarGrid() {
-  return gridFromElements(inner.value?.querySelectorAll(':scope > .navOption, .navChannel[href]') ?? [])
+  return gridFromElements(inner.value?.querySelectorAll(':scope > .navOption') ?? [])
 }
 
 // The side nav opens as a drawer (labels shown, page dimmed) while it has
