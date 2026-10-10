@@ -99,9 +99,14 @@ function open({ detail: { message, time, action, abortSignal } }) {
  * @param {Toast} toast
  */
 function close(toast) {
-  setTimeout(remove, 300, toast)
+  // We need to locate the object in the array so we get the reactive proxy,
+  // as modifying the original object won't trigger the leave animation
+  const reactiveToast = toasts.find(t => t.id === toast.id)
+  if (!reactiveToast) { return }
 
-  toast.isOpen = false
+  setTimeout(remove, 300, reactiveToast)
+
+  reactiveToast.isOpen = false
 }
 
 /**
