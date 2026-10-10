@@ -71,6 +71,14 @@ const FOCUSED_ATTRIBUTE = 'data-spatial-nav-focused'
 /** Mark list items with this so `gridFromElements` callers can find them. */
 export const ITEM_ATTRIBUTE = 'data-spatial-nav-item'
 
+/**
+ * Cells with this attribute tell a short press of Enter (select, on release)
+ * from a long one, which sends them LONG_PRESS_EVENT instead.
+ */
+export const LONG_PRESS_ATTRIBUTE = 'data-spatial-nav-long-press'
+export const LONG_PRESS_EVENT = 'spatial-nav-long-press'
+export const LONG_PRESS_MS = 500
+
 /** @type {Element | null} */
 let focusedElement = null
 
@@ -660,11 +668,40 @@ function onKeyDown(event) {
 
   // Android TV remotes send the D-pad center button to the WebView as Enter.
   if (event.key === 'Enter') {
+    // Still held since a long press cell: the key repeating does nothing,
+    // wherever the focus went meanwhile (e.g. onto what the long press opened)
+    if (heldEnter !== null) {
+      event.preventDefault()
+      return
+    }
+
+    // On a cell with a long press, Enter selects when it is released, unless
+    // it was held long enough
+    if (focusedElement?.hasAttribute(LONG_PRESS_ATTRIBUTE)) {
+      event.preventDefault()
+
+      if (!event.repeat) {
+        const cell = focusedElement
+        const held = {
+          longPressed: false,
+          timeout: setTimeout(() => {
+            held.longPressed = true
+            cell.dispatchEvent(new CustomEvent(LONG_PRESS_EVENT, { bubbles: true }))
+          }, LONG_PRESS_MS),
+        }
+        heldEnter = held
+      }
+      return
+    }
+
     if (handleSelect()) {
       event.preventDefault()
     }
     return
   }
+
+  // Another key while Enter is held: no select and no long press anymore
+  cancelHeldEnter()
 
   const direction = KEY_TO_DIRECTION[event.key]
   if (!direction) { return }
@@ -677,13 +714,41 @@ function onKeyDown(event) {
 let listenerAttached = false
 
 /** Registers the single document-level arrow-key listener. Call once, app-wide. */
+/** @type {{ longPressed: boolean, timeout: ReturnType<typeof setTimeout> } | null} Enter being held on a long press cell */
+let heldEnter = null
+
+function cancelHeldEnter() {
+  if (heldEnter !== null) {
+    clearTimeout(heldEnter.timeout)
+    heldEnter = null
+  }
+}
+
+/**
+ * Enter released on a long press cell: a short press selects it
+ * @param {KeyboardEvent} event
+ */
+function onKeyUp(event) {
+  if (event.key !== 'Enter' || heldEnter === null) { return }
+
+  const { longPressed } = heldEnter
+  cancelHeldEnter()
+
+  if (!longPressed) {
+    handleSelect()
+  }
+}
+
 export function initGlobalKeyListener() {
   if (listenerAttached) { return }
   document.addEventListener('keydown', onKeyDown)
+  document.addEventListener('keyup', onKeyUp)
   listenerAttached = true
 }
 
 export function teardownGlobalKeyListener() {
   document.removeEventListener('keydown', onKeyDown)
+  document.removeEventListener('keyup', onKeyUp)
+  cancelHeldEnter()
   listenerAttached = false
 }

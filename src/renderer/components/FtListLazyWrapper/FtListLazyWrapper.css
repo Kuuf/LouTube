@@ -14,3 +14,73 @@
   opacity: 0;
   transition: 0.01s;
 }
+
+/* A long press on a video: the item grows over its neighbours and shows its
+   actions under it. The negative margin takes the actions' height back, so
+   the list around it doesn't move. (The other transitions are those of list
+   items, spatialNav.css.) */
+.grid,
+.list {
+  transition:
+    transform 220ms cubic-bezier(0.2, 0, 0, 1.2),
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.actionsOpen {
+  position: relative;
+  z-index: 5;
+  margin-block-end: calc(-1 * var(--actions-size));
+  border-radius: var(--radius-md);
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, var(--bg-color));
+  box-shadow:
+    0 0 0 3px var(--primary-text-color),
+    0 20px 48px rgb(0 0 0 / 60%);
+  transform: scale(1.05);
+}
+
+.itemActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-block: 12px 8px;
+  padding-inline: 8px;
+  animation: item-actions-in 200ms ease-out both;
+}
+
+@keyframes item-actions-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.itemAction {
+  box-sizing: border-box;
+  block-size: 44px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.itemAction:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid,
+  .list {
+    transition-duration: 0ms;
+  }
+
+  .itemActions {
+    animation: none;
+  }
+}

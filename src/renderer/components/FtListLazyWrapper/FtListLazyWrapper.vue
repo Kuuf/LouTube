@@ -1,4 +1,6 @@
 <template>
+  <!-- The clicks handled here only follow a long press of the mouse, whose keyboard twin is Enter held (NavManager.js) -->
+  <!-- eslint-disable-next-line vuejs-accessibility/click-events-have-key-events -->
   <div
     v-if="showResult"
     v-observe-visibility="visible ? false : {
@@ -9,16 +11,27 @@
       list: layout === 'list',
       draggable: isDraggable,
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
+      actionsOpen,
     }"
+    :style="actionsOpen ? { '--actions-size': `${actionCount * 52 + 12}px` } : null"
     data-spatial-nav-item
+    :data-spatial-nav-long-press="isVideo ? '' : null"
     :draggable="isDraggable"
     v-on="isDraggable ? draggableEventHandlers : {}"
+    @spatial-nav-long-press="openActions"
+    @pointerdown="handlePointerDown"
+    @pointerup="cancelPointerLongPress"
+    @pointerleave="cancelPointerLongPress"
+    @pointercancel="cancelPointerLongPress"
+    @dragstart="cancelPointerLongPress"
+    @click.capture="handleClickCapture"
   >
     <template
       v-if="visible"
     >
       <FtListVideo
         v-if="finalDataType === 'video' || finalDataType === 'shortVideo'"
+        ref="videoRef"
         :appearance="appearance"
         :data="data"
         :playlist-id="playlistId"
@@ -61,12 +74,35 @@
         :appearance="appearance"
         :data="data"
       />
+      <!-- A long press on a video: its actions, under it -->
+      <div
+        v-if="actionsOpen"
+        ref="actionsRef"
+        class="itemActions"
+      >
+        <button
+          v-if="videoRef?.showPlaylists"
+          class="itemAction"
+          type="button"
+          @click="addToPlaylist"
+        >
+          {{ t('User Playlists.Add to Playlist') }}
+        </button>
+        <button
+          class="itemAction"
+          type="button"
+          @click="toggleWatchLater"
+        >
+          {{ videoRef?.isInWatchLater ? t('Video.Remove from Watch Later') : t('Video.Add to Watch Later') }}
+        </button>
+      </div>
     </template>
   </div>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, ref, useTemplateRef } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { handleDragAndDrop } from '../../helpers/dragAndDrop'
 
@@ -77,6 +113,14 @@ import FtCommunityPost from '../FtCommunityPost/FtCommunityPost.vue'
 import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
 
 import store from '../../store/index'
+
+import { activateZone, LONG_PRESS_MS, navState, registerZone, unregisterZone } from '../../helpers/spatialNav/NavManager'
+
+import { openItemActions } from './openItemActions'
+
+import android from 'android'
+
+const { t } = useI18n()
 
 const props = defineProps({
   data: {
@@ -372,6 +416,171 @@ function onDragVideo(event) {
 
   dragVideo(event, videoData)
 }
+
+// A long press on a video (Enter held on the remote, see NavManager.js, or
+// the mouse button held): the item grows over its neighbours and shows its
+// actions under it, adding it to a playlist or to Watch Later. Like the
+// channel cards of the channels list (SubscribedChannels.vue).
+const isVideo = computed(() => finalDataType.value === 'video' || finalDataType.value === 'shortVideo')
+
+const videoRef = useTemplateRef('videoRef')
+const actionsRef = useTemplateRef('actionsRef')
+
+const actionsOpen = ref(false)
+
+/** How many actions are shown, for the room they take (FtListLazyWrapper.css) */
+const actionCount = computed(() => videoRef.value?.showPlaylists ? 2 : 1)
+
+// Remote control (spatial nav): while open, the actions are a zone of their
+// own, one per row. Leaving them in any direction, Escape or the Back button
+// close them, and focus returns to the item.
+const ACTIONS_ZONE_ID = 'list-item-actions'
+
+/** The zone with the remote's focus before the actions took it */
+let returnZoneId = null
+
+function actionsGrid() {
+  return [...(actionsRef.value?.querySelectorAll('.itemAction') ?? [])].map(button => [button])
+}
+
+/**
+ * @param {KeyboardEvent} event
+ * @returns {boolean} handled here instead of by spatial nav
+ */
+function handleActionsKey(event) {
+  const row = navState.lastPosition.get(ACTIONS_ZONE_ID)?.row ?? 0
+
+  if (
+    event.key === 'Escape' ||
+    event.key === 'ArrowLeft' ||
+    event.key === 'ArrowRight' ||
+    (event.key === 'ArrowUp' && row === 0) ||
+    (event.key === 'ArrowDown' && row >= actionsGrid().length - 1)
+  ) {
+    event.preventDefault()
+    closeActions()
+    return true
+  }
+
+  return false
+}
+
+/**
+ * Clicking/tapping outside the item closes its actions
+ * @param {PointerEvent} event
+ */
+function handleOutsidePointerDown(event) {
+  if (!actionsRef.value?.parentElement.contains(/** @type {Node} */ (event.target))) {
+    closeActions()
+  }
+}
+
+async function openActions() {
+  if (!isVideo.value || actionsOpen.value) { return }
+
+  openItemActions.close?.()
+  openItemActions.close = closeActions
+
+  actionsOpen.value = true
+  registerZone({ id: ACTIONS_ZONE_ID, getGrid: actionsGrid, onKeyDown: handleActionsKey })
+  document.addEventListener('pointerdown', handleOutsidePointerDown, true)
+
+  // Android's Back button closes the actions
+  if (process.env.IS_ANDROID) {
+    android.enterPromptMode()
+    window.addEventListener('exit-prompt', closeActions)
+  }
+
+  // Only when the remote is in use (some zone has the focus)
+  const activeZoneId = navState.activeZoneId
+  if (activeZoneId === null) { return }
+
+  returnZoneId = activeZoneId
+  await nextTick()
+
+  if (actionsOpen.value) {
+    navState.lastPosition.set(ACTIONS_ZONE_ID, { row: 0, col: 0 })
+    activateZone(ACTIONS_ZONE_ID)
+  }
+}
+
+function closeActions() {
+  if (!actionsOpen.value) { return }
+
+  actionsOpen.value = false
+  document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
+
+  if (process.env.IS_ANDROID) {
+    android.exitPromptMode()
+    window.removeEventListener('exit-prompt', closeActions)
+  }
+
+  if (openItemActions.close === closeActions) {
+    openItemActions.close = null
+  }
+
+  // Back to the item, when the focus was in its actions
+  const hadFocus = navState.activeZoneId === ACTIONS_ZONE_ID
+  unregisterZone(ACTIONS_ZONE_ID)
+
+  if (hadFocus && returnZoneId !== null) {
+    activateZone(returnZoneId)
+  }
+  returnZoneId = null
+}
+
+function addToPlaylist() {
+  const video = videoRef.value
+  closeActions()
+  video?.togglePlaylistPrompt()
+}
+
+function toggleWatchLater() {
+  videoRef.value?.toggleWatchLater()
+  closeActions()
+}
+
+// The mouse (or a finger) held on the item for as long as a long press of
+// Enter. The click that ends it doesn't open the video.
+let pointerLongPressTimeout = 0
+let suppressNextClick = false
+
+/**
+ * @param {PointerEvent} event
+ */
+function handlePointerDown(event) {
+  suppressNextClick = false
+
+  if (!isVideo.value || actionsOpen.value || event.button !== 0 || /** @type {Element} */ (event.target).closest('button, [role="button"]')) {
+    return
+  }
+
+  clearTimeout(pointerLongPressTimeout)
+  pointerLongPressTimeout = setTimeout(() => {
+    suppressNextClick = true
+    openActions()
+  }, LONG_PRESS_MS)
+}
+
+function cancelPointerLongPress() {
+  clearTimeout(pointerLongPressTimeout)
+}
+
+/**
+ * @param {MouseEvent} event
+ */
+function handleClickCapture(event) {
+  if (suppressNextClick) {
+    suppressNextClick = false
+    event.preventDefault()
+    event.stopPropagation()
+  }
+}
+
+onBeforeUnmount(() => {
+  clearTimeout(pointerLongPressTimeout)
+  closeActions()
+})
 
 /** @import { VideoData } from '../../helpers/dragAndDrop' */
 

@@ -1204,6 +1204,51 @@ function removeFromQuickBookmarkPlaylist() {
   showToast(t('Video.Video has been removed from your saved list'))
 }
 
+// The "Watch Later" playlist, for the long press actions of the list item
+// (FtListLazyWrapper.vue)
+const WATCH_LATER_PLAYLIST_ID = 'watchLater'
+
+const isInWatchLater = computed(() => {
+  const playlist = store.getters.getPlaylist(WATCH_LATER_PLAYLIST_ID)
+  return playlist?.videos.some(video => video.videoId === id.value) ?? false
+})
+
+function toggleWatchLater() {
+  if (isInWatchLater.value) {
+    store.dispatch('removeVideo', {
+      _id: WATCH_LATER_PLAYLIST_ID,
+      // Remove all playlist items with same videoId
+      videoId: id.value,
+    })
+
+    showToast(t('Video.Removed from Watch Later'))
+    return
+  }
+
+  store.dispatch('addVideo', {
+    _id: WATCH_LATER_PLAYLIST_ID,
+    videoData: {
+      videoId: id.value,
+      title: title.value,
+      author: channelName.value,
+      authorId: channelId.value,
+      lengthSeconds: props.data.lengthSeconds,
+      published: published.value,
+      premiereDate: props.data.premiereDate,
+      premiereTimestamp: props.data.premiereTimestamp,
+    },
+  })
+
+  showToast(t('Video.Added to Watch Later'))
+}
+
+defineExpose({
+  showPlaylists,
+  isInWatchLater,
+  togglePlaylistPrompt,
+  toggleWatchLater,
+})
+
 function moveVideoUp() {
   emit('move-video-up', id.value, props.playlistItemId)
 }
