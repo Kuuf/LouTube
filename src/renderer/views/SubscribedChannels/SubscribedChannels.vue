@@ -109,7 +109,7 @@ import { useI18n } from 'vue-i18n'
 import store from '../../store/index'
 import { useTvPage } from '../../composables/useTvPage'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { activateZone, navState } from '../../helpers/spatialNav/NavManager'
+import { activateZone, handleDirection, navState } from '../../helpers/spatialNav/NavManager'
 
 import android from 'android'
 
@@ -345,8 +345,9 @@ function goToChannel(channelId) {
 }
 
 // Remote control (spatial nav): while a card is expanded, its actions are a
-// zone of their own, one per row. Left, Right, Up from the first action,
-// Escape or the Back button collapse the card, and focus returns to it.
+// zone of their own, one per row. Up from the first action, Down from the
+// last one, Escape or the Back button collapse the card, and focus returns to
+// it. Left and Right collapse it and move on to the channel beside it.
 const ACTIONS_ZONE_ID = 'subscribed-channel-actions'
 const channelsRef = useTemplateRef('channelsRef')
 
@@ -366,15 +367,27 @@ const actionsZone = useSpatialZone(ACTIONS_ZONE_ID, actionsGrid, {
 
     const row = navState.lastPosition.get(ACTIONS_ZONE_ID)?.row ?? 0
 
-    if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowRight' || (event.key === 'ArrowUp' && row === 0)) {
+    // Leaving the actions upwards or downwards (or Escape): back on the card
+    if (
+      event.key === 'Escape' ||
+      (event.key === 'ArrowUp' && row === 0) ||
+      (event.key === 'ArrowDown' && row >= actionsGrid().length - 1)
+    ) {
       event.preventDefault()
       collapse()
       return true
     }
 
-    // Dead end: nothing below the last action
-    if (event.key === 'ArrowDown' && row >= actionsGrid().length - 1) {
+    // Left and Right carry on to the channel beside the card
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const direction = event.key === 'ArrowLeft' ? 'left' : 'right'
+
       event.preventDefault()
+      collapse()
+      nextTick(() => {
+        activateZone(PAGE_ZONE_ID)
+        handleDirection(direction)
+      })
       return true
     }
 
