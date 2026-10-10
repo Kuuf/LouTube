@@ -125,22 +125,14 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
 }
 
-/* The theme's text and background colors swapped, like the remote focus of
-   spatialNav.css. Focusing a tab selects it, and it stays marked while the
-   focus is in its content. */
+/* Dimmed while the focus is elsewhere (in the tab's content). Focusing a tab
+   selects it, and with the remote's focus on it, it gets the swapped colors
+   of spatialNav.css. */
 .selectedTab {
-  background-color: var(--primary-text-color);
-  color: var(--bg-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  color: var(--primary-text-color);
   font-weight: bold;
   box-sizing: border-box;
-}
-
-/* Remote focus on a tab that is not selected (yet): a milder highlight than
-   the swapped colors, which mark the selected one (!important to win over
-   spatialNav.css) */
-.tab[data-spatial-nav-focused]:not(.selectedTab) {
-  background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent) !important;
-  color: var(--primary-text-color) !important;
 }
 
 .thumbnailContainer {
