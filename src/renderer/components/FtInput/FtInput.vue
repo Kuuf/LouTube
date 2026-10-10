@@ -26,6 +26,13 @@
         :tooltip="tooltip"
       />
     </label>
+    <!-- A search field's magnifying glass, where the clear button shows once there is text -->
+    <FontAwesomeIcon
+      v-if="showClearTextButton"
+      class="searchIcon"
+      :icon="['fas', 'search']"
+      aria-hidden="true"
+    />
     <button
       v-if="showClearTextButton"
       class="clearInputTextButton"
