@@ -20,10 +20,7 @@
     v-on="isDraggable ? draggableEventHandlers : {}"
     @spatial-nav-long-press="openActions"
     @pointerdown="handlePointerDown"
-    @pointerup="cancelPointerLongPress"
-    @pointerleave="cancelPointerLongPress"
-    @pointercancel="cancelPointerLongPress"
-    @dragstart="cancelPointerLongPress"
+    @dragstart="handleDragStartDuringPress"
     @click.capture="handleClickCapture"
   >
     <template
@@ -543,7 +540,13 @@ function toggleWatchLater() {
 // The mouse (or a finger) held on the item for as long as a long press of
 // Enter. The click that ends it doesn't open the video.
 let pointerLongPressTimeout = 0
+let isPointerLongPressPending = false
 let suppressNextClick = false
+
+/** How far the pointer may wander while held (px): a hand is never quite still */
+const POINTER_LONG_PRESS_SLOP = 12
+let pointerDownX = 0
+let pointerDownY = 0
 
 /**
  * @param {PointerEvent} event
@@ -555,15 +558,53 @@ function handlePointerDown(event) {
     return
   }
 
-  clearTimeout(pointerLongPressTimeout)
+  cancelPointerLongPress()
+  isPointerLongPressPending = true
+  pointerDownX = event.clientX
+  pointerDownY = event.clientY
+
+  // Followed on the document: the press ends when the button is released or
+  // the pointer really moves away, not when it merely shifts over the item
+  document.addEventListener('pointermove', handlePointerMoveDuringPress, true)
+  document.addEventListener('pointerup', cancelPointerLongPress, true)
+  document.addEventListener('pointercancel', cancelPointerLongPress, true)
+
   pointerLongPressTimeout = setTimeout(() => {
+    cancelPointerLongPress()
     suppressNextClick = true
     openActions()
   }, LONG_PRESS_MS)
 }
 
+/**
+ * @param {PointerEvent} event
+ */
+function handlePointerMoveDuringPress(event) {
+  if (Math.hypot(event.clientX - pointerDownX, event.clientY - pointerDownY) > POINTER_LONG_PRESS_SLOP) {
+    cancelPointerLongPress()
+  }
+}
+
 function cancelPointerLongPress() {
+  isPointerLongPressPending = false
   clearTimeout(pointerLongPressTimeout)
+  document.removeEventListener('pointermove', handlePointerMoveDuringPress, true)
+  document.removeEventListener('pointerup', cancelPointerLongPress, true)
+  document.removeEventListener('pointercancel', cancelPointerLongPress, true)
+}
+
+/**
+ * A hand holding the mouse still moves it a little, which starts dragging the
+ * thumbnail and would end the long press. Items that aren't meant to be
+ * dragged (reordering a playlist) keep the press instead of the drag.
+ * @param {DragEvent} event
+ */
+function handleDragStartDuringPress(event) {
+  if (isPointerLongPressPending && !isDraggable.value) {
+    event.preventDefault()
+  } else {
+    cancelPointerLongPress()
+  }
 }
 
 /**
@@ -578,7 +619,7 @@ function handleClickCapture(event) {
 }
 
 onBeforeUnmount(() => {
-  clearTimeout(pointerLongPressTimeout)
+  cancelPointerLongPress()
   closeActions()
 })
 

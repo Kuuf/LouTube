@@ -40,6 +40,12 @@
   transform: scale(1.05);
 }
 
+/* The video keeps its own height instead of filling the item, so the
+   actions under it stay inside the item */
+.actionsOpen :deep(.ft-list-item.ft-list-video) {
+  block-size: auto;
+}
+
 .itemActions {
   display: flex;
   flex-direction: column;
