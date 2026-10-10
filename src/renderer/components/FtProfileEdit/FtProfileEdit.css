@@ -1,90 +1,113 @@
-h2 {
-  text-align: center;
+/* Edit Profile section of the profile manager (TVProfileManage.vue) */
+.heading {
+  margin-block: 0 24px;
+  font-size: 28px;
 }
 
-h3 {
-  margin-block: 0 10px;
-  text-align: center;
+.section {
+  margin-block-end: 32px;
 }
 
-.message {
-  color: var(--tertiary-text-color);
+.sectionHeading {
+  margin-block: 0 12px;
+  color: var(--secondary-text-color);
+  font-size: 18px;
+  font-weight: 500;
 }
 
-.profileName,
-.colorSelection {
-  margin: auto;
-  inline-size: 350px;
+.profileName {
+  inline-size: min(420px, 100%);
 }
 
-.profileEdit {
-  flex-direction: column;
-  column-gap: 10px;
-}
-
-.profileEdit > * {
-  flex: 1;
-}
-
+/* 85 colors: 17 x 5 */
 .colorOptions {
-  margin-inline: auto;
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(17, 44px);
+}
+
+.colorOption {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  min-inline-size: 250px;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 10px;
+  font-size: 18px;
+  cursor: pointer;
+
+  /* The ring of the chosen and of the focused color, shown by its color */
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  transition:
+    outline-color 150ms ease-out,
+    transform 150ms ease-out;
+}
+
+.colorOption.chosen {
+  outline-color: color-mix(in srgb, var(--primary-text-color) 55%, transparent);
+}
+
+/* Remote focus: a full ring, and a little bigger, instead of the tinted
+   background of spatialNav.css (the swatch keeps its own color) */
+.colorOption[data-spatial-nav-focused] {
+  z-index: 1;
+  outline-color: var(--primary-text-color);
+  box-shadow: none;
+  border-radius: 10px;
+  transform: scale(1.15);
 }
 
 .customColorSection {
   display: flex;
   align-items: center;
+  gap: 10px;
+  margin-block-start: 16px;
+  color: var(--tertiary-text-color);
+}
+
+.colorValue {
+  font-family: monospace;
+}
+
+.previewRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 24px;
+}
+
+/* Like the tiles of the profile switcher (TVProfiles.css) */
+.preview {
+  display: flex;
+  flex: none;
+  align-items: center;
   justify-content: center;
-  gap: 5px;
-  margin-block-start: 5px;
-}
-
-.colorOption {
-  inline-size: 40px;
-  block-size: 40px;
-  margin: 2px;
-  cursor: pointer;
-  border-radius: 50%;
-}
-
-.initial {
-  font-size: 37.5px;
-  text-align: center;
+  inline-size: 110px;
+  block-size: 110px;
+  border-radius: 16px;
+  font-size: 52px;
+  font-weight: 500;
+  line-height: 1;
   user-select: none;
 }
 
-.colorOption:has(.initial) {
-  inline-size: 75px;
-  block-size: 75px;
+.actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  cursor: default;
+  gap: 4px;
 }
 
-.profilePreviewSection {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 5px;
+/* The translucent button backgrounds would show twice under FtButton's
+   border of the same color (!important over its inline style) */
+.actions :deep(.btn) {
+  border-color: transparent !important;
+  box-shadow: none;
 }
 
-.secondEditRow {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-evenly;
-}
-
-.card {
-  inline-size: 85%;
-  margin-block: 0 60px;
-  margin-inline: auto;
-}
-
-@media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
+@media only screen and (width <= 1250px) {
+  .colorOptions {
+    grid-template-columns: repeat(auto-fill, 44px);
   }
 }

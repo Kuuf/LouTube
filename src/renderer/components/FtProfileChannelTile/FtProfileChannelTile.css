@@ -1,0 +1,83 @@
+/* A channel of a profile, in the profile manager's lists: a rounded square
+   with a faint background, the channel's picture and its name */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  box-sizing: border-box;
+  min-block-size: 150px;
+  padding-block: 18px 14px;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 16px;
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  color: var(--primary-text-color);
+  font: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.tile:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+}
+
+.thumbnail {
+  flex: none;
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: var(--radius-round);
+  object-fit: cover;
+}
+
+.channelName {
+  /* Two lines at most */
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  inline-size: 100%;
+  font-size: 14px;
+  line-height: 1.3;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* Selected: a check on the corner, like the active profile of the switcher
+   (TVProfiles.css), on a stronger background */
+.selected {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+}
+
+.checkBadge {
+  position: absolute;
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 26px;
+  block-size: 26px;
+  border-radius: var(--radius-round);
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  font-size: 12px;
+}
+
+/* Remote focus: the theme's text and background colors swapped, instead of
+   the tinted background elements with an image get (spatialNav.css) */
+.tile[data-spatial-nav-focused] {
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  box-shadow: none;
+  border-radius: 16px;
+}
+
+.tile[data-spatial-nav-focused] .checkBadge {
+  background-color: var(--bg-color);
+  color: var(--primary-text-color);
+}

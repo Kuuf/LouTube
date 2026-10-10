@@ -1,0 +1,111 @@
+/* One profile's settings: a mini nav on the side, like the Settings page,
+   and the section it selects beside it */
+.profileManage {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  box-sizing: border-box;
+
+  /* Clear of the side nav's fading edge (SideNav.css) */
+  padding-block: 24px 60px;
+  padding-inline: 48px 32px;
+}
+
+.manageNav {
+  position: sticky;
+  inset-block-start: 24px;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  inline-size: 260px;
+}
+
+.navProfile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-block-end: 20px;
+}
+
+/* Like the tiles of the profile switcher (TVProfiles.css), smaller */
+.avatar {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  inline-size: 56px;
+  block-size: 56px;
+  border-radius: 12px;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+}
+
+.profileName {
+  overflow: hidden;
+  font-size: 22px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-block: 12px;
+  padding-inline: 14px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--tertiary-text-color);
+  font: inherit;
+  font-size: 18px;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.navItem:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
+}
+
+/* The open section: dimmed, the remote focus has the swapped colors
+   (spatialNav.css), like the channel page's tabs */
+.navItem.active {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.navIcon {
+  flex: none;
+}
+
+.backItem {
+  margin-block-start: 20px;
+}
+
+.manageContent {
+  flex: 1;
+  min-inline-size: 0;
+  max-inline-size: 1100px;
+}
+
+@media only screen and (width <= 1015px) {
+  .profileManage {
+    flex-direction: column;
+    gap: 24px;
+    padding-inline: 16px;
+  }
+
+  .manageNav {
+    position: static;
+    inline-size: 100%;
+  }
+}

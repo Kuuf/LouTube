@@ -1,46 +1,60 @@
 <template>
   <div>
-    <FtCard class="card">
-      <h2>
+    <div class="header">
+      <h2 class="heading">
         {{ $t("Profile.Subscription List") }}
       </h2>
       <p
-        v-if="showUnsubscribeButton"
+        v-if="showUnsubscribeButton && subscriptions.length > 0"
         class="selectedCount"
       >
         {{ selectedText }}
       </p>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in subscriptions"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
-      <FtFlexBox
-        v-if="showUnsubscribeButton"
-      >
-        <FtButton
-          :label="$t('Profile.Select All')"
-          @click="selectAll"
-        />
-        <FtButton
-          :label="$t('Profile.Select None')"
-          @click="selectNone"
-        />
-        <FtButton
-          :label="$t('Profile.Delete Selected')"
-          text-color="var(--destructive-text-color)"
-          background-color="var(--destructive-color)"
-          @click="displayDeletePrompt"
-        />
-      </FtFlexBox>
-    </FtCard>
+    </div>
+    <div
+      v-if="showUnsubscribeButton && subscriptions.length > 0"
+      class="actions"
+    >
+      <FtButton
+        :label="$t('Profile.Select All')"
+        :background-color="NEUTRAL_BUTTON_COLOR"
+        text-color="var(--primary-text-color)"
+        @click="selectAll"
+      />
+      <FtButton
+        :label="$t('Profile.Select None')"
+        :background-color="NEUTRAL_BUTTON_COLOR"
+        text-color="var(--primary-text-color)"
+        @click="selectNone"
+      />
+      <FtButton
+        :label="$t('Profile.Delete Selected')"
+        text-color="var(--destructive-text-color)"
+        background-color="var(--destructive-color)"
+        @click="displayDeletePrompt"
+      />
+    </div>
+    <div
+      v-if="subscriptions.length > 0"
+      class="channels"
+    >
+      <FtProfileChannelTile
+        v-for="channel in subscriptions"
+        :key="channel.id"
+        :channel-id="channel.id"
+        :channel-name="channel.name"
+        :channel-thumbnail="channel.thumbnail"
+        :selectable="showUnsubscribeButton"
+        :selected="selected.has(channel.id)"
+        @change="handleChannelToggle(channel.id)"
+      />
+    </div>
+    <p
+      v-else
+      class="message"
+    >
+      {{ $t("Profile.This profile has no subscriptions") }}
+    </p>
     <FtPrompt
       v-if="showDeletePrompt"
       :label="deletePromptMessage"
@@ -56,9 +70,7 @@
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtCard from '../ft-card/ft-card.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
+import FtProfileChannelTile from '../FtProfileChannelTile/FtProfileChannelTile.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 
@@ -80,6 +92,9 @@ import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
  */
 
 const { locale, t } = useI18n()
+
+/** Mild, for the actions that aren't the main (or destructive) one */
+const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const props = defineProps({
   /** @type {import('vue').PropType<Profile>} */

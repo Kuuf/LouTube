@@ -1,101 +1,104 @@
 <template>
-  <div>
-    <FtCard class="card">
-      <h2>{{ editOrCreateProfileLabel }}</h2>
-      <FtFlexBox class="profileEdit">
-        <div>
-          <h3>{{ $t("Profile.Color Picker") }}</h3>
-          <FtFlexBox
-            class="colorOptions"
-          >
-            <div
-              v-for="color in COLOR_VALUES"
-              :key="color"
-              class="colorOption"
-              :title="color + ' ' + $t('Profile.Custom Color')"
-              :style="{ background: color }"
-              tabindex="0"
-              role="button"
-              @click="profileBgColor = color"
-              @keydown.enter.space.prevent="profileBgColor = color"
-            />
-          </FtFlexBox>
-          <div class="customColorSection">
-            <label for="colorPicker">{{ $t("Profile.Custom Color") }}</label>
-            <input
-              id="colorPicker"
-              v-model="profileBgColor"
-              type="color"
-            >
-          </div>
-          <FtInput
-            class="colorSelection"
-            placeholder=""
-            :value="profileBgColor"
-            :show-action-button="false"
-            :disabled="true"
+  <div class="profileEdit">
+    <h2 class="heading">
+      {{ editOrCreateProfileLabel }}
+    </h2>
+    <section class="section">
+      <h3 class="sectionHeading">
+        {{ editOrCreateProfileNameLabel }}
+      </h3>
+      <FtInput
+        class="profileName"
+        :placeholder="$t('Profile.Profile Name')"
+        :disabled="isMainProfile"
+        :value="translatedProfileName"
+        :show-action-button="false"
+        :maxlength="100"
+        @input="profileName = $event"
+        @keydown.enter="saveProfile"
+      />
+    </section>
+    <section class="section">
+      <h3 class="sectionHeading">
+        {{ $t("Profile.Color Picker") }}
+      </h3>
+      <div class="colorOptions">
+        <div
+          v-for="color in COLOR_VALUES"
+          :key="color"
+          class="colorOption"
+          :class="{ chosen: color === profileBgColor }"
+          :title="color"
+          :style="{ background: color, color: calculateColorLuminance(color) }"
+          tabindex="0"
+          role="button"
+          :aria-pressed="color === profileBgColor"
+          @click="profileBgColor = color"
+          @keydown.enter.space.prevent="profileBgColor = color"
+        >
+          <FontAwesomeIcon
+            v-if="color === profileBgColor"
+            :icon="['fas', 'check']"
           />
         </div>
-        <div class="secondEditRow">
-          <div>
-            <h3>{{ editOrCreateProfileNameLabel }}</h3>
-            <FtInput
-              class="profileName"
-              :placeholder="$t('Profile.Profile Name')"
-              :disabled="isMainProfile"
-              :value="translatedProfileName"
-              :show-action-button="false"
-              :maxlength="100"
-              @input="profileName = $event"
-              @keydown.enter="saveProfile"
-            />
-          </div>
-          <div>
-            <h3>{{ $t("Profile.Profile Preview") }}</h3>
-            <div class="profilePreviewSection">
-              <div
-                class="colorOption"
-                :style="{ background: profileBgColor, color: profileTextColor }"
-              >
-                <div
-                  class="initial"
-                  dir="auto"
-                >
-                  {{ profileInitial }}
-                </div>
-              </div>
-              <FtFlexBox>
-                <FtButton
-                  v-if="isNew"
-                  :label="$t('Profile.Create Profile')"
-                  @click="saveProfile"
-                />
-                <template
-                  v-else
-                >
-                  <FtButton
-                    :label="$t('Profile.Update Profile')"
-                    @click="saveProfile"
-                  />
-                  <FtButton
-                    :label="$t('Profile.Make Default Profile')"
-                    @click="setDefaultProfile"
-                  />
-                  <FtButton
-                    v-if="!isMainProfile"
-                    :label="$t('Profile.Delete Profile')"
-                    text-color="var(--destructive-text-color)"
-                    background-color="var(--destructive-color)"
-                    :icon="['fas', 'trash']"
-                    @click="showDeletePrompt = true"
-                  />
-                </template>
-              </FtFlexBox>
-            </div>
-          </div>
+      </div>
+      <div class="customColorSection">
+        <label for="colorPicker">{{ $t("Profile.Custom Color") }}</label>
+        <input
+          id="colorPicker"
+          v-model="profileBgColor"
+          type="color"
+        >
+        <span class="colorValue">{{ profileBgColor }}</span>
+      </div>
+    </section>
+    <section class="section">
+      <h3 class="sectionHeading">
+        {{ $t("Profile.Profile Preview") }}
+      </h3>
+      <div class="previewRow">
+        <div
+          class="preview"
+          :style="{ background: profileBgColor, color: profileTextColor }"
+        >
+          <span
+            class="initial"
+            dir="auto"
+          >
+            {{ profileInitial }}
+          </span>
         </div>
-      </FtFlexBox>
-    </FtCard>
+        <div class="actions">
+          <FtButton
+            v-if="isNew"
+            :label="$t('Profile.Create Profile')"
+            @click="saveProfile"
+          />
+          <template
+            v-else
+          >
+            <FtButton
+              :label="$t('Profile.Update Profile')"
+              @click="saveProfile"
+            />
+            <FtButton
+              :label="$t('Profile.Make Default Profile')"
+              :background-color="NEUTRAL_BUTTON_COLOR"
+              text-color="var(--primary-text-color)"
+              @click="setDefaultProfile"
+            />
+            <FtButton
+              v-if="!isMainProfile"
+              :label="$t('Profile.Delete Profile')"
+              text-color="var(--destructive-text-color)"
+              background-color="var(--destructive-color)"
+              :icon="['fas', 'trash']"
+              @click="showDeletePrompt = true"
+            />
+          </template>
+        </div>
+      </div>
+    </section>
     <FtPrompt
       v-if="showDeletePrompt"
       :label="deletePromptLabel"
@@ -108,12 +111,11 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtCard from '../ft-card/ft-card.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtInput from '../FtInput/FtInput.vue'
 import FtButton from '../FtButton/FtButton.vue'
 
@@ -156,6 +158,9 @@ const props = defineProps({
 const emit = defineEmits(['new-profile-created', 'profile-deleted'])
 
 const COLOR_VALUES = colors.map(color => color.value)
+
+/** Mild, for the actions that aren't the main (or destructive) one */
+const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => store.getters.getActiveProfile)

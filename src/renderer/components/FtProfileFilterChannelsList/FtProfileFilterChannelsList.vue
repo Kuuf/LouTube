@@ -1,46 +1,37 @@
 <template>
   <div>
-    <FtCard class="card">
-      <h2>
+    <div class="header">
+      <h2 class="heading">
         {{ $t("Profile.Other Channels") }}
       </h2>
-      <FtFlexBox>
-        <FtSelect
-          :placeholder="$t('Profile.Profile Filter')"
-          :value="profileIdList[filteredProfileIndex]"
-          :select-names="profileNameList"
-          :select-values="profileIdList"
-          :icon="['fas', 'filter']"
-          @change="handleProfileFilterChange"
-        />
-      </FtFlexBox>
       <p
-        v-if="showUnsubscribeButton"
-        class="selected"
+        v-if="showUnsubscribeButton && channels.length > 0"
+        class="selectedCount"
       >
         {{ selectedText }}
       </p>
-      <FtFlexBox>
-        <FtChannelBubble
-          v-for="channel in channels"
-          :key="channel.id"
-          :channel-id="channel.id"
-          :channel-name="channel.name"
-          :channel-thumbnail="channel.thumbnail"
-          :selectable="showUnsubscribeButton"
-          :selected="selected.has(channel.id)"
-          @change="handleChannelToggle(channel.id)"
-        />
-      </FtFlexBox>
-      <FtFlexBox
-        v-if="showUnsubscribeButton"
-      >
+    </div>
+    <div class="actions">
+      <FtSelect
+        class="profileFilter"
+        :placeholder="$t('Profile.Profile Filter')"
+        :value="profileIdList[filteredProfileIndex]"
+        :select-names="profileNameList"
+        :select-values="profileIdList"
+        :icon="['fas', 'filter']"
+        @change="handleProfileFilterChange"
+      />
+      <template v-if="showUnsubscribeButton && channels.length > 0">
         <FtButton
           :label="$t('Profile.Select All')"
+          :background-color="NEUTRAL_BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
           @click="selectAll"
         />
         <FtButton
           :label="$t('Profile.Select None')"
+          :background-color="NEUTRAL_BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
           @click="selectNone"
         />
         <FtButton
@@ -49,8 +40,29 @@
           background-color="var(--primary-color)"
           @click="addChannelsToProfile"
         />
-      </FtFlexBox>
-    </FtCard>
+      </template>
+    </div>
+    <div
+      v-if="channels.length > 0"
+      class="channels"
+    >
+      <FtProfileChannelTile
+        v-for="channel in channels"
+        :key="channel.id"
+        :channel-id="channel.id"
+        :channel-name="channel.name"
+        :channel-thumbnail="channel.thumbnail"
+        :selectable="showUnsubscribeButton"
+        :selected="selected.has(channel.id)"
+        @change="handleChannelToggle(channel.id)"
+      />
+    </div>
+    <p
+      v-else
+      class="message"
+    >
+      {{ $t("Profile.No other channels to add") }}
+    </p>
   </div>
 </template>
 
@@ -58,9 +70,7 @@
 import { computed, reactive, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
-import FtCard from '../ft-card/ft-card.vue'
-import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
+import FtProfileChannelTile from '../FtProfileChannelTile/FtProfileChannelTile.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 
@@ -83,6 +93,9 @@ import { MAIN_PROFILE_ID } from '../../../constants'
  */
 
 const { locale, t } = useI18n()
+
+/** Mild, for the actions that aren't the main one */
+const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const props = defineProps({
   profile: {

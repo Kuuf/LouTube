@@ -1,19 +1,51 @@
-h2 {
-  text-align: center;
+/* A section of the profile manager (TVProfileManage.vue): heading, actions,
+   then the channels as a grid of tiles */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 16px;
+  margin-block-end: 16px;
 }
 
-.selected {
-  text-align: center;
+.heading {
+  margin: 0;
+  font-size: 28px;
 }
 
-.card {
-  inline-size: 85%;
-  margin-block: 0 15px;
-  margin-inline: auto;
+.selectedCount {
+  margin: 0;
+  color: var(--tertiary-text-color);
 }
 
-@media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
-  }
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-block-end: 20px;
+
+  /* FtButton has a 5px margin of its own */
+  margin-inline: -5px;
+}
+
+/* The translucent button backgrounds would show twice under FtButton's
+   border of the same color (!important over its inline style) */
+.actions :deep(.btn) {
+  border-color: transparent !important;
+  box-shadow: none;
+}
+
+.channels {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.message {
+  color: var(--tertiary-text-color);
+}
+
+.profileFilter {
+  margin-inline: 5px 16px;
 }
