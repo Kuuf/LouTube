@@ -48,10 +48,12 @@
 }
 
 /* Remote focus: a full ring, and a little bigger, instead of the tinted
-   background of spatialNav.css (the swatch keeps its own color) */
+   background of spatialNav.css (the swatch keeps its own color). The whole
+   outline is set again, as spatialNav.css removes it on focus. */
 .colorOption[data-spatial-nav-focused] {
   z-index: 1;
-  outline-color: var(--primary-text-color);
+  outline: 4px solid var(--primary-text-color);
+  outline-offset: 3px;
   box-shadow: none;
   border-radius: 16px;
   transform: scale(1.08);
