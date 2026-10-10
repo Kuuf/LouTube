@@ -12,15 +12,6 @@
       </p>
     </div>
     <div class="actions">
-      <FtSelect
-        class="profileFilter"
-        :placeholder="$t('Profile.Profile Filter')"
-        :value="profileIdList[filteredProfileIndex]"
-        :select-names="profileNameList"
-        :select-values="profileIdList"
-        :icon="['fas', 'filter']"
-        @change="handleProfileFilterChange"
-      />
       <template v-if="showUnsubscribeButton && channels.length > 0">
         <FtButton
           :label="$t('Profile.Select All')"
@@ -36,8 +27,8 @@
         />
         <FtButton
           :label="$t('Profile.Add Selected To Profile')"
-          text-color="var(--text-with-main-color)"
-          background-color="var(--primary-color)"
+          :background-color="NEUTRAL_BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
           @click="addChannelsToProfile"
         />
       </template>
@@ -67,12 +58,11 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, reactive, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtProfileChannelTile from '../FtProfileChannelTile/FtProfileChannelTile.vue'
 import FtButton from '../FtButton/FtButton.vue'
-import FtSelect from '../FtSelect/FtSelect.vue'
 
 import store from '../../store/index'
 
@@ -94,7 +84,7 @@ import { MAIN_PROFILE_ID } from '../../../constants'
 
 const { locale, t } = useI18n()
 
-/** Mild, for the actions that aren't the main one */
+/** Every action is a mild gray: the swapped colors are the remote focus */
 const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const props = defineProps({
@@ -108,12 +98,6 @@ const props = defineProps({
 const profileList = computed(() => {
   return store.getters.getProfileList
 })
-
-/** @type {import('vue').ShallowRef<string[]>} */
-const profileIdList = shallowRef([])
-
-/** @type {import('vue').ShallowRef<string[]>} */
-const profileNameList = shallowRef([])
 
 /** @type {import('vue').ComputedRef<'local' | 'invidious'>} */
 const backendPreference = computed(() => {
@@ -134,14 +118,12 @@ const showUnsubscribeButton = computed(() => {
   return !store.getters.getHideUnsubscribeButton
 })
 
-const filteredProfileIndex = ref(0)
-
 /** @type {import('vue').ShallowRef<Profile['subscriptions']>} */
 const channels = shallowRef([])
 
 function loadChannels() {
-  const profileId = profileIdList.value[filteredProfileIndex.value]
-  const profile = profileList.value.find((profile) => profile._id === profileId)
+  // The main profile has every subscribed channel
+  const profile = profileList.value.find((profile) => profile._id === MAIN_PROFILE_ID)
 
   /** @type {Profile['subscriptions']} */
   let channels_ = deepCopy(profile.subscriptions)
@@ -165,8 +147,6 @@ function loadChannels() {
   channels.value = channels_
 }
 
-fillProfileList()
-
 if (typeof props.profile.subscriptions !== 'undefined') {
   loadChannels()
 }
@@ -176,7 +156,7 @@ watch(() => props.profile, () => {
   selectNone()
 }, { deep: true })
 
-watch(filteredProfileIndex, loadChannels)
+watch(profileList, loadChannels, { deep: true })
 
 /** @type {import('vue').Reactive<Set<string>>} */
 const selected = reactive(new Set())
@@ -206,38 +186,12 @@ function handleChannelToggle(channelId) {
   }
 }
 
-watch(profileList, fillProfileList, { deep: true })
-watch(() => props.profile, fillProfileList, { deep: true })
-
-function fillProfileList() {
-  const profiles = profileList.value.filter((profile) => profile._id !== props.profile._id)
-
-  profileIdList.value = profiles.map((profile) => profile._id)
-  profileNameList.value = profiles.map(translateProfileName)
-}
-
-/**
- * @param {Profile} profile
- */
-function translateProfileName(profile) {
-  return profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
-}
-
-/**
- * @param {string} profileId
- */
-function handleProfileFilterChange(profileId) {
-  selectNone()
-  filteredProfileIndex.value = profileIdList.value.indexOf(profileId)
-}
-
 function addChannelsToProfile() {
   if (selected.size === 0) {
     showToast(t('Profile.No channel(s) have been selected'))
   } else {
-    const profileId = profileIdList.value[filteredProfileIndex.value]
     const subscriptions = profileList.value
-      .find((profile) => profile._id === profileId)
+      .find((profile) => profile._id === MAIN_PROFILE_ID)
       .subscriptions
       .filter((channel) => selected.has(channel.id))
 

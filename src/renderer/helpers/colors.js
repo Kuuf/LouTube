@@ -90,6 +90,16 @@ export const colors = [
   { name: 'SolarizedGreen', value: '#859900' },
 ]
 
+/** The few colors a profile can pick from: far apart in hue, close in weight */
+export const profileColors = [
+  '#E5534B',
+  '#F2A33A',
+  '#3FB57F',
+  '#3B9DDD',
+  '#8B6FE8',
+  '#E0669E',
+]
+
 export function getRandomColorClass() {
   return 'main' + getRandomColor().name
 }

@@ -19,26 +19,25 @@
   inline-size: min(420px, 100%);
 }
 
-/* 85 colors: 17 x 5 */
 .colorOptions {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: repeat(17, 44px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .colorOption {
   display: flex;
   align-items: center;
   justify-content: center;
-  inline-size: 44px;
-  block-size: 44px;
-  border-radius: 10px;
-  font-size: 18px;
+  inline-size: 88px;
+  block-size: 88px;
+  border-radius: 16px;
+  font-size: 30px;
   cursor: pointer;
 
   /* The ring of the chosen and of the focused color, shown by its color */
-  outline: 3px solid transparent;
-  outline-offset: 2px;
+  outline: 4px solid transparent;
+  outline-offset: 3px;
   transition:
     outline-color 150ms ease-out,
     transform 150ms ease-out;
@@ -54,26 +53,15 @@
   z-index: 1;
   outline-color: var(--primary-text-color);
   box-shadow: none;
-  border-radius: 10px;
-  transform: scale(1.15);
+  border-radius: 16px;
+  transform: scale(1.08);
 }
 
-.customColorSection {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-block-start: 16px;
-  color: var(--tertiary-text-color);
-}
-
-.colorValue {
-  font-family: monospace;
-}
-
+/* The preview, the actions under it */
 .previewRow {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 24px;
 }
 
@@ -97,6 +85,9 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 4px;
+
+  /* FtButton has a 5px margin of its own */
+  margin-inline: -5px;
 }
 
 /* The translucent button backgrounds would show twice under FtButton's
@@ -104,10 +95,4 @@
 .actions :deep(.btn) {
   border-color: transparent !important;
   box-shadow: none;
-}
-
-@media only screen and (width <= 1250px) {
-  .colorOptions {
-    grid-template-columns: repeat(auto-fill, 44px);
-  }
 }

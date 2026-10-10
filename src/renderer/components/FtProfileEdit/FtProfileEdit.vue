@@ -24,7 +24,7 @@
       </h3>
       <div class="colorOptions">
         <div
-          v-for="color in COLOR_VALUES"
+          v-for="color in profileColors"
           :key="color"
           class="colorOption"
           :class="{ chosen: color === profileBgColor }"
@@ -41,15 +41,6 @@
             :icon="['fas', 'check']"
           />
         </div>
-      </div>
-      <div class="customColorSection">
-        <label for="colorPicker">{{ $t("Profile.Custom Color") }}</label>
-        <input
-          id="colorPicker"
-          v-model="profileBgColor"
-          type="color"
-        >
-        <span class="colorValue">{{ profileBgColor }}</span>
       </div>
     </section>
     <section class="section">
@@ -72,6 +63,8 @@
           <FtButton
             v-if="isNew"
             :label="$t('Profile.Create Profile')"
+            :background-color="NEUTRAL_BUTTON_COLOR"
+            text-color="var(--primary-text-color)"
             @click="saveProfile"
           />
           <template
@@ -79,6 +72,8 @@
           >
             <FtButton
               :label="$t('Profile.Update Profile')"
+              :background-color="NEUTRAL_BUTTON_COLOR"
+              text-color="var(--primary-text-color)"
               @click="saveProfile"
             />
             <FtButton
@@ -90,8 +85,8 @@
             <FtButton
               v-if="!isMainProfile"
               :label="$t('Profile.Delete Profile')"
-              text-color="var(--destructive-text-color)"
-              background-color="var(--destructive-color)"
+              :background-color="NEUTRAL_BUTTON_COLOR"
+              text-color="var(--primary-text-color)"
               :icon="['fas', 'trash']"
               @click="showDeletePrompt = true"
             />
@@ -122,7 +117,7 @@ import FtButton from '../FtButton/FtButton.vue'
 import store from '../../store/index'
 
 import { MAIN_PROFILE_ID } from '../../../constants'
-import { calculateColorLuminance, colors } from '../../helpers/colors'
+import { calculateColorLuminance, profileColors } from '../../helpers/colors'
 import { deepCopy, showToast } from '../../helpers/utils'
 import { getFirstCharacter } from '../../helpers/strings'
 
@@ -157,9 +152,7 @@ const props = defineProps({
 
 const emit = defineEmits(['new-profile-created', 'profile-deleted'])
 
-const COLOR_VALUES = colors.map(color => color.value)
-
-/** Mild, for the actions that aren't the main (or destructive) one */
+/** Every action is a mild gray: the swapped colors are the remote focus */
 const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 /** @type {import('vue').ComputedRef<Profile>} */

@@ -87,7 +87,7 @@ import FtProfileFilterChannelsList from '../../components/FtProfileFilterChannel
 
 import store from '../../store/index'
 
-import { calculateColorLuminance, getRandomColor } from '../../helpers/colors'
+import { calculateColorLuminance, profileColors } from '../../helpers/colors'
 import { getFirstCharacter } from '../../helpers/strings'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { useSpatialZone } from '../../composables/useSpatialZone'
@@ -115,7 +115,7 @@ const profileId = computed(() => /** @type {string} */ (route.params.id ?? ''))
 const isMainProfile = computed(() => profileId.value === MAIN_PROFILE_ID)
 
 function newProfile() {
-  const bgColor = getRandomColor().value
+  const bgColor = profileColors[Math.floor(Math.random() * profileColors.length)]
 
   return {
     name: '',

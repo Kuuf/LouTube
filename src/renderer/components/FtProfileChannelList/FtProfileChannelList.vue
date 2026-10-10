@@ -29,8 +29,8 @@
       />
       <FtButton
         :label="$t('Profile.Delete Selected')"
-        text-color="var(--destructive-text-color)"
-        background-color="var(--destructive-color)"
+        :background-color="NEUTRAL_BUTTON_COLOR"
+        text-color="var(--primary-text-color)"
         @click="displayDeletePrompt"
       />
     </div>
@@ -93,7 +93,7 @@ import { youtubeImageUrlToInvidious } from '../../helpers/api/invidious'
 
 const { locale, t } = useI18n()
 
-/** Mild, for the actions that aren't the main (or destructive) one */
+/** Every action is a mild gray: the swapped colors are the remote focus */
 const NEUTRAL_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const props = defineProps({

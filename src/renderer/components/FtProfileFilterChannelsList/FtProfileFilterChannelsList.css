@@ -45,7 +45,3 @@
 .message {
   color: var(--tertiary-text-color);
 }
-
-.profileFilter {
-  margin-inline: 5px 16px;
-}
