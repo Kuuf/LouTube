@@ -5,8 +5,8 @@ import { gridFromElements, ITEM_ATTRIBUTE, navState, scrollToViewTopAnimated } f
 
 /** Header controls: subscribe (+ profile toggle), the tabs and the channel search */
 const HEADER_CONTROLS = 'button:not([disabled]), [role="tab"], input'
-/** Not worth a stop on a remote: sharing, and the search input's own buttons */
-const HEADER_EXCLUDED = '.shareIcon *, .channelSearch button'
+/** Not worth a stop on a remote: the search input's own buttons */
+const HEADER_EXCLUDED = '.channelSearch button'
 
 /**
  * Content controls: the sort buttons, Home shelves' "View Playlist", the list

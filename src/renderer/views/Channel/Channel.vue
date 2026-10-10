@@ -41,7 +41,6 @@
       :has-error-message="!!errorMessage"
       :thumbnail-url="thumbnailUrl"
       :sub-count="subCount"
-      :show-share-menu="showShareMenu"
       :show-search-bar="showSearchBar"
       :is-subscribed="isSubscribed"
       :visible-tabs="tabInfoValues"
@@ -385,7 +384,6 @@ const isFamilyFriendly = ref(false)
 
 const errorMessage = ref('')
 const showSearchBar = ref(true)
-const showShareMenu = ref(true)
 
 const PLAYLIST_SELECT_VALUES = ['newest', 'last']
 
@@ -639,12 +637,10 @@ watch(route, () => {
   currentTab.value = currentOrFirstTab(route.params.currentTab)
 
   if (id.value === '@@@') {
-    showShareMenu.value = false
     setErrorMessage(t('Channel.This channel does not exist'))
     return
   }
 
-  showShareMenu.value = true
   errorMessage.value = ''
 
   // Re-enable auto refresh on sort value change AFTER update done
@@ -670,7 +666,6 @@ onMounted(async () => {
   currentTab.value = currentOrFirstTab(route.params.currentTab)
 
   if (id.value === '@@@') {
-    showShareMenu.value = false
     setErrorMessage(t('Channel.This channel does not exist'))
     return
   }

@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, reactive } from 'vue'
+import { onBeforeUnmount, onMounted, reactive } from 'vue'
 import { ToastEventBus } from '../../helpers/utils'
 
 let idCounter = 0
@@ -47,7 +47,7 @@ function open({ detail: { message, time, action, abortSignal } }) {
     id,
     message,
     action,
-    isOpen: false,
+    isOpen: true,
     timeout: 0,
     interval: 0
   }
@@ -78,16 +78,6 @@ function open({ detail: { message, time, action, abortSignal } }) {
       close(toast)
     })
   }
-
-  nextTick(() => {
-    // We need to locate the object in the array so we get the reactive proxy,
-    // as modifying the original object won't trigger reactive effects such as updating the DOM
-    const toast = toasts.find(t => t.id === id)
-
-    if (toast) {
-      toast.isOpen = true
-    }
-  })
 
   if (toasts.length > 4) {
     remove(toasts[0])

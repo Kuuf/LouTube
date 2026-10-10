@@ -49,13 +49,6 @@
         </div>
 
         <div class="infoActionsContainer">
-          <FtShareButton
-            v-if="!hideSharingActions && showShareMenu"
-            :id="id"
-            share-target-type="Channel"
-            class="shareIcon"
-          />
-
           <FtSubscribeButton
             v-if="!hideUnsubscribeButton && (!hasErrorMessage || isSubscribed)"
             :channel-id="id"
@@ -258,7 +251,6 @@ import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
-import FtShareButton from '../FtShareButton/FtShareButton.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
 
@@ -291,10 +283,6 @@ const props = defineProps({
     type: Number,
     default: null
   },
-  showShareMenu: {
-    type: Boolean,
-    default: true
-  },
   showSearchBar: {
     type: Boolean,
     default: true
@@ -322,11 +310,6 @@ const emit = defineEmits(['change-tab', 'search', 'subscribed'])
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideChannelSubscriptions = computed(() => {
   return store.getters.getHideChannelSubscriptions
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const hideSharingActions = computed(() => {
-  return store.getters.getHideSharingActions
 })
 
 /** @type {import('vue').ComputedRef<boolean>} */

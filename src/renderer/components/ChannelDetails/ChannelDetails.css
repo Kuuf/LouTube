@@ -69,10 +69,6 @@
   align-items: center;
 }
 
-.shareIcon {
-  align-self: center;
-}
-
 .channelSearch {
   margin-block-start: 10px;
   max-inline-size: 250px;

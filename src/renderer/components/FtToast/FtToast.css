@@ -35,7 +35,7 @@
 }
 
 /* Enter: rises into place with a slight overshoot. An animation rather than
-   a transition, as a toast can be rendered open from the start. */
+   a transition, as a toast is rendered open from the start. */
 .open {
   pointer-events: auto;
   visibility: visible;
@@ -52,14 +52,22 @@
 }
 
 /* Leave: sinks, shrinks and fades, quicker than the enter (FtToast.vue
-   removes it after 300ms) */
+   removes it after 300ms). Also an animation: a transition doesn't start
+   from where the enter animation ended. */
 .closed {
-  visibility: hidden;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(16px) scale(0.94);
-  transition:
-    visibility 0s linear 220ms,
-    opacity 220ms ease-in,
-    transform 220ms ease-in;
+  animation: toast-out 220ms ease-in both;
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(16px) scale(0.94);
+  }
 }
