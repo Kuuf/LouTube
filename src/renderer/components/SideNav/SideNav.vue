@@ -15,13 +15,18 @@
       class="inner"
       :class="applyHiddenLabels"
     >
+      <!-- The icon on the rail, the full logo (icon and name) in the open drawer -->
       <div class="brand">
         <img
           class="brandLogo"
           src="../../assets/img/loutube-logo.png"
           alt=""
         >
-        <span class="brandName">{{ APP_NAME }}</span>
+        <img
+          class="brandLogoFull"
+          src="../../assets/img/loutube-logo-full.png"
+          :alt="APP_NAME"
+        >
       </div>
       <router-link
         class="navOption topNavOption mobileShow"

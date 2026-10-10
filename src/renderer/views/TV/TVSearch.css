@@ -32,3 +32,15 @@
     linear-gradient(to bottom, transparent, #000 22%, #000 78%, transparent);
   mask-composite: intersect;
 }
+
+/* The app's logo in the middle of the screen, over the flair */
+.logo {
+  position: fixed;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  z-index: 0;
+  inline-size: 30vw;
+  pointer-events: none;
+  user-select: none;
+  translate: -50% -50%;
+}

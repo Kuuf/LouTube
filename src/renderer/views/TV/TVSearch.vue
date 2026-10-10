@@ -13,12 +13,18 @@
       <SearchPage v-if="query !== ''" />
     </div>
     <!-- Nothing searched yet: the app's flair fills the screen behind the bar -->
-    <img
-      v-if="query === ''"
-      class="flair"
-      src="../../assets/img/search_flair_crazy.png"
-      alt=""
-    >
+    <template v-if="query === ''">
+      <img
+        class="flair"
+        src="../../assets/img/tv-background-4k.png"
+        alt=""
+      >
+      <img
+        class="logo"
+        src="../../assets/img/loutube-logo-full.png"
+        alt=""
+      >
+    </template>
   </div>
 </template>
 
@@ -96,7 +102,8 @@ const searchBarZone = useSpatialZone('tv-search-bar', searchBarGrid, {
   },
 })
 
-const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(results.value?.querySelectorAll(`[${ITEM_ATTRIBUTE}]`) ?? []), {
+// The results, and "Fetch more results" under them
+const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(results.value?.querySelectorAll(`[${ITEM_ATTRIBUTE}], .getNextPage`) ?? []), {
   edges: {
     left: 'sidebar',
     up: 'tv-search-bar',
