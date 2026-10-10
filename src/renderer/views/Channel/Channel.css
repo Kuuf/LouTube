@@ -48,18 +48,12 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
 }
 
-/* Swapped colors like the selected channel tab (ChannelDetails.css) */
+/* Dimmer than the selected channel tab (ChannelDetails.css). With the
+   remote's focus on it, it gets the swapped colors of spatialNav.css. */
 .selectedSortTab {
-  background-color: var(--primary-text-color);
-  color: var(--bg-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  color: var(--primary-text-color);
   font-weight: bold;
-}
-
-/* Remote focus on a sort order that is not selected: the same milder
-   highlight as the channel tabs, !important to win over spatialNav.css */
-.sortTab[data-spatial-nav-focused]:not(.selectedSortTab) {
-  background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent) !important;
-  color: var(--primary-text-color) !important;
 }
 
 /* Loading: shaped like ChannelDetails (banner, avatar and name, tabs) */
