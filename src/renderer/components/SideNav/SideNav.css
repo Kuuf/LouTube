@@ -70,6 +70,12 @@
   text-decoration: inherit;
 }
 
+/* The page that is open: its entry in the app's red. With the remote's focus
+   on it, the swapped colors of spatialNav.css take over. */
+.navOption.router-link-active {
+  color: var(--primary-color);
+}
+
 .navOption:hover,
 .navChannel:hover {
   background-color: var(--side-nav-hover-color);
