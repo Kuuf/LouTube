@@ -181,7 +181,6 @@
         role="button"
         to="/tv/profiles"
         :title="activeProfileName"
-        :style="{ '--current-page-color': activeProfile.bgColor }"
         data-spatial-nav-visual
       >
         <div

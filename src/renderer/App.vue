@@ -116,6 +116,7 @@ import store from './store/index'
 import packageDetails from '../../package.json'
 import { openExternalLink, openInternalPath, showToast } from './helpers/utils'
 import { translateWindowTitle } from './helpers/strings'
+import { calculateColorLuminance, colorChannels } from './helpers/colors'
 import { loadLocale } from './i18n/index'
 import { initGlobalKeyListener, teardownGlobalKeyListener } from './helpers/spatialNav/NavManager'
 
@@ -263,6 +264,55 @@ function updateTheme() {
 }
 
 updateTheme()
+
+// The app has one color: the active profile's. It is both the main and the
+// accent color of the theme (themes.css, where the classes above keep the
+// app's red and green as a fallback), set on the body over those classes.
+/** @type {import('vue').ComputedRef<{ bgColor: string, textColor: string } | undefined>} */
+const activeProfile = computed(() => store.getters.getActiveProfile)
+
+const PROFILE_COLOR_PROPERTIES = [
+  '--primary-color',
+  '--primary-color-hover',
+  '--primary-color-active',
+  '--text-with-main-color',
+  '--accent-color-rgb',
+  '--accent-color-hover',
+  '--accent-color-active',
+  '--accent-color-light',
+  '--accent-color-visited',
+  '--text-with-accent-color',
+]
+
+function updateProfileColor() {
+  const style = document.body.style
+  const color = activeProfile.value?.bgColor
+  const channels = color ? colorChannels(color) : null
+
+  if (!channels) {
+    PROFILE_COLOR_PROPERTIES.forEach(property => style.removeProperty(property))
+    return
+  }
+
+  const textColor = activeProfile.value.textColor || calculateColorLuminance(color)
+  const darker = `color-mix(in srgb, ${color} 86%, #000)`
+  const darkest = `color-mix(in srgb, ${color} 70%, #000)`
+
+  style.setProperty('--primary-color', color)
+  style.setProperty('--primary-color-hover', darker)
+  style.setProperty('--primary-color-active', darkest)
+  style.setProperty('--text-with-main-color', textColor)
+
+  // The accent color is given as its channels, for its translucent variants
+  style.setProperty('--accent-color-rgb', channels.join(' '))
+  style.setProperty('--accent-color-hover', darker)
+  style.setProperty('--accent-color-active', darkest)
+  style.setProperty('--accent-color-light', `color-mix(in srgb, ${color} 60%, #fff)`)
+  style.setProperty('--accent-color-visited', darkest)
+  style.setProperty('--text-with-accent-color', textColor)
+}
+
+watch(() => [activeProfile.value?.bgColor, activeProfile.value?.textColor], updateProfileColor, { immediate: true })
 
 const showUpdatesBanner = ref(false)
 const latestVersionNumber = ref('')

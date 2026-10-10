@@ -604,7 +604,8 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
 }
 
-/* The app's red, not Material's (the color themes can't be chosen anymore) */
+/* Fallback: the app's color is the active profile's, set on the body by
+   App.vue. The app's red, not Material's. */
 .mainRed {
   --primary-color: #d45754;
   --primary-color-hover: #c14b48;

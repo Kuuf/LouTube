@@ -70,11 +70,11 @@
   text-decoration: inherit;
 }
 
-/* The page that is open: its entry in the app's red, the profile's entry in
-   that profile's own color (set on it in SideNav.vue). With the remote's
-   focus on it, the swapped colors of spatialNav.css take over. */
+/* The page that is open: its entry in the app's color (the active profile's,
+   App.vue). With the remote's focus on it, the swapped colors of
+   spatialNav.css take over. */
 .navOption.router-link-active {
-  color: var(--current-page-color, var(--primary-color));
+  color: var(--primary-color);
 }
 
 .navOption:hover,

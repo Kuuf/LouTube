@@ -108,7 +108,12 @@ export function getRandomColor() {
   return randomArrayItem(colors)
 }
 
-export function calculateColorLuminance(colorValue) {
+/**
+ * @param {string} colorValue - a hex color (#rgb, #rrggbb) or an rgb() one
+ * @returns {[number, number, number] | null} its red, green and blue (0-255),
+ *   or null when it can't be read
+ */
+export function colorChannels(colorValue) {
   let colorValues
 
   if (colorValue.startsWith('#')) {
@@ -125,7 +130,17 @@ export function calculateColorLuminance(colorValue) {
     colorValues = colorValue.match(/\d+(\.\d+)?/g)?.slice(0, 3).map(Number)
   }
 
-  if (!colorValues || colorValues.some(value => isNaN(value))) {
+  if (!colorValues || colorValues.length < 3 || colorValues.some(value => isNaN(value))) {
+    return null
+  }
+
+  return /** @type {[number, number, number]} */ (colorValues)
+}
+
+export function calculateColorLuminance(colorValue) {
+  const colorValues = colorChannels(colorValue)
+
+  if (!colorValues) {
     return '#FFFFFF'
   }
 
