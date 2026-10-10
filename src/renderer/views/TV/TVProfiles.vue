@@ -1,44 +1,91 @@
 <template>
-  <div>
-    <FtCard
-      ref="selectCard"
-      class="card"
-    >
-      <h2>{{ t('Profile.Profile Select') }}</h2>
-      <FtFlexBox class="profileList">
-        <FtProfileBubble
-          v-for="profile in profileList"
-          :key="profile._id"
-          :is-main-profile="profile._id === MAIN_PROFILE_ID"
-          :profile-name="profile.name"
-          :background-color="profile.bgColor"
-          :text-color="profile.textColor"
-          :class="{ activeProfile: profile._id === activeProfile._id }"
-          @click="setActiveProfile(profile)"
-        />
-      </FtFlexBox>
-    </FtCard>
-    <div ref="manager">
-      <ProfileSettings />
-    </div>
+  <div
+    ref="root"
+    class="switcher"
+  >
+    <h1 class="heading">
+      {{ t('Profile.Who is Watching') }}
+    </h1>
+    <ul class="profiles">
+      <li
+        v-for="profile in profiles"
+        :key="profile._id"
+        class="profile"
+      >
+        <button
+          class="profileTile"
+          :class="{ active: profile.isActive }"
+          type="button"
+          data-spatial-nav-visual
+          :aria-current="profile.isActive"
+          @click="selectProfile(profile)"
+        >
+          <span
+            class="avatar"
+            :style="{ background: profile.bgColor, color: profile.textColor }"
+          >
+            <span
+              class="initial"
+              dir="auto"
+            >
+              {{ profile.initial }}
+            </span>
+            <span
+              v-if="profile.isActive"
+              class="activeBadge"
+            >
+              <FontAwesomeIcon :icon="['fas', 'check']" />
+            </span>
+          </span>
+          <span
+            class="name"
+            dir="auto"
+          >
+            {{ profile.displayName }}
+          </span>
+        </button>
+        <button
+          class="editButton"
+          type="button"
+          :title="t('Profile.Edit Profile')"
+          :aria-label="`${t('Profile.Edit Profile')}: ${profile.displayName}`"
+          @click="editProfile(profile)"
+        >
+          <FontAwesomeIcon :icon="['fas', 'pen']" />
+        </button>
+      </li>
+      <li class="profile">
+        <button
+          class="profileTile"
+          type="button"
+          data-spatial-nav-visual
+          @click="addProfile"
+        >
+          <span class="avatar addAvatar">
+            <FontAwesomeIcon :icon="['fas', 'plus']" />
+          </span>
+          <span class="name">
+            {{ t('Profile.Create New Profile') }}
+          </span>
+        </button>
+      </li>
+    </ul>
   </div>
 </template>
 
 <script setup>
-import { computed, useTemplateRef } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed, onMounted, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-import FtCard from '../../components/ft-card/ft-card.vue'
-import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtProfileBubble from '../../components/FtProfileBubble/FtProfileBubble.vue'
-import ProfileSettings from '../ProfileSettings/ProfileSettings.vue'
+import { useRouter } from 'vue-router'
 
 import store from '../../store/index'
 
 import { showToast } from '../../helpers/utils'
+import { getFirstCharacter } from '../../helpers/strings'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { focusableGrid } from '../../helpers/spatialNav/NavManager'
+import { navState } from '../../helpers/spatialNav/NavManager'
 
 /**
  * @typedef {object} Profile
@@ -48,45 +95,79 @@ import { focusableGrid } from '../../helpers/spatialNav/NavManager'
  * @property {string} textColor
  */
 
-const { t } = useI18n()
-
-/** @type {import('vue').ComputedRef<Profile[]>} */
-const profileList = computed(() => store.getters.getProfileList)
+const { locale, t } = useI18n()
+const router = useRouter()
 
 /** @type {import('vue').ComputedRef<Profile>} */
 const activeProfile = computed(() => store.getters.getActiveProfile)
 
-const selectCard = useTemplateRef('selectCard')
-const manager = useTemplateRef('manager')
+/** The profiles with what their tile shows (the main profile's name is translated, as elsewhere) */
+const profiles = computed(() => {
+  /** @type {Profile[]} */
+  const profileList = store.getters.getProfileList
 
-// Two spatial-nav zones: the profile select row on top, and every control of
-// the profile manager below it (its layout changes as profiles are opened,
-// so the grid is read from the page on each key press).
-useSpatialZone('tv-profile-select', () => focusableGrid(selectCard.value?.$el), {
+  return profileList.map(profile => {
+    const displayName = profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
+
+    return {
+      ...profile,
+      displayName,
+      initial: displayName ? getFirstCharacter(displayName, locale.value) : '',
+      isActive: profile._id === activeProfile.value._id,
+    }
+  })
+})
+
+// Remote control (spatial nav): the tiles are one row, the edit buttons
+// under them the next. Focus starts on the active profile.
+const ZONE_ID = 'tv-profile-select'
+const root = useTemplateRef('root')
+
+// Registered before the zone's own mounted hook, which activates it
+onMounted(() => {
+  const col = profiles.value.findIndex(profile => profile.isActive)
+  navState.lastPosition.set(ZONE_ID, { row: 0, col: Math.max(col, 0) })
+})
+
+/** One column per profile: its tile, and its edit button (none for "new profile") below */
+function switcherGrid() {
+  const columns = [...(root.value?.querySelectorAll('.profile') ?? [])]
+
+  return [
+    columns.map(column => column.querySelector('.profileTile')),
+    columns.map(column => column.querySelector('.editButton')),
+  ]
+}
+
+useSpatialZone(ZONE_ID, switcherGrid, {
   active: true,
   edges: {
     left: 'sidebar',
-    down: 'tv-profile-manager',
-  },
-})
-
-useSpatialZone('tv-profile-manager', () => focusableGrid(manager.value), {
-  edges: {
-    left: 'sidebar',
-    up: 'tv-profile-select',
   },
 })
 
 /**
+ * Switches to the profile and moves on to its subscriptions
+ * @param {Profile & { displayName: string }} profile
+ */
+function selectProfile(profile) {
+  if (profile._id !== activeProfile.value._id) {
+    store.commit('setActiveProfile', profile._id)
+    showToast(t('Profile.{profile} is now the active profile', { profile: profile.displayName }))
+  }
+
+  router.push('/subscriptions')
+}
+
+/**
  * @param {Profile} profile
  */
-function setActiveProfile(profile) {
-  if (profile._id === activeProfile.value._id) { return }
+function editProfile(profile) {
+  router.push(`/tv/profiles/edit/${profile._id}`)
+}
 
-  store.commit('setActiveProfile', profile._id)
-
-  const profileName = profile._id === MAIN_PROFILE_ID ? t('Profile.All Channels') : profile.name
-  showToast(t('Profile.{profile} is now the active profile', { profile: profileName }))
+function addProfile() {
+  router.push('/tv/profiles/new')
 }
 </script>
 

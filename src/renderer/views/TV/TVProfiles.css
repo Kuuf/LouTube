@@ -1,26 +1,168 @@
-h2 {
+/* Profile switcher: a centered row of profile tiles */
+.switcher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+  box-sizing: border-box;
+
+  /* Fills the screen (the page has 18px margins above and below) */
+  min-block-size: calc(100vh - 36px);
+  padding: 32px;
+}
+
+.heading {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 500;
   text-align: center;
 }
 
-.profileList {
-  max-inline-size: 1000px;
-  margin-block: 0 10px;
-  margin-inline: auto;
+.profiles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 36px;
+  max-inline-size: 1200px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/* Dimmed: the swapped colors are the remote focus (FtProfileBubble.css) */
-.activeProfile {
-  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
 }
 
-.card {
-  inline-size: 85%;
-  margin-block: 16px 15px;
-  margin-inline: auto;
+.profileTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--tertiary-text-color);
+  font: inherit;
+  cursor: pointer;
+}
+
+.avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 160px;
+  block-size: 160px;
+  border-radius: 20px;
+  font-size: 76px;
+  font-weight: 500;
+  line-height: 1;
+  user-select: none;
+
+  /* The focus ring, shown by its color */
+  outline: 4px solid transparent;
+  outline-offset: 5px;
+  transition:
+    transform 180ms cubic-bezier(0.2, 0, 0, 1),
+    outline-color 150ms ease-out;
+}
+
+.addAvatar {
+  background-color: color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+  color: var(--tertiary-text-color);
+  font-size: 52px;
+}
+
+.name {
+  max-inline-size: 180px;
+  overflow: hidden;
+  font-size: 20px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color 150ms ease-out;
+}
+
+/* The profile in use: a check on its tile, its name brighter */
+.active .name {
+  color: var(--primary-text-color);
+  font-weight: 600;
+}
+
+.activeBadge {
+  position: absolute;
+  inset-block-end: -8px;
+  inset-inline-end: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 30px;
+  block-size: 30px;
+  border: 3px solid var(--bg-color);
+  border-radius: var(--radius-round);
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  font-size: 14px;
+}
+
+.profileTile:hover .avatar {
+  outline-color: color-mix(in srgb, var(--primary-text-color) 40%, transparent);
+}
+
+.profileTile:hover .name {
+  color: var(--primary-text-color);
+}
+
+/* Remote focus: a ring around the tile, which grows a little, instead of
+   the background of spatialNav.css */
+.profileTile[data-spatial-nav-focused] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.profileTile[data-spatial-nav-focused] .avatar {
+  outline-color: var(--primary-text-color);
+  transform: scale(1.06);
+}
+
+.profileTile[data-spatial-nav-focused] .name {
+  color: var(--primary-text-color);
+}
+
+/* Faint until hovered or focused */
+.editButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 40px;
+  block-size: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-round);
+  background-color: transparent;
+  color: var(--primary-text-color);
+  font-size: 15px;
+  opacity: 0.4;
+  cursor: pointer;
+  transition: opacity 150ms ease-out;
+}
+
+.editButton:hover,
+.editButton[data-spatial-nav-focused] {
+  opacity: 1;
 }
 
 @media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
+  .heading {
+    font-size: 32px;
+  }
+
+  .avatar {
+    inline-size: 110px;
+    block-size: 110px;
+    font-size: 52px;
   }
 }

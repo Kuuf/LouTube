@@ -77,6 +77,19 @@ import { MAIN_PROFILE_ID } from '../../../constants'
  * @property {string|undefined} subscriptions[].thumbnail
  */
 
+const props = defineProps({
+  /** Profile to open the settings of right away */
+  profileId: {
+    type: String,
+    default: ''
+  },
+  /** Opens the settings for a new profile right away */
+  isNew: {
+    type: Boolean,
+    default: false
+  }
+})
+
 const isNewProfileOpen = ref(false)
 
 /** @type {import('vue').Ref<string>} */
@@ -144,6 +157,12 @@ function handleNewProfileCreated() {
 function handleProfileDeleted() {
   openSettingsProfile.value = null
   openSettingsProfileId.value = ''
+}
+
+if (props.isNew) {
+  openSettingsForNewProfile()
+} else if (props.profileId) {
+  openSettingsForProfileWithId(props.profileId)
 }
 </script>
 
