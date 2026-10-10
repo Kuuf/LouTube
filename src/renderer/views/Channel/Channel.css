@@ -72,13 +72,13 @@
 .skeletonTabs {
   display: flex;
   gap: 12px;
-  padding-block: 30px;
+  padding-block: 28px;
   padding-inline: 32px;
 }
 
 .skeletonTab {
-  font-size: 28px;
-  inline-size: 130px;
+  font-size: 22px;
+  inline-size: 110px;
   border-radius: var(--radius-pill);
 }
 

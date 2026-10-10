@@ -10,7 +10,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, transparent 45%, var(--bg-color) 100%);
+  background: linear-gradient(to bottom, transparent 0%, color-mix(in srgb, var(--bg-color) 55%, transparent) 55%, var(--bg-color) 100%);
   pointer-events: none;
 }
 
@@ -79,7 +79,9 @@
   inline-size: 220px;
   margin-inline-start: auto;
   align-self: flex-end;
-  flex: 1 1 0%;
+
+  /* Only as wide as the search bar, the tabs get the rest of the row */
+  flex: none;
 }
 
 .infoTabs {
@@ -96,15 +98,16 @@
 
 .tabs {
   display: flex;
-  flex: 0 1 66%;
+  flex: 1 1 0;
+  min-inline-size: 0;
   flex-wrap: wrap;
   gap: 12px;
 }
 
 .tab {
-  padding-block: 14px;
-  padding-inline: 32px;
-  font-size: 28px;
+  padding-block: 10px;
+  padding-inline: 24px;
+  font-size: 22px;
   cursor: pointer;
   align-self: center;
   text-align: center;
