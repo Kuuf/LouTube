@@ -1,98 +1,65 @@
 <template>
   <FtPrompt
-    theme="flex-column"
-    :label="title"
-    :inert="showingCreatePlaylistPrompt"
-    :fullscreen="true"
+    theme="medium"
+    :label="t('User Playlists.AddVideoPrompt.Select Playlist')"
     @click="hide"
   >
-    <p class="selected-count">
-      {{ t('User Playlists.AddVideoPrompt.N playlists selected', {
-        playlistCount: selectedPlaylistCount,
-      }, selectedPlaylistCount) }}
-    </p>
-    <template
-      v-if="allPlaylists.length > 1"
+    <!-- Arrow keys: Up/Down through the playlists and on to the buttons (Left/Right between those is FtPrompt's) -->
+    <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
+    <div
+      ref="content"
+      @keydown.up.down="handleVerticalKeys"
     >
       <div
-        class="searchInputsRow"
+        class="playlists"
+        role="radiogroup"
+        :aria-label="t('User Playlists.AddVideoPrompt.Select Playlist')"
       >
-        <FtSearchInput
-          ref="searchBar"
-          :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-          @input="updateQueryDebounce"
-          @clear="updateQueryDebounce('')"
-        />
-      </div>
-      <div
-        class="optionsRow"
-      >
-        <div
-          class="tightOptions"
-        >
-          <FtToggleSwitch
-            class="matchingVideoToggle"
-            :label="t('User Playlists.Playlists with Matching Videos')"
-            :compact="true"
-            :default-value="doSearchPlaylistsWithMatchingVideos"
-            @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
-          />
-          <FtToggleSwitch
-            v-if="anyPlaylistContainsVideosToBeAdded"
-            class="allowDuplicateToggle"
-            :label="t('User Playlists.AddVideoPrompt.Allow Adding Duplicate Video(s)')"
-            :compact="true"
-            :default-value="addingDuplicateVideosEnabled"
-            @change="addingDuplicateVideosEnabled = !addingDuplicateVideosEnabled"
-          />
-        </div>
-        <FtSelect
-          class="sortSelect"
-          :value="sortBy"
-          :select-names="sortBySelectNames"
-          :select-values="SORT_BY_SELECT_VALUES"
-          :placeholder="t('Global.Sort By')"
-          :icon="sortBySelectIcon"
-          @change="sortBy = $event"
-        />
-      </div>
-    </template>
-    <div class="playlists-container">
-      <FtFlexBox>
-        <div
-          v-for="playlist in activePlaylists"
+        <button
+          v-for="playlist in playlists"
           :key="playlist._id"
-          class="playlist-selector-container"
-          :class="{
-            disabled: playlistDisabled(playlist._id),
-          }"
-          :aria-disabled="playlistDisabled(playlist._id)"
+          class="playlist"
+          :class="{ selected: playlist._id === selectedPlaylistId }"
+          type="button"
+          role="radio"
+          :aria-checked="playlist._id === selectedPlaylistId"
+          @click="selectedPlaylistId = playlist._id"
         >
-          <FtPlaylistSelector
-            :tabindex="playlistDisabled(playlist._id) ? -1 : 0"
-            :playlist="playlist"
-            :selected="selectedPlaylistIdList.includes(playlist._id)"
-            :disabled="playlistDisabled(playlist._id)"
-            :adding-duplicate-videos-enabled="addingDuplicateVideosEnabled"
-            @selected="countSelected"
-          />
-        </div>
-      </FtFlexBox>
-    </div>
-    <div class="actions-container">
-      <FtFlexBox>
+          <span class="checkIndicator">
+            <FontAwesomeIcon
+              :icon="['fas', 'check']"
+              class="checkIcon"
+            />
+          </span>
+          <span class="playlistText">
+            <span
+              class="playlistName"
+              dir="auto"
+            >
+              {{ playlist.playlistName }}
+            </span>
+            <span class="videoCount">
+              {{ t('Global.Counts.Video Count', { count: playlist.videos.length }, playlist.videos.length) }}
+            </span>
+          </span>
+          <img
+            class="thumbnail"
+            :src="thumbnailOf(playlist)"
+            alt=""
+          >
+        </button>
+      </div>
+      <FtFlexBox class="actions">
         <FtButton
-          :label="t('User Playlists.Create New Playlist')"
-          @click="openCreatePlaylistPrompt"
-        />
-        <FtButton
-          :label="t('User Playlists.AddVideoPrompt.Save')"
-          @click="addSelectedToPlaylists"
+          :label="t('Confirm')"
+          :background-color="BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
+          @click="confirm"
         />
         <FtButton
           :label="t('User Playlists.Cancel')"
-          :text-color="null"
-          :background-color="null"
+          :background-color="BUTTON_COLOR"
+          text-color="var(--primary-text-color)"
           @click="hide"
         />
       </FtFlexBox>
@@ -101,363 +68,114 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { computed, nextTick, onMounted, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
-import FtPlaylistSelector from '../FtPlaylistSelector/FtPlaylistSelector.vue'
-import FtSearchInput from '../FtSearchInput/FtSearchInput.vue'
-import FtSelect from '../FtSelect/FtSelect.vue'
-import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 
 import store from '../../store/index'
 
-import {
-  debounce,
-  showToast,
-  ctrlFHandler,
-  getIconForSortPreference
-} from '../../helpers/utils'
+import { showToast } from '../../helpers/utils'
 
-const { locale, t } = useI18n()
+import thumbnailPlaceholder from '../../assets/img/thumbnail_placeholder.svg'
 
-const SORT_BY_VALUES = {
-  NameAscending: 'name_ascending',
-  NameDescending: 'name_descending',
+const { t } = useI18n()
 
-  LatestCreatedFirst: 'latest_created_first',
-  EarliestCreatedFirst: 'earliest_created_first',
+/** A mild gray: the swapped colors are the focused button (FtPrompt.css) */
+const BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
-  LatestUpdatedFirst: 'latest_updated_first',
-  EarliestUpdatedFirst: 'earliest_updated_first',
-}
+// Picking one playlist for the video(s) handed to the prompt, then confirming
+// or cancelling: nothing else.
 
-const SORT_BY_SELECT_VALUES = Object.values(SORT_BY_VALUES)
-
-const sortBySelectNames = computed(() => {
-  return SORT_BY_SELECT_VALUES.map((k) => {
-    switch (k) {
-      case SORT_BY_VALUES.NameAscending:
-        return t('User Playlists.Sort By.NameAscending')
-      case SORT_BY_VALUES.NameDescending:
-        return t('User Playlists.Sort By.NameDescending')
-      case SORT_BY_VALUES.LatestCreatedFirst:
-        return t('User Playlists.Sort By.LatestCreatedFirst')
-      case SORT_BY_VALUES.EarliestCreatedFirst:
-        return t('User Playlists.Sort By.EarliestCreatedFirst')
-      case SORT_BY_VALUES.LatestUpdatedFirst:
-        return t('User Playlists.Sort By.LatestUpdatedFirst')
-      case SORT_BY_VALUES.EarliestUpdatedFirst:
-        return t('User Playlists.Sort By.EarliestUpdatedFirst')
-      default:
-        console.error(`Unknown sortBy: ${k}`)
-        return k
-    }
-  })
+/** The playlists, the most recently updated first */
+const playlists = computed(() => {
+  return store.getters.getAllPlaylists.toSorted((a, b) => (b.lastUpdatedAt ?? 0) - (a.lastUpdatedAt ?? 0))
 })
 
-/** @type {import('vue').Ref<'name_ascending' | 'name_descending' | 'latest_created_first' | 'earliest_created_first' | 'latest_updated_first' | 'earliest_updated_first'>} */
-const sortBy = ref(SORT_BY_VALUES.LatestUpdatedFirst)
-
-const sortBySelectIcon = computed(() => getIconForSortPreference(sortBy.value))
-
-/** @type {Set<string>} */
-const createdSincePromptShownPlaylistIdList = new Set()
-
-/** @type {import('vue').Ref<string[]>} */
-const selectedPlaylistIdList = ref([])
-const query = ref('')
-const doSearchPlaylistsWithMatchingVideos = ref(false)
-const lastShownAt = Date.now()
-const addingDuplicateVideosEnabled = ref(false)
-
-const title = computed(() => {
-  return t('User Playlists.AddVideoPrompt.Select a playlist to add your N videos to', {
-    videoCount: toBeAddedToPlaylistVideoCount.value,
-  }, toBeAddedToPlaylistVideoCount.value)
-})
-
-const selectedPlaylistCount = computed(() => selectedPlaylistIdList.value.length)
+/** @type {import('vue').Ref<string | null>} */
+const selectedPlaylistId = ref(null)
 
 /** @type {import('vue').ComputedRef<{ videoId: string, [key: string]: any }[]>} */
-const toBeAddedToPlaylistVideoList = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
+const videosToAdd = computed(() => store.getters.getToBeAddedToPlaylistVideoList)
 
-const toBeAddedToPlaylistVideoCount = computed(() => toBeAddedToPlaylistVideoList.value.length)
+/**
+ * The playlist's first video stands for it
+ * @param {{ videos: { videoId: string }[] }} playlist
+ */
+function thumbnailOf(playlist) {
+  if (playlist.videos.length === 0) { return thumbnailPlaceholder }
 
-const toBeAddedToPlaylistVideoIdList = computed(() => {
-  return toBeAddedToPlaylistVideoList.value.map((v) => v.videoId)
-})
+  const origin = store.getters.getBackendPreference === 'invidious'
+    ? store.getters.getCurrentInvidiousInstanceUrl
+    : 'https://i.ytimg.com'
 
-const cachedCollator = computed(() => new Intl.Collator([locale.value, 'en'], { sensitivity: 'base' }))
-
-/** @type {import('vue').ComputedRef<object[]>} */
-const allPlaylists = computed(() => {
-  const collator = cachedCollator.value
-
-  return store.getters.getAllPlaylists.toSorted((a, b) => {
-    switch (sortBy.value) {
-      case SORT_BY_VALUES.NameAscending:
-        return collator.compare(a.playlistName, b.playlistName)
-      case SORT_BY_VALUES.NameDescending:
-        return collator.compare(b.playlistName, a.playlistName)
-      case SORT_BY_VALUES.LatestCreatedFirst: {
-        if (a.createdAt > b.createdAt) { return -1 }
-        if (a.createdAt < b.createdAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      }
-      case SORT_BY_VALUES.EarliestCreatedFirst: {
-        if (a.createdAt < b.createdAt) { return -1 }
-        if (a.createdAt > b.createdAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      }
-      case SORT_BY_VALUES.LatestUpdatedFirst: {
-        if (a.lastUpdatedAt > b.lastUpdatedAt) { return -1 }
-        if (a.lastUpdatedAt < b.lastUpdatedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      }
-      case SORT_BY_VALUES.EarliestUpdatedFirst: {
-        if (a.lastUpdatedAt < b.lastUpdatedAt) { return -1 }
-        if (a.lastUpdatedAt > b.lastUpdatedAt) { return 1 }
-
-        return collator.compare(a.playlistName, b.playlistName)
-      }
-      default:
-        console.error(`Unknown sortBy: ${sortBy.value}`)
-        return 0
-    }
-  })
-})
-
-const allPlaylistsLength = computed(() => allPlaylists.value.length)
-
-const processedQuery = computed(() => query.value.trim().toLowerCase())
-
-const activePlaylists = computed(() => {
-  const processedQuery_ = processedQuery.value
-
-  // Very rare that a playlist name only has 1 char
-  if (processedQuery_.length === 0) { return allPlaylists.value }
-
-  return allPlaylists.value.filter((playlist) => {
-    if (typeof playlist.playlistName !== 'string') {
-      return false
-    }
-
-    if (
-      doSearchPlaylistsWithMatchingVideos.value &&
-      playlist.videos.some((v) => {
-        return v.author?.toLowerCase().includes(processedQuery_) || v.title.toLowerCase().includes(processedQuery_)
-      })
-    ) {
-      return true
-    }
-
-    return playlist.playlistName.toLowerCase().includes(processedQuery_)
-  })
-})
-
-const getPlaylistIdsFiltered = (filter) => {
-  /** @type {Set<string>} */
-  const ids = new Set()
-
-  const toBeAddedToPlaylistVideoIdList_ = toBeAddedToPlaylistVideoIdList.value
-
-  allPlaylists.value.forEach((playlist) => {
-    const playlistVideoIdSet = playlist.videos.reduce((s, v) => s.add(v.videoId), new Set())
-
-    if (filter(toBeAddedToPlaylistVideoIdList_, playlistVideoIdSet)) {
-      ids.add(playlist._id)
-    }
-  })
-
-  return ids
+  return `${origin}/vi/${playlist.videos[0].videoId}/mqdefault.jpg`
 }
-
-const playlistIdsContainingVideosToBeAdded = computed(() => {
-  return getPlaylistIdsFiltered((videoIdsToAdd, playlistVideoIds) =>
-    videoIdsToAdd.some((videoId) => playlistVideoIds.has(videoId))
-  )
-})
-
-const playlistIdsContainingAllVideosToBeAdded = computed(() => {
-  return getPlaylistIdsFiltered((videoIdsToAdd, playlistVideoIds) =>
-    videoIdsToAdd.every((videoId) => playlistVideoIds.has(videoId))
-  )
-})
-
-const anyPlaylistContainsVideosToBeAdded = computed(() => {
-  return playlistIdsContainingVideosToBeAdded.value.size > 0
-})
-
-const searchBar = useTemplateRef('searchBar')
-
-watch(allPlaylistsLength, (val, oldVal) => {
-  const allPlaylistIds = new Set()
-
-  // Add new playlists to selected
-  allPlaylists.value.forEach((playlist) => {
-    allPlaylistIds.add(playlist._id)
-
-    if (
-      // Old playlists don't have `createdAt`
-      playlist.createdAt == null ||
-      // Only playlists created after this prompt shown should be considered
-      playlist.createdAt < lastShownAt ||
-      // Only playlists not auto added to selected yet should be considered
-      createdSincePromptShownPlaylistIdList.has(playlist._id)
-    ) {
-      return
-    }
-
-    // Add newly created playlists to selected ONCE
-    createdSincePromptShownPlaylistIdList.add(playlist._id)
-    selectedPlaylistIdList.value.push(playlist._id)
-  })
-
-  // Remove  deleted playlist from deleted
-  selectedPlaylistIdList.value = selectedPlaylistIdList.value.filter(playlistId => {
-    return allPlaylistIds.has(playlistId)
-  })
-
-  if (val > oldVal) {
-    // Only move focus back to search input when a playlist was added,
-    // to allow searching for and deselecting the new created playlist more easily.
-    nextTick(() => {
-      searchBar.value?.focus()
-    })
-  }
-})
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const showingCreatePlaylistPrompt = computed(() => store.getters.getShowCreatePlaylistPrompt)
-
-watch(showingCreatePlaylistPrompt, (val) => {
-  if (!val) {
-    // Only care when CreatePlaylistPrompt hidden
-    // Shift focus from button to prevent unwanted click event
-    // due to enter key press in CreatePlaylistPrompt
-    nextTick(() => {
-      searchBar.value?.focus()
-    })
-  }
-})
-
-watch(addingDuplicateVideosEnabled, (val) => {
-  if (!val) {
-    // Only care when addingDuplicateVideosEnabled disabled
-    // Remove disabled playlists
-    selectedPlaylistIdList.value = selectedPlaylistIdList.value.filter(playlistId => {
-      return !playlistIdsContainingAllVideosToBeAdded.value.has(playlistId)
-    })
-  }
-})
 
 function hide() {
   store.dispatch('hideAddToPlaylistPrompt')
 }
 
-/**
- * @param {string} playlistId
- */
-function countSelected(playlistId) {
-  const index = selectedPlaylistIdList.value.indexOf(playlistId)
-
-  if (index !== -1) {
-    selectedPlaylistIdList.value.splice(index, 1)
-  } else {
-    selectedPlaylistIdList.value.push(playlistId)
-  }
-}
-
-function addSelectedToPlaylists() {
-  const addedPlaylistIds = new Set()
-
-  if (selectedPlaylistIdList.value.length === 0) {
+function confirm() {
+  const playlist = playlists.value.find(list => list._id === selectedPlaylistId.value)
+  if (playlist == null) {
     showToast(t('User Playlists.AddVideoPrompt.Toast["You haven\'t selected any playlist yet."]'))
     return
   }
 
-  const allPlaylists_ = allPlaylists.value
-  const toBeAddedToPlaylistVideoList_ = toBeAddedToPlaylistVideoList.value
+  // Videos the playlist has already aren't added twice
+  const playlistVideoIds = new Set(playlist.videos.map(video => video.videoId))
 
-  selectedPlaylistIdList.value.forEach((selectedPlaylistId) => {
-    const playlist = allPlaylists_.find((list) => list._id === selectedPlaylistId)
-    if (playlist == null) { return }
-
-    let videosToBeAdded
-
-    if (!addingDuplicateVideosEnabled.value) {
-      const playlistVideoIds = playlist.videos.map((v) => v.videoId)
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.filter((v) => !playlistVideoIds.includes(v.videoId))
-    } else {
-      // Use slice() to avoid `do not mutate vuex store state outside mutation handlers`
-      videosToBeAdded = toBeAddedToPlaylistVideoList_.slice()
-    }
-
-    store.dispatch('addVideos', {
-      _id: playlist._id,
-      videos: videosToBeAdded,
-    })
-
-    addedPlaylistIds.add(playlist._id)
+  store.dispatch('addVideos', {
+    _id: playlist._id,
+    videos: videosToAdd.value.filter(video => !playlistVideoIds.has(video.videoId)),
   })
 
-  showToast(t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', {
-    playlistCount: addedPlaylistIds.size,
-  }, addedPlaylistIds.size))
+  showToast(t('User Playlists.AddVideoPrompt.Toast.Video(s) added to {playlistCount} playlists', { playlistCount: 1 }, 1))
 
   hide()
 }
 
-/** @type {import('vue').ComputedRef<object>} */
-const newPlaylistDefaultProperties = computed(() => store.getters.getNewPlaylistDefaultProperties)
-
-function openCreatePlaylistPrompt() {
-  store.dispatch('showCreatePlaylistPrompt', {
-    title: newPlaylistDefaultProperties.value.title || '',
-  })
-}
-
-const updateQueryDebounce = debounce(/** @param {string} query_ */(query_) => {
-  query.value = query_
-}, 500)
+// The prompt keeps the keyboard focus on its buttons (FtPrompt.vue), and the
+// remote's spatial nav stays out of prompts: the focus starts on the first
+// playlist, and Up/Down walk the playlists and then the buttons.
+const content = useTemplateRef('content')
 
 onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-  // Don't open keyboard prompt immediately on android
-  if (!process.env.IS_ANDROID) {
-    // User might want to search first if they have many playlists
-    nextTick(() => {
-      searchBar.value?.focus()
-    })
-  }
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
+  // After FtPrompt has focused its first button
+  nextTick(() => {
+    content.value?.querySelector('.playlist')?.focus()
+  })
 })
 
 /**
  * @param {KeyboardEvent} event
  */
-function keyboardShortcutHandler(event) {
-  ctrlFHandler(event, searchBar.value)
-}
+function handleVerticalKeys(event) {
+  const rows = [...content.value.querySelectorAll('.playlist')]
+  const buttons = [...content.value.querySelectorAll('.btn')]
+  const target = /** @type {HTMLElement} */ (event.target)
 
-/**
- * @param {string} playlistId
- */
-function playlistDisabled(playlistId) {
-  if (addingDuplicateVideosEnabled.value) {
-    return false
+  const row = rows.indexOf(target)
+  const onButton = buttons.includes(target)
+  if (row === -1 && !onButton) { return }
+
+  event.preventDefault()
+
+  if (event.key === 'ArrowDown') {
+    if (row !== -1) {
+      // The next playlist, or the buttons under the last one
+      (rows[row + 1] ?? buttons[0])?.focus()
+    }
+  } else if (onButton) {
+    // Back up to the selected playlist, or the last one
+    (rows.find(playlist => playlist.classList.contains('selected')) ?? rows.at(-1))?.focus()
+  } else {
+    rows[row - 1]?.focus()
   }
-
-  return playlistIdsContainingAllVideosToBeAdded.value.has(playlistId)
 }
 </script>
 

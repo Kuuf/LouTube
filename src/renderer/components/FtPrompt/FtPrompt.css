@@ -75,9 +75,11 @@
   padding-block: 10px;
 }
 
-/* A question and its options only: a medium sized dialog in the middle of
-   the screen (after the sizes above, which it replaces) */
-.promptCard.simple {
+/* A question and its options only, or a prompt asking for it (`medium`
+   theme): a medium sized dialog in the middle of the screen (after the sizes
+   above, which it replaces) */
+.promptCard.simple,
+.promptCard.medium {
   position: static;
   box-sizing: border-box;
   inline-size: min(520px, 92vw);
@@ -87,7 +89,8 @@
   padding: 28px;
 }
 
-.promptCard.simple h2 {
+.promptCard.simple h2,
+.promptCard.medium h2 {
   margin-block: 0 24px;
   font-size: 22px;
   line-height: 1.35;

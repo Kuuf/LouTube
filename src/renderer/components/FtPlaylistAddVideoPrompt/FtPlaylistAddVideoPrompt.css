@@ -1,75 +1,113 @@
-.selected-count {
-  text-align: center;
+/* "Select Playlist": a plain list, one playlist per row (its name and number
+   of videos, its thumbnail at the end), then Confirm and Cancel */
+.playlists {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-block-size: min(52vh, 480px);
+  margin-block-end: 24px;
+  overflow-y: auto;
+  scrollbar-width: none;
 }
 
-.searchInputsRow {
-  display: grid;
-
-  /* 2 columns */
-  grid-template-columns: 1fr auto;
-  column-gap: 16px;
-}
-
-@media only screen and (width <= 800px) {
-  .searchInputsRow {
-    /* Switch to 2 rows from 2 columns */
-    grid-template-columns: auto;
-    grid-template-rows: auto auto;
-  }
-}
-
-.optionsRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+.playlist {
+  display: flex;
+  flex: none;
   align-items: center;
-}
-
-.tightOptions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
-  column-gap: 16px;
-  align-items: center;
-}
-
-@media only screen and (width <= 800px) {
-  .optionsRow {
-    /* Switch to rows from columns */
-    grid-template-columns: auto;
-    align-items: stretch;
-  }
-
-  .tightOptions {
-    /* Switch to rows from columns */
-    grid-template-columns: auto;
-    align-items: stretch;
-  }
-}
-
-.sortSelect {
-  /* Put it on the right */
-  margin-inline-start: auto;
-}
-
-.playlists-container {
-  box-shadow: inset 0 0 5px rgb(0 0 0 / 50%);
-
-  /* Use remaining height */
-  flex-grow: 1;
-  overflow-y: scroll;
-}
-
-.playlist-selector-container:not(.disabled) {
-  /* Make them look selectable */
+  gap: 14px;
+  padding-block: 10px;
+  padding-inline: 14px 10px;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  color: var(--primary-text-color);
+  font: inherit;
+  text-align: start;
   cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
 }
 
-.playlist-selector-container.disabled {
-  opacity: 0.5;
+.playlist:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
 }
 
-@media only screen and (width <= 420px) {
-  .heading {
-    font-size: 1.4em;
-    margin-block-end: 0;
-  }
+.playlistText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-inline-size: 0;
+}
+
+.playlistName {
+  overflow: hidden;
+  font-size: 17px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.videoCount {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.thumbnail {
+  flex: none;
+  inline-size: 96px;
+  block-size: 54px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+/* Check circle: an outline, filled with a check on the selected playlist */
+.checkIndicator {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: 22px;
+  block-size: 22px;
+  border: 2px solid color-mix(in srgb, currentcolor 40%, transparent);
+  border-radius: var(--radius-round);
+}
+
+.checkIcon {
+  font-size: 11px;
+  opacity: 0;
+}
+
+/* Selected: dimmed. Focused: the theme's text and background colors swapped,
+   like the remote focus elsewhere (the prompt moves the keyboard focus). */
+.selected {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+}
+
+.selected .checkIndicator {
+  border-color: currentcolor;
+  background-color: currentcolor;
+}
+
+.selected .checkIcon {
+  color: var(--bg-color);
+  opacity: 1;
+}
+
+/* stylelint-disable-next-line a11y/no-outline-none */
+.playlist:focus {
+  outline: none;
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+}
+
+.playlist:focus.selected .checkIcon {
+  color: var(--primary-text-color);
+}
+
+.actions {
+  justify-content: center;
+  gap: 12px;
 }

@@ -240,6 +240,7 @@ User Playlists:
 
       This playlist has a video with a duration error: This playlist contains at least one video that doesn't have a duration, it will be sorted as if their duration is zero.
   AddVideoPrompt:
+    Select Playlist: Select Playlist
     Select a playlist to add your N videos to: 'Select a playlist to add your video to | Select a playlist to add your {videoCount} videos to'
     N playlists selected: '{playlistCount} Selected'
     Search in Playlists: Search in Playlists
@@ -1183,6 +1184,7 @@ Hashtag:
   This hashtag does not currently have any videos: This hashtag does not currently
       have any videos
 Moments Ago: moments ago
+Confirm: Confirm
 Yes: Yes
 No: No
 Ok: Ok
