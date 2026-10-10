@@ -8,14 +8,11 @@
         />
         {{ $t('Channels.Title') }}
       </h2>
-      <ft-input
+      <FtSearchInput
         v-show="subscribedChannels.length > 1"
         ref="searchBarChannels"
         :placeholder="$t('Channels.Search bar placeholder')"
         :value="query"
-        :show-clear-text-button="true"
-        :show-action-button="false"
-        :maxlength="255"
         @input="handleQueryChange"
         @clear="() => handleQueryChange('')"
       />
@@ -42,6 +39,13 @@
           <div class="skeleton skeletonText skeletonName" />
         </div>
       </div>
+      <!-- A search that matches no channel -->
+      <p
+        v-else-if="channelList.length === 0"
+        class="message noResults"
+      >
+        {{ $t('Channels.No Results') }}
+      </p>
       <template v-else>
         <ft-flex-box
           ref="channelsRef"
@@ -116,7 +120,7 @@ import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
-import FtInput from '../../components/FtInput/FtInput.vue'
+import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import FtSubscribeButton from '../../components/FtSubscribeButton/FtSubscribeButton.vue'
 import { invidiousGetChannelInfo, youtubeImageUrlToInvidious, invidiousImageUrlToInvidious } from '../../helpers/api/invidious'
 import { getLocalChannel, parseLocalChannelHeader } from '../../helpers/api/local'

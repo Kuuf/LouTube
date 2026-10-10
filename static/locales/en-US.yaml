@@ -143,6 +143,7 @@ Channels:
   Title: Channel List
   Search bar placeholder: Search Channels
   Go To Channel: Go to Channel
+  No Results: No Results
   Count: '{number} channel(s) found.'
   Empty: Your channel list is currently empty.
   Unsubscribe Prompt: Are you sure you want to unsubscribe from "{channelName}"?

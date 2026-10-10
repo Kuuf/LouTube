@@ -22,13 +22,10 @@
           v-if="fullData.length > 1"
           class="searchInputsRow"
         >
-          <FtInput
+          <FtSearchInput
             ref="searchBar"
             :placeholder="$t('User Playlists.Search bar placeholder')"
             :value="query"
-            :show-clear-text-button="true"
-            :show-action-button="false"
-            :maxlength="255"
             @input="handleQueryChange"
             @clear="() => handleQueryChange('')"
           />
@@ -109,7 +106,7 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../../components/FtIconButton/FtIconButton.vue'
-import FtInput from '../../components/FtInput/FtInput.vue'
+import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'

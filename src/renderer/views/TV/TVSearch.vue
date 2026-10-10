@@ -1,14 +1,11 @@
 <template>
   <div>
     <div class="searchBar">
-      <FtInput
+      <FtSearchInput
         ref="searchInput"
         :placeholder="t('Search Bar.Search')"
         :value="query"
-        :action-button-label="t('Search Bar.Search')"
-        is-search
-        show-clear-text-button
-        @click="search"
+        @search="search"
       />
     </div>
     <div ref="results">
@@ -22,7 +19,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, useTemplateRef } from '
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
-import FtInput from '../../components/FtInput/FtInput.vue'
+import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import SearchPage from '../SearchPage/SearchPage.vue'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
@@ -39,16 +36,19 @@ const results = useTemplateRef('results')
 const query = computed(() => route.params.query ?? '')
 
 // Two spatial-nav zones: the search bar on top, the results grid below it.
-// Enter on the search bar focuses the real input, which opens the on-screen
-// keyboard on Android TV.
-// The focus outline goes on the input component itself, hugging the bar
-const searchBarZone = useSpatialZone('tv-search-bar', () => (searchInput.value?.$el ? [[searchInput.value.$el]] : []), {
+// The bar's cell is its text field, which is ready to type into as soon as
+// it has the focus (opens the on-screen keyboard on Android TV).
+function searchBarGrid() {
+  const field = searchInput.value?.$el.querySelector('input')
+  return field ? [[field]] : []
+}
+
+const searchBarZone = useSpatialZone('tv-search-bar', searchBarGrid, {
   edges: {
     left: 'sidebar',
     // Only when there are results to go to
     down: () => (results.value?.querySelector(`[${ITEM_ATTRIBUTE}]`) ? 'tv-search-results' : null),
   },
-  onSelect: () => searchInput.value?.focus(),
 })
 
 const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(results.value?.querySelectorAll(`[${ITEM_ATTRIBUTE}]`) ?? []), {
@@ -85,7 +85,6 @@ onMounted(() => {
     focusResults()
   } else {
     searchBarZone.activate()
-    searchInput.value?.focus()
   }
 })
 

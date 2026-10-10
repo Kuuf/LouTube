@@ -214,14 +214,11 @@
           v-if="searchVideoModeAllowed"
           class="searchInputsRow"
         >
-          <FtInput
+          <FtSearchInput
             ref="searchInput"
             class="inputElement"
             :placeholder="$t('User Playlists.SinglePlaylistView.Search for Videos')"
-            :show-clear-text-button="true"
-            :show-action-button="false"
             :value="query"
-            :maxlength="255"
             @input="updateQueryDebounced"
             @clear="updateQueryDebounced('')"
           />
@@ -270,6 +267,7 @@ import { useRouter } from 'vue-router'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtIconButton from '../FtIconButton/FtIconButton.vue'
 import FtInput from '../FtInput/FtInput.vue'
+import FtSearchInput from '../FtSearchInput/FtSearchInput.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtShareButton from '../FtShareButton/FtShareButton.vue'
 

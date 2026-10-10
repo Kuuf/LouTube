@@ -10,12 +10,10 @@
         />
         {{ t('History.History') }}
       </h2>
-      <FtInput
+      <FtSearchInput
         v-show="fullData.length > 1"
         ref="searchBar"
         :placeholder="t('History.Search bar placeholder')"
-        :show-clear-text-button="true"
-        :show-action-button="false"
         :value="query"
         @input="handleQueryChange"
         @clear="() => handleQueryChange('')"
@@ -89,7 +87,7 @@ import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
-import FtInput from '../../components/FtInput/FtInput.vue'
+import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
 

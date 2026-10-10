@@ -17,12 +17,9 @@
       <div
         class="searchInputsRow"
       >
-        <FtInput
+        <FtSearchInput
           ref="searchBar"
           :placeholder="t('User Playlists.AddVideoPrompt.Search in Playlists')"
-          :show-clear-text-button="true"
-          :show-action-button="false"
-          :maxlength="255"
           @input="updateQueryDebounce"
           @clear="updateQueryDebounce('')"
         />
@@ -111,7 +108,7 @@ import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
 import FtButton from '../FtButton/FtButton.vue'
 import FtPlaylistSelector from '../FtPlaylistSelector/FtPlaylistSelector.vue'
-import FtInput from '../FtInput/FtInput.vue'
+import FtSearchInput from '../FtSearchInput/FtSearchInput.vue'
 import FtSelect from '../FtSelect/FtSelect.vue'
 import FtToggleSwitch from '../FtToggleSwitch/FtToggleSwitch.vue'
 

@@ -1,0 +1,25 @@
+/* FtInput holds room for a clear button, and shows a magnifying glass there
+   while the field is empty (FtInput.css). Here the glass stays, and there is
+   no clear button to take its place. */
+.ftSearchInput :deep(.clearInputTextButton) {
+  display: none;
+}
+
+.ftSearchInput :deep(.searchIcon) {
+  opacity: 0.7;
+}
+
+.ftSearchInput :deep(.ft-input) {
+  padding-inline: 46px 1rem;
+}
+
+/* Remote focus: the field has the swapped colors (spatialNav.css), its
+   placeholder and glass follow them */
+.ftSearchInput :deep(.ft-input[data-spatial-nav-focused]::placeholder) {
+  color: inherit;
+  opacity: 0.6;
+}
+
+.ftSearchInput:has(.ft-input[data-spatial-nav-focused]) :deep(.searchIcon) {
+  color: var(--bg-color);
+}

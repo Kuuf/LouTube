@@ -229,16 +229,13 @@
           </div>
         </div>
 
-        <FtInput
+        <FtSearchInput
           v-if="showSearchBar"
           ref="searchBar"
           :placeholder="$t('Channel.Search Channel')"
-          :action-button-label="$t('Search Bar.Search')"
           :value="query"
-          :show-clear-text-button="true"
           class="channelSearch"
-          :maxlength="255"
-          @click="search"
+          @search="search"
         />
       </FtFlexBox>
     </div>
@@ -252,7 +249,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
-import FtInput from '../FtInput/FtInput.vue'
+import FtSearchInput from '../FtSearchInput/FtSearchInput.vue'
 
 import store from '../../store/index'
 
