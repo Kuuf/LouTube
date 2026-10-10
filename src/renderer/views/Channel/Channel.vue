@@ -68,53 +68,24 @@
         :tags="tags"
         :related-channels="relatedChannels"
       />
-      <div class="select-container">
-        <FtButton
-          v-if="showViewAllButton"
-          style="margin-top: 33px;"
-          :label="$t('Channel.View All')"
-          @click="router.push(currentTabViewAllRoute)"
-        />
-        <FtSelect
-          v-if="showVideoSortBy"
-          v-show="currentTab === 'videos' && (showFetchMoreButton || filteredVideos.length > 1)"
-          :value="videoSortBy"
-          :select-names="videoLiveShortSelectNames"
-          :select-values="videoLiveShortSelectValues"
-          :placeholder="$t('Global.Sort By')"
-          :icon="getIconForSortPreference(videoSortBy)"
-          @change="videoSortBy = $event"
-        />
-        <FtSelect
-          v-if="!hideChannelShorts && showShortSortBy"
-          v-show="currentTab === 'shorts' && (showFetchMoreButton || filteredShorts.length > 1)"
-          :value="shortSortBy"
-          :select-names="videoLiveShortSelectNames"
-          :select-values="videoLiveShortSelectValues"
-          :placeholder="$t('Global.Sort By')"
-          :icon="getIconForSortPreference(shortSortBy)"
-          @change="shortSortBy = $event"
-        />
-        <FtSelect
-          v-if="!hideLiveStreams && showLiveSortBy"
-          v-show="currentTab === 'live' && (showFetchMoreButton || filteredLive.length > 1)"
-          :value="liveSortBy"
-          :select-names="videoLiveShortSelectNames"
-          :select-values="videoLiveShortSelectValues"
-          :placeholder="$t('Global.Sort By')"
-          :icon="getIconForSortPreference(liveSortBy)"
-          @change="liveSortBy = $event"
-        />
-        <FtSelect
-          v-if="!hideChannelPlaylists && showPlaylistSortBy"
-          v-show="currentTab === 'playlists' && latestPlaylists.length > 0"
-          :value="playlistSortBy"
-          :select-names="playlistSelectNames"
-          :select-values="PLAYLIST_SELECT_VALUES"
-          :placeholder="$t('Global.Sort By')"
-          :icon="getIconForSortPreference(playlistSortBy)"
-          @change="playlistSortBy = $event"
-        />
+      <div
+        v-if="sortOptions.length > 0"
+        class="sortTabs"
+        role="radiogroup"
+        :aria-label="$t('Global.Sort By')"
+      >
+        <button
+          v-for="option in sortOptions"
+          :key="option.value"
+          class="sortTab"
+          :class="{ selectedSortTab: currentSortBy === option.value }"
+          type="button"
+          role="radio"
+          :aria-checked="currentSortBy === option.value"
+          @click="currentSortBy = option.value"
+        >
+          {{ option.label }}
+        </button>
       </div>
       <FtSkeletonList
         v-if="isCurrentTabLoading"
@@ -315,8 +286,6 @@ import FtCard from '../../components/ft-card/ft-card.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtSkeletonList from '../../components/FtSkeletonList/FtSkeletonList.vue'
-import FtSelect from '../../components/FtSelect/FtSelect.vue'
-import FtButton from '../../components/FtButton/FtButton.vue'
 
 import store from '../../store/index'
 
@@ -325,7 +294,6 @@ import {
   extractNumberFromString,
   showToast,
   getChannelPlaylistId,
-  getIconForSortPreference,
   removeFromArrayIfExists
 } from '../../helpers/utils'
 import { isNullOrEmpty } from '../../helpers/strings'
@@ -420,30 +388,12 @@ const showSearchBar = ref(true)
 const showShareMenu = ref(true)
 
 const PLAYLIST_SELECT_VALUES = ['newest', 'last']
-const playlistSelectNames = computed(() => [
-  t('Channel.Playlists.Sort Types.Newest'),
-  t('Channel.Playlists.Sort Types.Last Video Added')
-])
 
+// In the order of YouTube's own sort filters, which are applied by index
 const videoLiveShortSelectValues = computed(() => {
   return isArtistTopicChannel.value
     ? ['newest', 'popular']
     : ['newest', 'popular', 'oldest']
-})
-
-const videoLiveShortSelectNames = computed(() => {
-  if (isArtistTopicChannel.value) {
-    return [
-      t('Channel.Videos.Sort Types.Newest'),
-      t('Channel.Videos.Sort Types.Most Popular'),
-    ]
-  }
-
-  return [
-    t('Channel.Videos.Sort Types.Newest'),
-    t('Channel.Videos.Sort Types.Most Popular'),
-    t('Channel.Videos.Sort Types.Oldest')
-  ]
 })
 
 const SUPPORTED_CHANNEL_TABS = [
@@ -566,22 +516,62 @@ const tabInfoValues = computed(() => {
   return values
 })
 
-const showViewAllButton = computed(() => {
-  switch (currentTab.value) {
-    case 'videos': return (videoSortBy.value === 'newest' || videoSortBy.value === 'popular') && (showFetchMoreButton.value || filteredVideos.value.length > 1)
-    case 'shorts': return (shortSortBy.value === 'newest' || shortSortBy.value === 'popular') && (showFetchMoreButton.value || filteredShorts.value.length > 1)
-    case 'live': return (liveSortBy.value === 'newest' || liveSortBy.value === 'popular') && (showFetchMoreButton.value || filteredLive.value.length > 1)
-    default: return false
+/** The current tab's sort order, `null` on tabs without one */
+const currentSortBy = computed({
+  get() {
+    switch (currentTab.value) {
+      case 'videos': return videoSortBy.value
+      case 'shorts': return shortSortBy.value
+      case 'live': return liveSortBy.value
+      case 'playlists': return playlistSortBy.value
+      default: return null
+    }
+  },
+  set(value) {
+    switch (currentTab.value) {
+      case 'videos': videoSortBy.value = value; break
+      case 'shorts': shortSortBy.value = value; break
+      case 'live': liveSortBy.value = value; break
+      case 'playlists': playlistSortBy.value = value; break
+    }
   }
 })
 
-const currentTabViewAllRoute = computed(() => {
+/**
+ * The sort buttons under the tabs: empty on tabs without sorting, or with
+ * nothing to sort
+ * @type {import('vue').ComputedRef<{ value: string, label: string }[]>}
+ */
+const sortOptions = computed(() => {
+  let visible
   switch (currentTab.value) {
-    case 'videos': return `/playlist/${getChannelPlaylistId(id.value, 'videos', videoSortBy.value)}`
-    case 'shorts': return `/playlist/${getChannelPlaylistId(id.value, 'shorts', shortSortBy.value)}`
-    case 'live': return `/playlist/${getChannelPlaylistId(id.value, 'live', liveSortBy.value)}`
-    default: return ''
+    case 'videos':
+      visible = showVideoSortBy.value && (showFetchMoreButton.value || filteredVideos.value.length > 1)
+      break
+    case 'shorts':
+      visible = !hideChannelShorts.value && showShortSortBy.value && (showFetchMoreButton.value || filteredShorts.value.length > 1)
+      break
+    case 'live':
+      visible = !hideLiveStreams.value && showLiveSortBy.value && (showFetchMoreButton.value || filteredLive.value.length > 1)
+      break
+    case 'playlists':
+      if (hideChannelPlaylists.value || !showPlaylistSortBy.value || latestPlaylists.value.length === 0) { return [] }
+
+      return [
+        { value: 'newest', label: t('Channel.Playlists.Sort Types.Newest') },
+        { value: 'last', label: t('Channel.Playlists.Sort Types.Last Video Added') },
+      ]
+    default:
+      return []
   }
+
+  if (!visible) { return [] }
+
+  return [
+    { value: 'newest', label: t('Channel.Videos.Sort Types.Newest') },
+    { value: 'oldest', label: t('Channel.Videos.Sort Types.Oldest') },
+    { value: 'popular', label: t('Channel.Videos.Sort Types.Most Popular') },
+  ].filter(option => videoLiveShortSelectValues.value.includes(option.value))
 })
 
 watch(route, () => {

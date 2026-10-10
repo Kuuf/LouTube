@@ -23,13 +23,42 @@
   max-inline-size: none;
 }
 
-.select-container {
+/* Sort order of the current tab: a smaller row of pills under the tabs */
+.sortTabs {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-end;
-  align-items: baseline;
-  gap: 10px;
-  margin-block-end: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-block-end: 16px;
+}
+
+.sortTab {
+  padding-block: 6px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: transparent;
+  color: var(--tertiary-text-color);
+  font: inherit;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.sortTab:focus-visible,
+.sortTab:hover:not(.selectedSortTab) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+}
+
+.selectedSortTab {
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  color: var(--primary-text-color);
+  font-weight: bold;
+}
+
+/* Remote focus: the same milder highlight as the channel tabs
+   (ChannelDetails.css), !important to win over spatialNav.css */
+.sortTab[data-spatial-nav-focused] {
+  background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent) !important;
+  color: var(--primary-text-color) !important;
 }
 
 /* Loading: shaped like ChannelDetails (banner, avatar and name, tabs) */

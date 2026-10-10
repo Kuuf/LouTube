@@ -9,12 +9,11 @@ const HEADER_CONTROLS = 'button:not([disabled]), [role="tab"], input'
 const HEADER_EXCLUDED = '.shareIcon *, .channelSearch button'
 
 /**
- * Content controls: sort/"view all", Home shelves' "View Playlist", the list
+ * Content controls: the sort buttons, Home shelves' "View Playlist", the list
  * items, About links, fetch more
  */
 const CONTENT_CONTROLS = [
-  '.select-container button',
-  '.select-container select',
+  '.sortTab',
   '.playAllLink',
   `[${ITEM_ATTRIBUTE}]`,
   '#aboutPanel a[href]',
