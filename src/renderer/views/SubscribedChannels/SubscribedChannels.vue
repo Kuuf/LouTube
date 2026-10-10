@@ -26,6 +26,22 @@
           {{ $t('Channels.Empty') }}
         </p>
       </ft-flex-box>
+      <!-- A search waits a moment before it filters: cards to come meanwhile -->
+      <div
+        v-else-if="isFiltering"
+        class="channels"
+        aria-busy="true"
+      >
+        <div
+          v-for="index in skeletonCount"
+          :key="index"
+          class="channel skeletonChannel"
+          aria-hidden="true"
+        >
+          <div class="skeleton skeletonRound channelThumbnail" />
+          <div class="skeleton skeletonText skeletonName" />
+        </div>
+      </div>
       <template v-else>
         <ft-flex-box
           ref="channelsRef"
@@ -184,7 +200,16 @@ function getSubscription() {
   })
 }
 
+// From a change of the search text until the list is filtered for it (the
+// filtering waits for the typing to pause): skeleton cards are shown
+const isFiltering = ref(false)
+
+/** As many skeleton cards as channels can match, a few rows at most */
+const skeletonCount = computed(() => Math.min(Math.max(subscribedChannels.value.length, 1), 9))
+
 function filterChannels() {
+  isFiltering.value = false
+
   if (query.value === '') {
     filteredChannels.value = []
     return
@@ -255,7 +280,12 @@ function handleQueryChange(val, filterNow = false) {
 
   saveStateInRouter(val)
 
-  filterNow ? filterChannels() : filterChannelsDebounce()
+  if (filterNow) {
+    filterChannels()
+  } else {
+    isFiltering.value = true
+    filterChannelsDebounce()
+  }
 }
 
 async function saveStateInRouter(query) {

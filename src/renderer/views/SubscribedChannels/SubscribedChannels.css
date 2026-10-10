@@ -63,6 +63,17 @@
   transform: scale(1.08);
 }
 
+/* Placeholder cards while a search is pending: same shape, never a stop for
+   the remote */
+.skeletonChannel {
+  pointer-events: none;
+}
+
+.skeletonName {
+  inline-size: 60%;
+  font-size: 1.15rem;
+}
+
 .channelMain {
   display: flex;
   padding: 0;
