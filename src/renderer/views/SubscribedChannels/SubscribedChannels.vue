@@ -139,7 +139,7 @@ const PAGE_ZONE_ID = 'page-subscribed-channels'
 
 // Starts on the first channel, not on the search field above them, which
 // takes the keyboard as soon as it is focused
-useTvPage(PAGE_ZONE_ID)
+useTvPage(PAGE_ZONE_ID, { topOnFirstRow: true })
 
 const route = useRoute()
 const router = useRouter()

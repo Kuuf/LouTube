@@ -96,7 +96,7 @@ import store from '../../store'
 import { ctrlFHandler, debounce, getIconForSortPreference } from '../../helpers/utils'
 import { useTvPage } from '../../composables/useTvPage'
 
-useTvPage('page-history')
+useTvPage('page-history', { topOnFirstRow: true })
 
 const { t } = useI18n()
 const route = useRoute()
