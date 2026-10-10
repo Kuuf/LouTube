@@ -302,6 +302,38 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
     delta = bottom - viewBottom
   }
 
+  animateScrollBy(scroller, delta, () => {
+    // Lazily rendered list items grow once scrolled into view, which can
+    // push the element back out of view: one short follow-up corrects it.
+    if (!isFollowUp && element === focusedElement) {
+      scrollIntoViewAnimated(element, true)
+    }
+  })
+}
+
+/**
+ * Scrolls so that the element's top sits `offset` px below the top of the
+ * view, with the same animation as the focus scroll. For pages that want
+ * something else than "nearest" in view for some focus moves; call it after
+ * the focus has moved, as it replaces the running focus scroll.
+ *
+ * @param {Element} element
+ * @param {number} [offset]
+ */
+export function scrollToViewTopAnimated(element, offset = 0) {
+  const scroller = getScrollParent(element)
+  const viewTop = scroller === document.scrollingElement ? 0 : scroller.getBoundingClientRect().top
+
+  animateScrollBy(scroller, element.getBoundingClientRect().top - viewTop - offset)
+}
+
+/**
+ * @param {Element} scroller
+ * @param {number} delta
+ * @param {() => void} [onEnd] - not called when there is nothing to scroll,
+ *   nor when another scroll replaces this one
+ */
+function animateScrollBy(scroller, delta, onEnd) {
   if (Math.abs(delta) < 1) { return }
 
   const start = scroller.scrollTop
@@ -342,12 +374,7 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
       scrollAnimations.set(scroller, requestAnimationFrame(step))
     } else {
       scrollAnimations.delete(scroller)
-
-      // Lazily rendered list items grow once scrolled into view, which can
-      // push the element back out of view: one short follow-up corrects it.
-      if (!isFollowUp && element === focusedElement) {
-        scrollIntoViewAnimated(element, true)
-      }
+      onEnd?.()
     }
   }
 

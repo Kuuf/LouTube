@@ -1,7 +1,7 @@
 import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { gridFromElements, ITEM_ATTRIBUTE, navState } from '../../helpers/spatialNav/NavManager'
+import { gridFromElements, ITEM_ATTRIBUTE, navState, scrollToViewTopAnimated } from '../../helpers/spatialNav/NavManager'
 
 /** Header controls: subscribe (+ profile toggle), the tabs and the channel search */
 const HEADER_CONTROLS = 'button:not([disabled]), [role="tab"], input'
@@ -20,6 +20,9 @@ const CONTENT_CONTROLS = [
   '#aboutPanel button',
   '.getNextPage',
 ].join(', ')
+
+/** Space above the tab bar when it is scrolled to the top of the screen (px) */
+const TAB_BAR_TOP_PADDING = 24
 
 /**
  * Remote control (spatial nav) for the channel page: the header (subscribe,
@@ -48,11 +51,31 @@ export function useTvChannel() {
     },
   })
 
-  useSpatialZone('channel-content', () => gridFromElements(channelContent.value?.$el.querySelectorAll(CONTENT_CONTROLS) ?? []), {
+  function contentGrid() {
+    return gridFromElements(channelContent.value?.$el.querySelectorAll(CONTENT_CONTROLS) ?? [])
+  }
+
+  const contentZone = useSpatialZone('channel-content', contentGrid, {
     edges: {
       up: 'channel-header',
       left: 'sidebar',
     },
+  })
+
+  // In the content's first rows, the tab bar goes to the top of the screen
+  // (past the banner and channel info) as long as the focused cell still
+  // fits under it. Further down, the focus scroll's "nearest" takes over.
+  watch(contentZone.focusedPosition, (position) => {
+    if (position == null) { return }
+
+    const cell = contentGrid()[position.row]?.[position.col]
+    const tabBar = channelHeader.value?.$el.querySelector('.infoTabs')
+    if (!(cell instanceof Element) || !tabBar) { return }
+
+    const tabBarTop = tabBar.getBoundingClientRect().top - TAB_BAR_TOP_PADDING
+    if (cell.getBoundingClientRect().bottom - tabBarTop <= window.innerHeight - TAB_BAR_TOP_PADDING) {
+      scrollToViewTopAnimated(tabBar, TAB_BAR_TOP_PADDING)
+    }
   })
 
   // Focusing a tab opens it, no Enter needed
