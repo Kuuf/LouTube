@@ -22,11 +22,8 @@
   user-select: none;
 }
 
-/* Drawn with black lines: a faint light halo keeps them readable on dark
-   themes */
 .mascot {
   inline-size: 220px;
-  filter: drop-shadow(0 0 2px rgb(255 255 255 / 55%));
   -webkit-user-drag: none;
 }
 
