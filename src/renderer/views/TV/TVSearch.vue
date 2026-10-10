@@ -12,11 +12,11 @@
     <div ref="results">
       <SearchPage v-if="query !== ''" />
     </div>
-    <!-- Nothing searched yet: the app's flair under the bar -->
+    <!-- Nothing searched yet: the app's flair fills the screen behind the bar -->
     <img
       v-if="query === ''"
       class="flair"
-      src="../../assets/img/search_flair.png"
+      src="../../assets/img/search_flair_crazy.png"
       alt=""
     >
   </div>
