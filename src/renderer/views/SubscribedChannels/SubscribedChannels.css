@@ -51,7 +51,7 @@
 }
 
 /* Pressed: the card grows over its neighbours and shows its actions under
-   the picture. The negative margin takes the actions' height back, so the
+   its name. The negative margin takes the actions' height back, so the
    grid around it doesn't move. */
 .channel.expanded {
   z-index: 5;
@@ -133,6 +133,11 @@
   -webkit-box-orient: vertical;
   padding-block: 0;
   padding-inline: 4px;
+}
+
+/* Not stretched: the actions follow right under the name */
+.expanded .channelName {
+  flex-grow: 0;
 }
 
 .headingIcon {

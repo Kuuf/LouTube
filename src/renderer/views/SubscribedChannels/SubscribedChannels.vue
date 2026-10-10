@@ -59,6 +59,13 @@
                 :icon="['fas', 'circle-user']"
               />
             </button>
+            <span
+              class="channelName"
+              dir="auto"
+              :title="channel.name"
+            >
+              {{ channel.name }}
+            </span>
             <div
               v-if="expandedChannelId === channel.id"
               class="channelActions"
@@ -79,13 +86,6 @@
                 :open-dropdown-on-subscribe="false"
               />
             </div>
-            <span
-              class="channelName"
-              dir="auto"
-              :title="channel.name"
-            >
-              {{ channel.name }}
-            </span>
           </div>
         </ft-flex-box>
       </template>
@@ -317,7 +317,7 @@ onBeforeUnmount(() => {
 const enableChannelLinks = computed(() => !store.getters.getDisableChannelLinks)
 
 // A pressed channel card grows over its neighbours and shows its actions
-// under the picture: going to the channel, and unsubscribing.
+// under its name: going to the channel, and unsubscribing.
 const ACTION_BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 14%, transparent)'
 
 /** @type {import('vue').Ref<string | null>} */
