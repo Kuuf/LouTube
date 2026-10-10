@@ -326,6 +326,51 @@
   .sideNav.hiddenLabels {
     overflow: visible;
     inline-size: 80px;
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  /* The side nav's background: no hard edge, it fades out over the page
+     next to it. Solid under the icons (and the labels of the open drawer),
+     then a fade to transparent, much wider when the drawer is open. Under
+     the panel (.inner), above the scrim. */
+  .sideNav::after {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 0;
+    inline-size: 130px;
+
+    /* Eased stops, so the fade has no visible start */
+    background:
+      linear-gradient(
+        to right,
+        var(--side-nav-color) 45%,
+        color-mix(in srgb, var(--side-nav-color) 92%, transparent) 54%,
+        color-mix(in srgb, var(--side-nav-color) 60%, transparent) 70%,
+        color-mix(in srgb, var(--side-nav-color) 22%, transparent) 86%,
+        transparent
+      );
+    pointer-events: none;
+    transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
+  }
+
+  :global(body[dir='rtl']) .sideNav::after {
+    background:
+      linear-gradient(
+        to left,
+        var(--side-nav-color) 45%,
+        color-mix(in srgb, var(--side-nav-color) 92%, transparent) 54%,
+        color-mix(in srgb, var(--side-nav-color) 60%, transparent) 70%,
+        color-mix(in srgb, var(--side-nav-color) 22%, transparent) 86%,
+        transparent
+      );
+  }
+
+  .sideNav.drawerOpen::after {
+    inline-size: 640px;
+    transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
   }
 
   .inner,
@@ -336,25 +381,21 @@
     z-index: 1;
     inline-size: 80px;
     overflow: hidden auto;
-    background-color: var(--side-nav-color);
-    transition:
-      inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15),
-      box-shadow 200ms ease-in;
+    transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
   }
 
   .drawerOpen .inner {
     inline-size: 260px;
-    box-shadow: 8px 0 32px rgb(0 0 0 / 50%);
-    transition:
-      inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1),
-      box-shadow 300ms ease-out;
+    transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
   }
 
   .drawerScrim {
     display: block;
     position: fixed;
     inset: 0;
-    background-color: rgb(0 0 0 / 55%);
+
+    /* Light: the fading background already sets the drawer off the page */
+    background-color: rgb(0 0 0 / 35%);
     opacity: 0;
     pointer-events: none;
     transition: opacity 200ms ease-in;
@@ -446,6 +487,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .sideNav::after,
   .sideNav .inner,
   .sideNav .drawerScrim,
   .sideNav .navOption .navLabel,
