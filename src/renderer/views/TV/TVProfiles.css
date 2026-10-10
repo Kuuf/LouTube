@@ -8,9 +8,9 @@ h2 {
   margin-inline: auto;
 }
 
+/* Dimmed: the swapped colors are the remote focus (FtProfileBubble.css) */
 .activeProfile {
-  background-color: var(--primary-text-color);
-  color: var(--card-bg-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
 }
 
 .card {

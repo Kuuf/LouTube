@@ -12,15 +12,16 @@ h2 {
   margin-inline: auto;
 }
 
+/* Dimmed: the swapped colors are the remote focus (FtProfileBubble.css) */
 .openedProfile {
-  background-color: var(--primary-text-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
   transition: background 0.2s ease-out;
-  color: var(--card-bg-color);
 }
 
 .openedProfile:hover,
 .openedProfile:focus-visible {
-  background-color: var(--tertiary-text-color);
+  background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent);
+  color: inherit;
   transition: background 0.2s ease-in;
 }
 

@@ -4,7 +4,17 @@
   padding-block: 10px 30px;
   padding-inline: 10px;
   cursor: pointer;
+  border-radius: var(--radius-md);
   transition: background 0.2s ease-out;
+}
+
+/* Remote focus: the theme's text and background colors swapped, like text
+   based elements (spatialNav.css), so it stands out from the selected
+   profile's dimmed background */
+.bubblePadding[data-spatial-nav-focused] {
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  box-shadow: none;
 }
 
 .bubblePadding:hover {
