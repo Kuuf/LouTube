@@ -2,38 +2,36 @@
   <FtSettingsSection
     :title="$t('Settings.SponsorBlock Settings.SponsorBlock Settings')"
   >
-    <FtFlexBox class="settingsFlexStart500px">
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
-        :default-value="useSponsorBlock"
-        @change="handleUpdateSponsorBlock"
-      />
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
-        :default-value="useDeArrowTitles"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
-        @change="handleUpdateUseDeArrowTitles"
-      />
-      <FtToggleSwitch
-        :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
-        :default-value="useDeArrowThumbnails"
-        :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
-        @change="handleUpdateUseDeArrowThumbnails"
-      />
-    </FtFlexBox>
-    <template
-      v-if="useSponsorBlock || useDeArrowTitles || useDeArrowThumbnails"
-    >
-      <FtFlexBox
-        v-if="useSponsorBlock"
-        class="settingsFlexStart500px"
-      >
+    <div class="switchColumnGrid">
+      <div class="switchColumn">
         <FtToggleSwitch
+          :label="$t('Settings.SponsorBlock Settings.Enable SponsorBlock')"
+          :default-value="useSponsorBlock"
+          @change="handleUpdateSponsorBlock"
+        />
+        <FtToggleSwitch
+          v-if="useSponsorBlock"
           :label="$t('Settings.SponsorBlock Settings.Notify when sponsor segment is skipped')"
           :default-value="sponsorBlockShowSkippedToast"
           @change="handleUpdateSponsorBlockShowSkippedToast"
         />
-      </FtFlexBox>
+        <FtToggleSwitch
+          :label="$t('Settings.SponsorBlock Settings.UseDeArrowTitles')"
+          :default-value="useDeArrowTitles"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowTitles')"
+          @change="handleUpdateUseDeArrowTitles"
+        />
+        <FtToggleSwitch
+          :label="$t('Settings.SponsorBlock Settings.UseDeArrowThumbnails')"
+          :default-value="useDeArrowThumbnails"
+          :tooltip="$t('Tooltips.SponsorBlock Settings.UseDeArrowThumbnails')"
+          @change="handleUpdateUseDeArrowThumbnails"
+        />
+      </div>
+    </div>
+    <template
+      v-if="useSponsorBlock || useDeArrowTitles || useDeArrowThumbnails"
+    >
       <FtFlexBox>
         <FtInput
           ref="sponsorBlockUrlInput"

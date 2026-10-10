@@ -1,15 +1,15 @@
+/* A SponsorBlock category in the settings: its name as a sub heading, its
+   two dropdowns under it, one per row like every other setting */
 .sponsorBlockCategory {
-  margin-block-start: 30px;
-  padding-block: 0;
-  padding-inline: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  inline-size: 100%;
+  margin-block-start: 16px;
 }
 
 .sponsorTitle {
-  font-size: x-large;
-}
-
-@media only screen and (width <= 680px) {
-  .sponsorBlockCategory {
-    inline-size: 100%;
-  }
+  margin-block-end: -8px;
+  font-size: 19px;
+  font-weight: bold;
 }

@@ -93,6 +93,15 @@
   margin-inline: 0;
 }
 
+// A text field's label, like a dropdown's (FtSelect.css)
+.settingsSection :deep(.ft-input-component .selectLabel) {
+  display: block;
+  margin-block-end: 8px;
+  color: var(--primary-text-color);
+  font-size: 17px;
+  font-weight: 500;
+}
+
 // Tag lists (hidden channels, forbidden words, ...) too
 .settingsSection :deep(.ft-input-tags-component) {
   inline-size: 100%;

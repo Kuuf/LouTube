@@ -40,23 +40,6 @@
           class="section"
           :data-section="activeSectionEntry.type"
         />
-        <div
-          v-if="activeSection === 'general'"
-          class="switchRow"
-        >
-          <FtButton
-            v-if="USING_ELECTRON"
-            :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
-            :icon="['fas', 'keyboard']"
-            @click="showKeyboardShortcutPrompt"
-          />
-          <FtToggleSwitch
-            class="settingsToggle"
-            :label="t('Settings.Sort Settings Sections (A-Z)')"
-            :default-value="settingsSectionSortEnabled"
-            @change="updateSettingsSectionSortEnabled"
-          />
-        </div>
       </div>
     </template>
     <PasswordDialog
@@ -85,14 +68,10 @@ import ParentalControlSettings from '../../components/ParentalControlSettings.vu
 import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
 import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
-import FtToggleSwitch from '../../components/FtToggleSwitch/FtToggleSwitch.vue'
-import FtButton from '../../components/FtButton/FtButton.vue'
 
 import store from '../../store/index'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { focusableGrid, navState } from '../../helpers/spatialNav/NavManager'
-
-const USING_ELECTRON = !!process.env.IS_ELECTRON
 
 const { locale, t } = useI18n()
 
@@ -232,17 +211,6 @@ function handleUnlock() {
   nextTick(() => {
     menuZone.activate()
   })
-}
-
-function showKeyboardShortcutPrompt() {
-  store.dispatch('showKeyboardShortcutPrompt')
-}
-
-/**
- * @param {boolean} value
- */
-function updateSettingsSectionSortEnabled(value) {
-  store.dispatch('updateSettingsSectionSortEnabled', value)
 }
 
 // Spatial-nav (remote control): the section nav on the left, one item per

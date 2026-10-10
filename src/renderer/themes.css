@@ -28,7 +28,7 @@ body {
   --link-color: var(--accent-color);
   --link-visited-color: var(--accent-color-visited);
   --instance-menu-color: var(--search-bar-color);
-  --red-500: #f44336;
+  --red-500: #d45754;
   --top-bar-push-down-adjustment-default: -35px;
 
   /* Value of 0 without 'px' does not work inside calc() */
@@ -38,10 +38,10 @@ body {
   --top-bar-push-down-adjustment-one-or-fewer: 0px;
   /* stylelint-enable length-zero-no-unit */
 
-  --destructive-color: #f44336;
+  --destructive-color: #d45754;
   --destructive-text-color: #000;
-  --destructive-hover-color: #e53935;
-  --destructive-active-color: #c62828;
+  --destructive-hover-color: #c14b48;
+  --destructive-active-color: #a63f3d;
 
   /* For the 'About' page, show the logo with the primary text color by default */
   --logo-primary-color: var(--primary-text-color);
@@ -604,10 +604,11 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --logo-text-bar-color: url('../../_icons/textBlackSmall.svg');
 }
 
+/* The app's red, not Material's (the color themes can't be chosen anymore) */
 .mainRed {
-  --primary-color: #f44336;
-  --primary-color-hover: #e53935;
-  --primary-color-active: #c62828;
+  --primary-color: #d45754;
+  --primary-color-hover: #c14b48;
+  --primary-color-active: #a63f3d;
 }
 
 .mainPink {
@@ -1308,12 +1309,15 @@ it can be safely elided. This looks quite pleasant on this theme. */
   --accent-color-visited: #1a237e;
 }
 
+/* The app's default accent: a green (#9abc67) in place of Material's blue,
+   light enough to need dark text on it */
 .secBlue {
-  --accent-color-rgb: 33 150 243;
-  --accent-color-hover: #1e88e5;
-  --accent-color-active: #1565c0;
-  --accent-color-light: #90caf9;
-  --accent-color-visited: #0d47a1;
+  --accent-color-rgb: 154 188 103;
+  --accent-color-hover: #8aad58;
+  --accent-color-active: #6f9040;
+  --accent-color-light: #c3d9a3;
+  --accent-color-visited: #5d7a35;
+  --text-with-accent-color: #000;
 }
 
 .secLightBlue {

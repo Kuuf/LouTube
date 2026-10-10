@@ -11,7 +11,7 @@
       <FtCard
         ref="promptCard"
         class="promptCard"
-        :class="{ autosize, [theme]: true, fullscreen }"
+        :class="{ autosize, [theme]: true, fullscreen, simple: isSimple }"
         role="dialog"
         aria-modal="true"
         :aria-labelledby="id"
@@ -38,7 +38,7 @@
               {{ extraLabel }}
             </strong>
           </p>
-          <FtFlexBox>
+          <FtFlexBox class="options">
             <FtButton
               v-for="(option, index) in optionNames"
               :key="index"
@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-import { nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef, computed, useSlots } from 'vue'
 import android from 'android'
 
 import store from '../../store/index'
@@ -106,6 +106,11 @@ const props = defineProps({
 
 const emit = defineEmits(['click'])
 
+// Just a question and its options (no content of its own): a medium sized
+// dialog instead of one as wide as the screen
+const slots = useSlots()
+const isSimple = computed(() => !slots.default)
+
 const id = useId()
 
 const promptCard = useTemplateRef('promptCard')
@@ -124,7 +129,9 @@ onMounted(() => {
 
   nextTick(() => {
     promptButtons = Array.from(promptCard.value.$el.querySelectorAll('.btn.ripple, .iconButton'))
-    focusItem(0)
+
+    // Not on a destructive first option: a stray Enter then cancels
+    focusItem(props.isFirstOptionDestructive ? promptButtons.length - 1 : 0)
   })
   if (process.env.IS_ANDROID) {
     android.enterPromptMode()
@@ -148,10 +155,8 @@ onBeforeUnmount(() => {
 function optionButtonTextColor(index) {
   if (index === 0 && props.isFirstOptionDestructive) {
     return 'var(--destructive-text-color)'
-  } else if (index < props.optionNames.length - 1) {
-    return 'var(--text-with-accent-color)'
   } else {
-    return null
+    return 'var(--primary-text-color)'
   }
 }
 
@@ -161,10 +166,9 @@ function optionButtonTextColor(index) {
 function optionButtonBackgroundColor(index) {
   if (index === 0 && props.isFirstOptionDestructive) {
     return 'var(--destructive-color)'
-  } else if (index < props.optionNames.length - 1) {
-    return 'var(--accent-color)'
   } else {
-    return null
+    // A mild gray: the swapped colors are the focused option (FtPrompt.css)
+    return 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
   }
 }
 

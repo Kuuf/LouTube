@@ -16,8 +16,36 @@
 }
 
 .promptCard {
-  overflow-y: scroll;
+  overflow-y: auto;
   max-block-size: 95%;
+  border: 1px solid color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+  border-radius: 20px;
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 20%),
+    0 16px 40px rgb(0 0 0 / 35%);
+}
+
+/* Option buttons: pills, without FtButton's border and shadow. The focused
+   one has the theme's text and background colors swapped, like the remote
+   focus elsewhere (!important over FtButton's inline colors). */
+.promptCard :deep(.btn) {
+  padding-block: 12px;
+  padding-inline: 26px;
+  border-color: transparent !important;
+  border-radius: var(--radius-pill);
+  box-shadow: none;
+}
+
+/* stylelint-disable-next-line a11y/no-outline-none */
+.promptCard :deep(.btn:focus-visible) {
+  outline: none;
+  background-color: var(--primary-text-color) !important;
+  color: var(--bg-color) !important;
+}
+
+.options {
+  justify-content: center;
+  gap: 12px;
 }
 
 .promptCard.autosize {
@@ -45,6 +73,29 @@
   max-inline-size: 70%;
   inset-inline-start: 15%;
   padding-block: 10px;
+}
+
+/* A question and its options only: a medium sized dialog in the middle of
+   the screen (after the sizes above, which it replaces) */
+.promptCard.simple {
+  position: static;
+  box-sizing: border-box;
+  inline-size: min(520px, 92vw);
+  max-inline-size: none;
+  margin-block: 0;
+  margin-inline: auto;
+  padding: 28px;
+}
+
+.promptCard.simple h2 {
+  margin-block: 0 24px;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.promptCard.simple p {
+  margin-block: -8px 24px;
+  color: var(--secondary-text-color);
 }
 
 .promptCard.readable-width {

@@ -56,6 +56,19 @@
           :compact="true"
           @change="updateShowTapHighlight"
         />
+        <FtToggleSwitch
+          :label="t('Settings.Sort Settings Sections (A-Z)')"
+          :default-value="settingsSectionSortEnabled"
+          :compact="true"
+          @change="updateSettingsSectionSortEnabled"
+        />
+        <FtToggleSwitch
+          v-if="USING_ELECTRON"
+          :label="t('KeyboardShortcutPrompt.Show Keyboard Shortcuts')"
+          :default-value="isKeyboardShortcutPromptShown"
+          :compact="true"
+          @change="toggleKeyboardShortcutPrompt"
+        />
       </div>
     </div>
     <div class="switchGrid">
@@ -209,6 +222,28 @@ if (process.env.IS_ELECTRON && process.platform === 'linux') {
   onMounted(async () => {
     isLinuxWayland.value = await window.ftElectron.isWaylandPlatform()
   })
+}
+
+/** @type {import('vue').ComputedRef<boolean>} */
+const settingsSectionSortEnabled = computed(() => store.getters.getSettingsSectionSortEnabled)
+
+/**
+ * @param {boolean} value
+ */
+function updateSettingsSectionSortEnabled(value) {
+  store.dispatch('updateSettingsSectionSortEnabled', value)
+}
+
+// On while the keyboard shortcuts are shown: turning it on opens them,
+// closing them turns it off again
+/** @type {import('vue').ComputedRef<boolean>} */
+const isKeyboardShortcutPromptShown = computed(() => store.getters.getIsKeyboardShortcutPromptShown)
+
+/**
+ * @param {boolean} value
+ */
+function toggleKeyboardShortcutPrompt(value) {
+  store.dispatch(value ? 'showKeyboardShortcutPrompt' : 'hideKeyboardShortcutPrompt')
 }
 
 /** @type {import('vue').ComputedRef<boolean>} */

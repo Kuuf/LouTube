@@ -235,15 +235,11 @@ const baseTheme = computed(() => store.getters.getBaseTheme)
 
 watch(baseTheme, updateTheme)
 
-/** @type {import('vue').ComputedRef<string>} */
-const mainColor = computed(() => store.getters.getMainColor)
-
-watch(mainColor, updateTheme)
-
-/** @type {import('vue').ComputedRef<string>} */
-const secColor = computed(() => store.getters.getSecColor)
-
-watch(secColor, updateTheme)
+// The color themes can't be chosen anymore (ThemeSettings.vue): always the
+// app's own red and green (.mainRed and .secBlue in themes.css), whatever
+// was stored before
+const mainColor = computed(() => 'Red')
+const secColor = computed(() => 'Blue')
 
 function updateTheme() {
   if (process.env.IS_ANDROID) {
