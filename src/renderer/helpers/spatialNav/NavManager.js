@@ -152,9 +152,13 @@ export function focusableGrid(container, excludeSelector) {
  *
  * @param {Element | null | undefined} container
  * @param {string} [excludeSelector] - skip controls matching this
+ * @param {boolean} [sortByPosition] - order the cells by where they are on
+ *   screen instead of by the document. For pages whose cards hold stacked
+ *   controls (a picture with buttons under it): in document order each card
+ *   comes whole, which doesn't group into rows.
  * @returns {Element[][]}
  */
-export function pageGrid(container, excludeSelector) {
+export function pageGrid(container, excludeSelector, sortByPosition = false) {
   if (!container) { return [] }
 
   const items = [...container.querySelectorAll(`[${ITEM_ATTRIBUTE}]`)]
@@ -167,6 +171,12 @@ export function pageGrid(container, excludeSelector) {
 
   const cells = [...items, ...controls]
     .sort((a, b) => (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) ? -1 : 1)
+
+  if (sortByPosition) {
+    // Stable: cells starting at the same height keep their document order
+    const tops = new Map(cells.map(cell => [cell, Math.round(cell.getBoundingClientRect().top)]))
+    cells.sort((a, b) => tops.get(a) - tops.get(b))
+  }
 
   return gridFromElements(cells)
 }

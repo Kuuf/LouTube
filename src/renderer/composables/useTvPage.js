@@ -1,4 +1,4 @@
-import { onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 
 import { useSpatialZone } from './useSpatialZone'
 import { ITEM_ATTRIBUTE, navState, pageGrid } from '../helpers/spatialNav/NavManager'
@@ -25,6 +25,8 @@ const ITEM_WAIT_MS = 2000
  * and focus still moves on to the first item if one shows up before the
  * remote is used.
  *
+ * Tabs (`role="tab"`) are selected as soon as they are focused.
+ *
  * Template ref to bind: `tvPageRoot` (the page's root element).
  *
  * @param {string} zoneId
@@ -32,13 +34,14 @@ const ITEM_WAIT_MS = 2000
  * @param {'item' | 'first'} [options.startOn]
  * @param {string} [options.exclude] - more controls to skip, on top of
  *   DEFAULT_EXCLUDE
+ * @param {boolean} [options.sortByPosition] - see `pageGrid`
  */
-export function useTvPage(zoneId, { startOn = 'item', exclude } = {}) {
+export function useTvPage(zoneId, { startOn = 'item', exclude, sortByPosition = false } = {}) {
   const root = useTemplateRef('tvPageRoot')
   const excludeSelector = exclude ? `${DEFAULT_EXCLUDE}, ${exclude}` : DEFAULT_EXCLUDE
 
   function grid() {
-    return pageGrid(root.value, excludeSelector)
+    return pageGrid(root.value, excludeSelector, sortByPosition)
   }
 
   let usedRemote = false
@@ -52,6 +55,17 @@ export function useTvPage(zoneId, { startOn = 'item', exclude } = {}) {
       usedRemote = true
       return false
     },
+  })
+
+  // Focusing a tab selects it, no Enter needed, like the channel page's tabs
+  // (useTvChannel.js). The tabs mark the selected one with `.selectedTab`.
+  watch(zone.focusedPosition, (position) => {
+    if (position == null) { return }
+
+    const cell = grid()[position.row]?.[position.col]
+    if (cell instanceof HTMLElement && cell.matches('[role="tab"]:not(.selectedTab)')) {
+      cell.click()
+    }
   })
 
   let startedOnItem = false

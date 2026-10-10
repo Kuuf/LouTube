@@ -96,7 +96,8 @@ import { useTvPage } from '../../composables/useTvPage'
 
 // One stop per channel (its avatar), plus its unsubscribe button: the name
 // links to the same channel
-useTvPage('page-subscribed-channels', { startOn: 'first', exclude: '.channel .channelName' })
+// Each card has its picture and, under it, its subscribe buttons: rows by position
+useTvPage('page-subscribed-channels', { startOn: 'first', exclude: '.channel .channelName', sortByPosition: true })
 
 const route = useRoute()
 const router = useRouter()
