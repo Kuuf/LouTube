@@ -48,15 +48,16 @@
   background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
 }
 
+/* Swapped colors like the selected channel tab (ChannelDetails.css) */
 .selectedSortTab {
-  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
-  color: var(--primary-text-color);
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
   font-weight: bold;
 }
 
-/* Remote focus: the same milder highlight as the channel tabs
-   (ChannelDetails.css), !important to win over spatialNav.css */
-.sortTab[data-spatial-nav-focused] {
+/* Remote focus on a sort order that is not selected: the same milder
+   highlight as the channel tabs, !important to win over spatialNav.css */
+.sortTab[data-spatial-nav-focused]:not(.selectedSortTab) {
   background-color: color-mix(in srgb, var(--primary-text-color) 24%, transparent) !important;
   color: var(--primary-text-color) !important;
 }
