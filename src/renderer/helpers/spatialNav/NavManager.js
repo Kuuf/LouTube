@@ -323,7 +323,12 @@ function scrollIntoViewAnimated(element, isFollowUp = false) {
   // Longer when it goes further than one screen (e.g. back to the top of a
   // page), which otherwise passes too fast to be seen as movement
   const extraDistance = Math.max(Math.abs(target - start) - window.innerHeight, 0)
-  const duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS)
+  let duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS)
+
+  // Back to the very top of the page: twice as long, a calmer return
+  if (target === 0) {
+    duration *= 2
+  }
 
   const step = (now) => {
     startTime ??= now
