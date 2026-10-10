@@ -142,7 +142,7 @@ import SubscriptionsPosts from '../../components/SubscriptionPosts/Subscriptions
 import store from '../../store/index'
 import { useTvPage } from '../../composables/useTvPage'
 
-useTvPage('page-subscriptions')
+useTvPage('page-subscriptions', { topOnFirstRow: true })
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideSubscriptionsVideos = computed(() => {

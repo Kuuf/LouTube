@@ -118,7 +118,7 @@ import { getLocalTrending } from '../../helpers/api/local'
 import { KeyboardShortcuts } from '../../../constants'
 import { useTvPage } from '../../composables/useTvPage'
 
-useTvPage('page-trending')
+useTvPage('page-trending', { topOnFirstRow: true })
 
 const { t } = useI18n()
 

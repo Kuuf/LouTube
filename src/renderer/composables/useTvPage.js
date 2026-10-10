@@ -1,7 +1,7 @@
 import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
 
 import { useSpatialZone } from './useSpatialZone'
-import { ITEM_ATTRIBUTE, navState, pageGrid } from '../helpers/spatialNav/NavManager'
+import { ITEM_ATTRIBUTE, navState, pageGrid, scrollPageToTopAnimated } from '../helpers/spatialNav/NavManager'
 
 /**
  * Not worth a stop on a remote: tooltip buttons, and a text input's own
@@ -34,8 +34,11 @@ const ITEM_WAIT_MS = 2000
  * @param {'item' | 'first'} [options.startOn]
  * @param {string} [options.exclude] - more controls to skip, on top of
  *   DEFAULT_EXCLUDE
+ * @param {boolean} [options.topOnFirstRow] - focusing a list item of the
+ *   first row scrolls the page back to its very top (heading and tabs in
+ *   view again), instead of just far enough to show the item
  */
-export function useTvPage(zoneId, { startOn = 'item', exclude } = {}) {
+export function useTvPage(zoneId, { startOn = 'item', exclude, topOnFirstRow = false } = {}) {
   const root = useTemplateRef('tvPageRoot')
   const excludeSelector = exclude ? `${DEFAULT_EXCLUDE}, ${exclude}` : DEFAULT_EXCLUDE
 
@@ -61,9 +64,24 @@ export function useTvPage(zoneId, { startOn = 'item', exclude } = {}) {
   watch(zone.focusedPosition, (position) => {
     if (position == null) { return }
 
-    const cell = grid()[position.row]?.[position.col]
-    if (cell instanceof HTMLElement && cell.matches('[role="tab"]:not(.selectedTab)')) {
+    const cells = grid()
+    const cell = cells[position.row]?.[position.col]
+    if (!(cell instanceof HTMLElement)) { return }
+
+    if (cell.matches('[role="tab"]:not(.selectedTab)')) {
       cell.click()
+      return
+    }
+
+    // Back on the first row of list items: the page returns to its top, as
+    // long as the item still fits on screen there. The focus stays on it.
+    if (topOnFirstRow && cell.matches(`[${ITEM_ATTRIBUTE}]`)) {
+      const firstItemRow = cells.findIndex(row => row.some(rowCell => rowCell.matches(`[${ITEM_ATTRIBUTE}]`)))
+      const bottomAtTop = cell.getBoundingClientRect().bottom + document.scrollingElement.scrollTop
+
+      if (position.row === firstItemRow && bottomAtTop <= window.innerHeight) {
+        scrollPageToTopAnimated()
+      }
     }
   })
 

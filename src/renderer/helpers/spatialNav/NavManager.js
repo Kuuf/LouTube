@@ -329,6 +329,16 @@ export function scrollToViewTopAnimated(element, offset = 0) {
 }
 
 /**
+ * Scrolls the page back to its very top, with the same animation as the
+ * focus scroll. Like `scrollToViewTopAnimated`, call it after the focus has
+ * moved, as it replaces the running focus scroll.
+ */
+export function scrollPageToTopAnimated() {
+  const scroller = document.scrollingElement
+  animateScrollBy(scroller, -scroller.scrollTop)
+}
+
+/**
  * @param {Element} scroller
  * @param {number} delta
  * @param {() => void} [onEnd] - not called when there is nothing to scroll,
