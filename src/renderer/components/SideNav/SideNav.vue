@@ -243,31 +243,6 @@
           {{ $t("About.About") }}
         </p>
       </router-link>
-      <!-- New version available: opens its release notes (App.vue) -->
-      <a
-        v-if="updateVersion"
-        class="navOption mobileShow updateOption"
-        role="button"
-        tabindex="0"
-        :title="$t('Version {versionNumber} is now available!  Click for more details', { versionNumber: updateVersion })"
-        @click="emit('show-update')"
-        @keydown.enter.space.prevent="emit('show-update')"
-      >
-        <div
-          class="thumbnailContainer"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'download']"
-            class="navIcon"
-            :class="applyNavIconExpand"
-          />
-        </div>
-        <p
-          class="navLabel"
-        >
-          {{ $t("Update Available") }}
-        </p>
-      </a>
       <a
         v-if="usingAndroid && !usingRelease"
         class="navOption mobileHidden"
@@ -356,16 +331,6 @@ import { KeyboardShortcuts, MAIN_PROFILE_ID } from '../../../constants'
 import { getFirstCharacter } from '../../helpers/strings'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
-
-defineProps({
-  /** Version of an available update, shown as a nav item, or null */
-  updateVersion: {
-    type: String,
-    default: null
-  }
-})
-
-const emit = defineEmits(['show-update'])
 
 const { locale, t } = useI18n()
 const route = useRoute()

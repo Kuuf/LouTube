@@ -19,6 +19,12 @@
   margin-block-end: 1em;
 }
 
+.updateButton {
+  margin-block: 0 2em;
+  margin-inline: auto;
+  white-space: normal;
+}
+
 .about-chunks {
   display: grid;
   gap: 16px;

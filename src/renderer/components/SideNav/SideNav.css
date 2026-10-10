@@ -64,11 +64,6 @@
   user-select: none;
 }
 
-/* New version available: accent colored to stand out */
-.updateOption {
-  color: var(--accent-color);
-}
-
 .channelLink {
   display: block;
   color: inherit;

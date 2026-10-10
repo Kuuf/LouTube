@@ -12,8 +12,6 @@
   >
     <SideNav
       :inert="isAnyPromptOpen"
-      :update-version="showUpdatesBanner ? latestVersionNumber : null"
-      @show-update="showReleaseNotes = true"
     />
     <FtFlexBox
       class="flexBox routerView"
@@ -96,7 +94,7 @@
 
 <script setup>
 import { marked } from 'marked'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -293,6 +291,15 @@ async function checkForNewUpdates() {
     updateLink.value = info.downloadLink
   }
 }
+
+// For the About page: the available update's version (or null), and its
+// release notes
+provide('appUpdate', {
+  version: computed(() => showUpdatesBanner.value ? latestVersionNumber.value : null),
+  showReleaseNotes: () => {
+    showReleaseNotes.value = true
+  },
+})
 
 function toggleShowReleaseNotes() {
   showReleaseNotes.value = !showReleaseNotes.value

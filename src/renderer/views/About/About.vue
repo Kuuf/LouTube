@@ -13,6 +13,13 @@
         <div class="version">
           {{ versionNumber }} {{ $t("About.Beta") }}
         </div>
+        <FtButton
+          v-if="updateVersion"
+          class="updateButton"
+          :icon="['fas', 'download']"
+          :label="$t('Version {versionNumber} is now available!  Click for more details', { versionNumber: updateVersion })"
+          @click="appUpdate.showReleaseNotes()"
+        />
       </section>
       <section class="about-chunks">
         <figure
@@ -39,9 +46,10 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed } from 'vue'
+import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 
+import FtButton from '../../components/FtButton/FtButton.vue'
 import FtCard from '../../components/ft-card/ft-card.vue'
 import FtLogoFull from '../../components/FtLogoFull/FtLogoFull.vue'
 import { vSaferHtml } from '../../directives/vSaferHtml.js'
@@ -55,6 +63,10 @@ useTvPage('page-about', { startOn: 'first' })
 const { t } = useI18n()
 
 const versionNumber = `v${packageDetails.version}`
+
+// Provided by App.vue, which checks for updates and shows the release notes
+const appUpdate = inject('appUpdate')
+const updateVersion = computed(() => appUpdate.version.value)
 
 const chunks = computed(() => [
   {
