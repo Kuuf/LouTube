@@ -2,6 +2,13 @@
   display: flex;
 }
 
+/* Clear of the side nav's fading edge (SideNav.css) */
+@media only screen and (width > 1015px) {
+  .settingsPage {
+    padding-inline-start: 48px;
+  }
+}
+
 .settingsSections,
 .switchRow {
   overflow-x: hidden;
