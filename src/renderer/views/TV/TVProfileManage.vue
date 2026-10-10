@@ -228,7 +228,7 @@ watch(navZone.focusedPosition, (position) => {
   }
 })
 
-useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
+const contentZone = useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
   edges: {
     // Back to the mini nav, on the section that is open
     left: () => {
@@ -236,6 +236,18 @@ useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
       return NAV_ZONE_ID
     },
   },
+})
+
+// The profile name is ready to type into as soon as the focus is on it, no
+// Enter needed (opens the on-screen keyboard on Android TV). Up/Down leave
+// it again, see NavManager.
+watch(contentZone.focusedPosition, (position) => {
+  if (position == null) { return }
+
+  const cell = contentGrid()[position.row]?.[position.col]
+  if (cell instanceof HTMLInputElement && cell.closest('.profileName')) {
+    cell.focus({ preventScroll: true })
+  }
 })
 </script>
 
