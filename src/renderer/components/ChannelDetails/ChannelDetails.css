@@ -113,6 +113,10 @@
   text-align: center;
   color: var(--tertiary-text-color);
   border-radius: var(--radius-pill);
+
+  /* Coming back up to the tabs scrolls the page to its very top, banner
+     included (the remote focus scrolls by this margin, see NavManager.js) */
+  scroll-margin-block-start: 100vh;
 }
 
 .tab:focus-visible,
