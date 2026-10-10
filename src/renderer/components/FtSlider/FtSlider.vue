@@ -1,8 +1,23 @@
 <template>
-  <label
-    class="pure-material-slider"
-    :for="id"
+  <div
+    class="ftSlider"
+    :class="{ disabled }"
+    :style="{ '--fill': `${fillPercent}%` }"
   >
+    <div class="header">
+      <label
+        class="label"
+        :for="id"
+      >
+        {{ label }}
+      </label>
+      <span
+        class="value"
+        aria-hidden="true"
+      >
+        {{ displayLabel }}
+      </span>
+    </div>
     <input
       :id="id"
       v-model.number="currentValue"
@@ -14,10 +29,7 @@
       :step="step"
       @change="change"
     >
-    <span class="label">
-      {{ $t('Display Label', {label: label, value: displayLabel}) }}
-    </span>
-  </label>
+  </div>
 </template>
 
 <script setup>
@@ -63,6 +75,14 @@ watch(() => props.defaultValue, (value) => {
   if (currentValue.value !== value) {
     currentValue.value = value
   }
+})
+
+/** How far along the track the value is, for the filled part of the track */
+const fillPercent = computed(() => {
+  const range = props.maxValue - props.minValue
+  if (range <= 0) { return 0 }
+
+  return Math.min(Math.max((currentValue.value - props.minValue) / range, 0), 1) * 100
 })
 
 const displayLabel = computed(() => {

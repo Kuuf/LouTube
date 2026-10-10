@@ -1,160 +1,184 @@
-.pure-material-slider {
-  display: inline-block;
+/* A slider row: its label and current value on top, a thick track filled up
+   to a round thumb below. The range input stays the control (and the remote's
+   focus stop): with the remote, Enter starts adjusting it (Left/Right), Enter
+   or Up/Down ends it, see NavManager.js. */
+.ftSlider {
+  --track-size: 8px;
+  --thumb-size: 24px;
+  --fill-color: var(--primary-text-color);
+  --rest-color: color-mix(in srgb, var(--primary-text-color) 18%, transparent);
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-sizing: border-box;
   inline-size: 380px;
-  color: rgb(var(--primary-text-color) 0.87);
+  padding-block: 14px 10px;
+  padding-inline: 16px;
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+  text-align: start;
+  transition: background-color 150ms ease-out;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.label {
   font-size: 16px;
-  line-height: 1.5;
-  padding: 5px;
-  margin-block: 12px;
-  margin-inline: 8px;
+  cursor: pointer;
+}
+
+/* The value, in a pill that pops while the slider is being adjusted */
+.value {
+  flex: none;
+  min-inline-size: 2.5em;
+  padding-block: 3px;
+  padding-inline: 10px;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  text-align: center;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    transform 200ms cubic-bezier(0.2, 0, 0, 1.4);
 }
 
 .input {
   appearance: none;
-  position: relative;
-  inset-block-start: 24px;
   display: block;
-  margin-block: 0 -36px;
-  margin-inline: 0;
   inline-size: 100%;
-  block-size: 36px;
+  block-size: 32px;
+  margin: 0;
   background-color: transparent;
   cursor: pointer;
 }
 
-/* Without Span */
-.input:last-child {
-  position: static;
-  margin: 0;
-}
-
-.label {
-  display: inline-block;
-  margin-block-end: 36px;
-}
 /* stylelint-disable-next-line a11y/no-outline-none */
 .input:focus {
   outline: none;
 }
 
-.input:disabled {
-  cursor: default;
-  opacity: 0.38;
-}
-
-.input:disabled + .label {
-  opacity: 0.38;
-}
-
 .input::-webkit-slider-runnable-track {
-  margin-block: 17px;
-  margin-inline: 0;
-  border-radius: 1px;
-  inline-size: 100%;
-  block-size: 2px;
-  background-color: var(--accent-color-opacity4);
+  block-size: var(--track-size);
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--fill-color) var(--fill), var(--rest-color) var(--fill));
+  transition: block-size 150ms ease-out;
+}
+
+.input:dir(rtl)::-webkit-slider-runnable-track {
+  background: linear-gradient(to left, var(--fill-color) var(--fill), var(--rest-color) var(--fill));
 }
 
 .input::-webkit-slider-thumb {
   appearance: none;
+  inline-size: var(--thumb-size);
+  block-size: var(--thumb-size);
+
+  /* Centered on the track */
+  margin-block-start: calc((var(--track-size) - var(--thumb-size)) / 2);
   border: 0;
-  border-radius: 50%;
-  block-size: 2px;
-  inline-size: 2px;
-  background-color: var(--accent-color);
-  transform: scale(6, 6);
-  transition: box-shadow 0.2s;
-}
-
-.input:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity2);
-}
-
-.input:active::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4) !important;
-}
-
-.input:disabled::-webkit-slider-thumb {
-  background-color: #000;
-  color: #fff; /* Safari */
-  box-shadow: 0 0 0 1px #fff !important;
-  transform: scale(4, 4);
-}
-
-.pure-material-slider:hover > .input::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-.pure-material-slider:hover > .input:focus::-webkit-slider-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-.input:disabled::-webkit-slider-runnable-track {
-  background-color: rgb(0 0 0 / 38%);
+  border-radius: var(--radius-round);
+  background-color: #fff;
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 40%),
+    0 0 0 0 color-mix(in srgb, var(--primary-text-color) 30%, transparent);
+  transition:
+    transform 200ms cubic-bezier(0.2, 0, 0, 1.4),
+    box-shadow 150ms ease-out;
 }
 
 .input::-moz-range-track {
-  margin-block: 0;
-  margin: 17px;
-  border-radius: 1px;
-  inline-size: 100%;
-  block-size: 2px;
-  background-color: var(--accent-color-opacity4);
-}
-
-.input::-moz-range-thumb {
-  appearance: none;
-  border: 0;
-  border-radius: 50%;
-  block-size: 2px;
-  inline-size: 2px;
-  background-color: var(--accent-color);
-  transform: scale(6, 6);
-  transition: box-shadow 0.2s;
+  block-size: var(--track-size);
+  border-radius: var(--radius-pill);
+  background-color: var(--rest-color);
 }
 
 .input::-moz-range-progress {
-  border-radius: 1px;
-  block-size: 2px;
-  background-color: var(--accent-color);
+  block-size: var(--track-size);
+  border-radius: var(--radius-pill);
+  background-color: var(--fill-color);
 }
 
-.input:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity2);
-}
-
-.input:active::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity4) !important;
-}
-
-.input:disabled::-moz-range-thumb {
-  background-color: #000;
-  box-shadow: 0 0 0 1px #fff !important;
-  transform: scale(4, 4);
-}
-
-.pure-material-slider:hover > .input:hover::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity1);
-}
-
-.pure-material-slider:hover > input:focus::-moz-range-thumb {
-  box-shadow: 0 0 0 2px var(--accent-color-opacity3);
-}
-
-.input:disabled::-moz-range-track {
-  background-color: rgb(0 0 0 / 38%);
-}
-
-.input:disabled::-moz-range-progress {
-  background-color: rgb(0 0 0 / 87%);
-}
-
-.input::-moz-focus-outer {
+.input::-moz-range-thumb {
+  inline-size: var(--thumb-size);
+  block-size: var(--thumb-size);
   border: 0;
+  border-radius: var(--radius-round);
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 40%);
+}
+
+.ftSlider:hover .input:enabled::-webkit-slider-thumb {
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 40%),
+    0 0 0 6px color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+}
+
+/* Remote focus: the whole row lights up and the thumb gets a halo. The
+   input itself stays clear, over the swapped colors of spatialNav.css. */
+.input[data-spatial-nav-focused] {
+  background-color: transparent !important;
+}
+
+.ftSlider:has(.input[data-spatial-nav-focused]) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+}
+
+.ftSlider .input[data-spatial-nav-focused]::-webkit-slider-thumb {
+  box-shadow:
+    0 1px 3px rgb(0 0 0 / 40%),
+    0 0 0 6px color-mix(in srgb, var(--primary-text-color) 30%, transparent);
+}
+
+/* Being adjusted (the input has the keyboard focus, or is dragged): a bigger
+   thumb on a thicker track, and the value pops in swapped colors */
+.ftSlider .input:enabled:focus::-webkit-slider-thumb,
+.ftSlider .input:enabled:active::-webkit-slider-thumb {
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 45%),
+    0 0 0 8px color-mix(in srgb, var(--primary-text-color) 30%, transparent);
+  transform: scale(1.2);
+}
+
+.ftSlider:has(.input:focus),
+.ftSlider:has(.input:active) {
+  --track-size: 10px;
+}
+
+.ftSlider:has(.input:focus) .value,
+.ftSlider:has(.input:active) .value {
+  background-color: var(--primary-text-color);
+  color: var(--bg-color);
+  transform: scale(1.12);
+}
+
+.disabled {
+  opacity: 0.4;
+}
+
+.disabled .label,
+.disabled .input {
+  cursor: not-allowed;
 }
 
 @media only screen and (width <= 680px) {
-  .pure-material-slider {
+  .ftSlider {
     inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .value,
+  .input::-webkit-slider-thumb,
+  .input::-webkit-slider-runnable-track {
+    transition-duration: 0ms;
   }
 }

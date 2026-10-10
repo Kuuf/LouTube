@@ -1,161 +1,235 @@
-/*
-    This file is part of FreeTube.
-
-    FreeTube is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    FreeTube is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with FreeTube.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/*
-* Credit goes to pavelvaravko for making this css.
-* https://codepen.io/pavelvaravko/pen/qjojOr
-*/
-
-/* select starting stylings ------------------------------ */
+/* A dropdown: its label, a button showing the chosen option, and the options
+   in a card under it while open (like the subscribe button's profile
+   dropdown, FtSubscribeButton.css) */
 .select {
   position: relative;
-  inline-size: 200px;
-  margin-block-start: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  inline-size: 220px;
+  text-align: start;
 }
 
-.select-text {
-  position: relative;
-  font-family: inherit;
-  background-color: var(--search-bar-color);
+/* Above the controls that follow it while open */
+.select.open {
+  z-index: 4;
+}
+
+.selectHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.selectLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: var(--primary-text-color);
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.selectIcon {
+  flex: none;
+  inline-size: 15px;
+  block-size: 15px;
+}
+
+.selectTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
   inline-size: 100%;
-  block-size: 45px;
-  padding-inline-start: 1rem;
-  font-size: 16px;
-  border-radius: var(--radius-sm);
+  min-block-size: 48px;
+  padding-block: 10px;
+  padding-inline: 16px;
   border: 0;
+  border-radius: var(--radius-lg);
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 16px;
+  text-align: start;
+  cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
 }
 
-.select option {
-  color: var(--secondary-text-color);
-  background-color: var(--card-bg-color);
-}
-
-/* stylelint-disable-next-line a11y/no-outline-none */
-.select-text:focus {
-  outline: none;
-}
-
-/* Use custom arrow */
-.select .select-text {
-  appearance: none;
-  text-overflow: ellipsis;
-  padding-inline-end: 1.5rem;
-}
-
-.iconSelect {
-  position: absolute;
-  inset-block-start: 10px;
-  inset-inline-end: 10px;
-
-  /* Styling the down arrow */
-  padding: 0;
-  content: '';
-  border-inline-start: 6px solid transparent;
-  border-inline-end: 6px solid transparent;
-  pointer-events: none;
-  color: var(--tertiary-text-color);
-}
-
-.disabled,
-.disabled + .iconSelect {
+.disabled .selectLabel,
+.selectTrigger:disabled {
   opacity: 0.4;
+}
+
+.selectTrigger:disabled {
   cursor: not-allowed;
 }
 
-.selectTooltip {
-  position: absolute;
-  inset-block-start: -22px;
-  inset-inline-end: 10px;
-  border-inline-end: 6px solid transparent;
+.selectTrigger:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
 }
 
+.selectValue {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
-/* LABEL ======================================= */
-.select-label {
-  font-size: 18px;
-  font-weight: normal;
+.selectChevron {
+  flex: none;
+  opacity: 0.7;
+  transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.open .selectChevron {
+  transform: rotate(180deg);
+}
+
+/* Popover card under the button */
+.selectDropdown {
   position: absolute;
+  inset-block-start: calc(100% + 6px);
+  inset-inline-start: 0;
+  z-index: 5;
   display: flex;
-  column-gap: 6px;
-  inset-inline-start: 0;
-  inset-block-start: 10px;
-  transition: 0.2s ease all;
-  color: var(--tertiary-text-color);
+  flex-direction: column;
+  gap: 2px;
+  box-sizing: border-box;
+  min-inline-size: 100%;
+  max-inline-size: min(420px, 90vw);
+  max-block-size: min(50vh, 420px);
+  margin: 0;
+  padding: 8px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  list-style: none;
+  border: 1px solid color-mix(in srgb, var(--primary-text-color) 10%, transparent);
+  border-radius: 16px;
+  background-color: var(--card-bg-color);
+  color: var(--primary-text-color);
+  box-shadow:
+    0 2px 6px rgb(0 0 0 / 20%),
+    0 16px 40px rgb(0 0 0 / 35%);
+  user-select: none;
+  transform-origin: top left;
+
+  /* Clear of the screen's edges when scrolled into view */
+  scroll-margin: 16px;
 }
 
-.select-icon {
-  inline-size: 14px;
-  block-size: 14px;
+.selectDropdown:dir(rtl) {
+  transform-origin: top right;
 }
 
-/* active state */
-.select-text:focus ~ .select-label,
-.select-text:valid ~ .select-label {
-  color: var(--accent-color);
-  inset-block-start: -20px;
-  transition: 0.2s ease all;
-  font-size: 14px;
+/* stylelint-disable-next-line a11y/no-outline-none */
+.selectDropdown:focus {
+  outline: none;
 }
 
-/* BOTTOM BARS ================================= */
-.select-bar {
-  position: relative;
-  display: block;
+/* Open: fades in, growing out of the button; close: the reverse, quicker */
+.selectDropdown-enter-active {
+  transition:
+    opacity 180ms ease-out,
+    transform 220ms cubic-bezier(0.2, 0, 0, 1.2);
 }
 
-.select-bar::before,
-.select-bar::after {
-  content: '';
-  block-size: 2px;
-  inline-size: 0;
-  inset-block-end: 1px;
-  position: absolute;
-  background: var(--accent-color);
-  transition: 0.2s ease all;
+.selectDropdown-leave-active {
+  transition:
+    opacity 120ms ease-in,
+    transform 120ms ease-in;
 }
 
-.select-bar::before {
-  inset-inline-start: 50%;
+.selectDropdown-enter-from,
+.selectDropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.94);
 }
 
-.select-bar::after {
-  inset-inline-end: 50%;
+.selectOption {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 12px;
+  padding-block: 10px;
+  padding-inline: 12px;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+  scroll-margin: 8px;
+  transition:
+    background-color 150ms ease-out,
+    transform 150ms ease-out;
 }
 
-/* active state */
-.select-text:focus ~ .select-bar::before,
-.select-text:focus ~ .select-bar::after {
-  inline-size: 50%;
+.selectOption:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
 }
 
-/* HIGHLIGHTER ================================== */
-.select-highlight {
-  position: absolute;
-  block-size: 60%;
-  inline-size: 100px;
-  inset-block-start: 25%;
-  inset-inline-start: 0;
-  pointer-events: none;
-  opacity: 0.5;
+.selectOption:active {
+  transform: scale(0.98);
+}
+
+/* Remote focus (spatial nav): a clear highlight, scaled up a little */
+.selectOption[data-spatial-nav-focused] {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  box-shadow: none;
+  border-radius: 10px;
+  transform: scale(1.02);
+}
+
+.optionName {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selected .optionName {
+  font-weight: 600;
+}
+
+/* Check circle: filled with a check on the chosen option */
+.checkIndicator {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: 22px;
+  block-size: 22px;
+  border-radius: var(--radius-round);
+  color: var(--bg-color);
+}
+
+.checkIcon {
+  font-size: 11px;
+  opacity: 0;
+}
+
+.selected .checkIndicator {
+  background-color: var(--primary-text-color);
+}
+
+.selected .checkIcon {
+  opacity: 1;
 }
 
 @media only screen and (width <= 800px) {
   .select {
     inline-size: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selectDropdown-enter-active,
+  .selectDropdown-leave-active,
+  .selectChevron,
+  .selectOption {
+    transition-duration: 0ms;
   }
 }

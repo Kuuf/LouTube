@@ -1,5 +1,9 @@
+// One setting per row, in half of a 12 column page (6 columns), everything
+// aligned to the start
 .settingsSection {
   margin-block: 0;
+  inline-size: min(100%, 600px);
+  text-align: start;
 
   @media only screen and (width <= 800px) {
     inline-size: 100%;
@@ -19,8 +23,7 @@
 
   > :deep(div) {
     box-sizing: border-box;
-    padding-block: 0;
-    padding-inline: 20px;
+    padding: 0;
     inline-size: 100%;
   }
 
@@ -38,20 +41,17 @@
 }
 
 :deep(.groupTitle) {
-  text-align: center;
-  margin-block: 0.5em;
+  text-align: start;
+  margin-block: 1.4em 0.6em;
+  font-size: 19px;
 }
 
 %switch-grid {
   align-items: start;
   display: grid;
-  gap: 16px 24px;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  grid-template-columns: minmax(0, 1fr);
   margin-block: 8px 16px;
-
-  @media only screen and (width <= 680px) {
-    grid-template-columns: auto;
-  }
 }
 
 :deep(.switchGrid) {
@@ -71,7 +71,44 @@
 }
 
 :deep(.center) {
-  text-align: center;
+  text-align: start;
+}
+
+// Rows of controls start from the left. Dropdowns, sliders and text fields
+// fill the section's width, so each sits on a row of its own; buttons stay
+// side by side.
+:deep(.ft-flex-box) {
+  justify-content: flex-start;
+  gap: 16px;
+  margin-block: 16px;
+}
+
+// With the section's class, to win over the components' own widths
+.settingsSection :deep(.select),
+.settingsSection :deep(.ftSlider),
+.settingsSection :deep(.ft-input-component) {
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: none;
+  margin-inline: 0;
+}
+
+// Tag lists (hidden channels, forbidden words, ...) too
+.settingsSection :deep(.ft-input-tags-component) {
+  inline-size: 100%;
+  margin: 0;
+  padding-block: 12px;
+  padding-inline: 0;
+}
+
+// Over rows that center their content themselves (e.g. DataSettings.css)
+.settingsSection :deep(.ft-flex-box) {
+  justify-content: flex-start;
+}
+
+// FtButton has a 5px margin of its own: lined up with the other controls
+:deep(.ft-flex-box > .btn) {
+  margin-inline: 0;
 }
 
 @media only screen and (width <= 460px) {
@@ -134,15 +171,15 @@ $knob-inset: 2px;
 :deep(.switchColumn),
 :deep(.switchGrid > .switch-ctn),
 :deep(.ft-flex-box > .switch-ctn) {
-  background-color: var(--bg-color);
+  // Faint, on the page's own background
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
   border-radius: $row-radius;
   overflow: hidden;
 }
 
-// Lone switches in a centered row of controls
+// Lone switches in a row of controls
 :deep(.ft-flex-box > .switch-ctn) {
-  min-inline-size: 320px;
-  margin: 8px;
+  inline-size: 100%;
 }
 
 .settingsSection :deep(.switch-ctn) {
