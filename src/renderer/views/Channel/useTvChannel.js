@@ -21,8 +21,8 @@ const CONTENT_CONTROLS = [
   '.getNextPage',
 ].join(', ')
 
-/** Space above the tab bar when it is scrolled to the top of the screen (px) */
-const TAB_BAR_TOP_PADDING = 24
+/** Space above the tabs when they are scrolled to the top of the screen (px) */
+const TAB_BAR_TOP_PADDING = 16
 
 /**
  * Remote control (spatial nav) for the channel page: the header (subscribe,
@@ -69,7 +69,8 @@ export function useTvChannel() {
     if (position == null) { return }
 
     const cell = contentGrid()[position.row]?.[position.col]
-    const tabBar = channelHeader.value?.$el.querySelector('.infoTabs')
+    // A tab rather than their row, which has padding of its own
+    const tabBar = channelHeader.value?.$el.querySelector('.tab')
     if (!(cell instanceof Element) || !tabBar) { return }
 
     const tabBarTop = tabBar.getBoundingClientRect().top - TAB_BAR_TOP_PADDING
