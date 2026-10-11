@@ -6,8 +6,10 @@
   gap: 48px;
   box-sizing: border-box;
 
-  /* Clear of the side nav's fading edge (SideNav.css) */
-  padding-block: 24px 60px;
+  /* Clear of the side nav's fading edge (SideNav.css). The room under the
+     page is the section's (.settingsContent): here it would push the stuck
+     nav up at the end of the page. */
+  padding-block: 24px 0;
   padding-inline: 48px 32px;
 
   /* The settings' hidden help texts (FtTooltip) reach past the section: on
@@ -16,8 +18,10 @@
 }
 
 .settingsNav {
+  /* Stays where it is while the section beside it scrolls: stuck at the
+     height it rests at (36px above the page, 24px of its own padding) */
   position: sticky;
-  inset-block-start: 24px;
+  inset-block-start: 60px;
   display: flex;
   flex: none;
   flex-direction: column;
@@ -25,7 +29,7 @@
   inline-size: 280px;
 
   /* More sections than fit on a small screen: the nav scrolls by itself */
-  max-block-size: calc(100vh - 48px);
+  max-block-size: calc(100vh - 96px);
   overflow-y: auto;
   scrollbar-width: none;
 }
@@ -90,6 +94,7 @@
   flex: 1;
   min-inline-size: 0;
   max-inline-size: 1100px;
+  padding-block-end: 60px;
 }
 
 /* The section fills the content column, without the card around it */

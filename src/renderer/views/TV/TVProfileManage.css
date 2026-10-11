@@ -12,8 +12,10 @@
 }
 
 .manageNav {
+  /* Stays where it is while the section beside it scrolls: stuck at the
+     height it rests at (36px above the page, 24px of its own padding) */
   position: sticky;
-  inset-block-start: 24px;
+  inset-block-start: 60px;
   display: flex;
   flex: none;
   flex-direction: column;
