@@ -114,6 +114,23 @@
         margin: 0;
       }
 
+      .returnHome {
+        position: absolute;
+        inset-block-end: 12%;
+        inset-inline: 0;
+        inline-size: fit-content;
+        margin-inline: auto;
+        padding-block: 14px;
+        padding-inline: 28px;
+        border: 0;
+        border-radius: 999px;
+        background-color: rgb(40 40 40 / 95%);
+        color: #fff;
+        font: inherit;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
       @media only screen and (width <= 680px) {
         .errorContainer {
           inset: 10px;

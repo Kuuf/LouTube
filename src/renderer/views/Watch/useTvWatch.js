@@ -62,6 +62,12 @@ export function useTvWatch() {
   let awaitingPlayer = true
 
   function playerGrid() {
+    // No player (the video can't be played, or hasn't started yet): the
+    // button that leaves the watch view
+    if (!player.value) {
+      return focusableGrid(watchRoot.value?.querySelector('.videoPlayer'))
+    }
+
     // Sliders (seeking is Left/Right while the controls are hidden) and the
     // time/ad labels aren't worth a stop. The big play button over the video
     // is the row above the control bar (Up from the bar). The settings menus
@@ -307,8 +313,16 @@ export function useTvWatch() {
   }
 
   const playerObserver = new MutationObserver(() => {
-    // (no player while the next video loads)
-    if (!player.value || !playerZone.isActive.value || document.querySelector('[data-spatial-nav-focused]')) { return }
+    if (!playerZone.isActive.value || document.querySelector('[data-spatial-nav-focused]')) { return }
+
+    // No player: while the next video loads there is nothing to focus, when
+    // it can't be played there is the button that leaves the watch view
+    if (!player.value) {
+      if (playerGrid().length > 0) {
+        playerZone.activate({ resetPosition: true })
+      }
+      return
+    }
 
     // Wait for FreeTube's layout, with both the big play button and the
     // control bar: shaka first builds its default one (bar only), and
@@ -352,5 +366,10 @@ export function useTvWatch() {
     }
   }
 
-  return { watchRoot, player, upNext, exitWatch, goToChannel }
+  /** Out of a video that can't be played, to the subscriptions (the home page) */
+  function returnHome() {
+    router.push('/subscriptions')
+  }
+
+  return { watchRoot, player, upNext, exitWatch, goToChannel, returnHome }
 }

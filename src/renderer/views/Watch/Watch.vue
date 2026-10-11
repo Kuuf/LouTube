@@ -122,6 +122,14 @@
               </p>
             </div>
           </div>
+          <!-- No player, so no exit button of its own: the way out of the watch view -->
+          <button
+            class="returnHome"
+            type="button"
+            @click="returnHome"
+          >
+            {{ $t('Video.Return to Home') }}
+          </button>
         </div>
       </div>
     </div>
