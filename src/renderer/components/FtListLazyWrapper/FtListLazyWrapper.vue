@@ -77,21 +77,32 @@
         ref="actionsRef"
         class="itemActions"
       >
+        <!-- In one of the user's playlists: taking the video out of it -->
         <button
-          v-if="videoRef?.showPlaylists"
+          v-if="isRemovable"
           class="itemAction"
           type="button"
-          @click="addToPlaylist"
+          @click="removeFromOpenPlaylist"
         >
-          {{ t('User Playlists.Add to Playlist') }}
+          {{ t('User Playlists.Remove from Playlist') }}
         </button>
-        <button
-          class="itemAction"
-          type="button"
-          @click="toggleWatchLater"
-        >
-          {{ videoRef?.isInWatchLater ? t('Video.Remove from Watch Later') : t('Video.Add to Watch Later') }}
-        </button>
+        <template v-else>
+          <button
+            v-if="videoRef?.showPlaylists"
+            class="itemAction"
+            type="button"
+            @click="addToPlaylist"
+          >
+            {{ t('User Playlists.Add to Playlist') }}
+          </button>
+          <button
+            class="itemAction"
+            type="button"
+            @click="toggleWatchLater"
+          >
+            {{ videoRef?.isInWatchLater ? t('Video.Remove from Watch Later') : t('Video.Add to Watch Later') }}
+          </button>
+        </template>
       </div>
     </template>
   </div>
@@ -416,9 +427,13 @@ function onDragVideo(event) {
 
 // A long press on a video (Enter held on the remote, see NavManager.js, or
 // the mouse button held): the item grows over its neighbours and shows its
-// actions under it, adding it to a playlist or to Watch Later. Like the
+// actions under it, adding it to a playlist or to Watch Later, or on the page
+// of one of the user's playlists, removing it from that playlist. Like the
 // channel cards of the channels list (SubscribedChannels.vue).
 const isVideo = computed(() => finalDataType.value === 'video' || finalDataType.value === 'shortVideo')
+
+/** On the page of one of the user's playlists, which the video can be taken out of */
+const isRemovable = computed(() => inUserPlaylist && props.canRemoveFromPlaylist)
 
 const videoRef = useTemplateRef('videoRef')
 const actionsRef = useTemplateRef('actionsRef')
@@ -426,7 +441,7 @@ const actionsRef = useTemplateRef('actionsRef')
 const actionsOpen = ref(false)
 
 /** How many actions are shown, for the room they take (FtListLazyWrapper.css) */
-const actionCount = computed(() => videoRef.value?.showPlaylists ? 2 : 1)
+const actionCount = computed(() => !isRemovable.value && videoRef.value?.showPlaylists ? 2 : 1)
 
 // Remote control (spatial nav): while open, the actions are a zone of their
 // own, one per row. Leaving them in any direction, Escape or the Back button
@@ -530,6 +545,11 @@ function addToPlaylist() {
   const video = videoRef.value
   closeActions()
   video?.togglePlaylistPrompt()
+}
+
+function removeFromOpenPlaylist() {
+  closeActions()
+  removeFromPlaylist(props.data.videoId, props.playlistItemId)
 }
 
 function toggleWatchLater() {

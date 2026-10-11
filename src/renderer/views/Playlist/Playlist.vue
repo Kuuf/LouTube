@@ -266,8 +266,6 @@ const { locale, t } = useI18n()
 const route = useRoute()
 const router = useRouter()
 
-useTvPlaylist()
-
 const isLoading = ref(true)
 const playlistTitle = ref('')
 const playlistDescription = ref('')
@@ -295,6 +293,8 @@ const userPlaylistVisibleLimit = ref(100)
 const continuationData = shallowRef(null)
 const isLoadingMore = ref(false)
 const playlistInEditMode = ref(false)
+
+useTvPlaylist(playlistInEditMode)
 const forceListView = ref(false)
 let alreadyShownNotice = false
 const videoSearchQuery = ref('')
