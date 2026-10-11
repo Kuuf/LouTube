@@ -74,63 +74,6 @@
         @click="handleExternalPlayer"
         @dragstart="onDragStart"
       />
-      <span
-        class="playlistIcons"
-        draggable="true"
-        @dragstart="onDragStart"
-      >
-        <FtIconButton
-          v-if="showPlaylists"
-          :title="t('User Playlists.Add to Playlist')"
-          :icon="['fas', 'plus']"
-          class="addToPlaylistIcon"
-          :class="alwaysShowAddToPlaylistButton ? 'alwaysVisible' : ''"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="togglePlaylistPrompt"
-        />
-        <FtIconButton
-          v-if="isQuickBookmarkEnabled && quickBookmarkButtonEnabled"
-          :title="quickBookmarkIconText"
-          :icon="isInQuickBookmarkPlaylist ? ['fas', 'check'] : ['fas', 'bookmark']"
-          class="quickBookmarkVideoIcon"
-          :class="{
-            bookmarked: isInQuickBookmarkPlaylist,
-            alwaysVisible: alwaysShowAddToPlaylistButton,
-          }"
-          :theme="quickBookmarkIconTheme"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="toggleQuickBookmarked"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoUp"
-          :title="t('User Playlists.Move Video Up')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-up'] : ['fas', 'arrow-left']"
-          class="upArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoUp"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canMoveVideoDown"
-          :title="t('User Playlists.Move Video Down')"
-          :icon="effectiveListTypeIsList ? ['fas', 'arrow-down'] : ['fas', 'arrow-right']"
-          class="downArrowIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="moveVideoDown"
-        />
-        <FtIconButton
-          v-if="inUserPlaylist && canRemoveFromPlaylist"
-          :title="t('User Playlists.Remove from Playlist')"
-          :icon="['fas', 'trash']"
-          class="trashIcon"
-          :padding="playlistIconPadding"
-          :size="playlistIconSize"
-          @click="removeFromPlaylist"
-        />
-      </span>
       <div
         v-if="addWatchedStyle"
         class="videoWatched"
@@ -397,12 +340,9 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'move-video-down',
-  'move-video-up',
   'move-video-to-the-top',
   'move-video-to-the-bottom',
   'pause-player',
-  'remove-from-playlist'
 ])
 
 const { locale, t } = useI18n()
@@ -832,43 +772,6 @@ const playlistIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistId
 const playlistTypeFinal = computed(() => playlistIdTypePairFinal.value?.playlistType)
 const playlistItemIdFinal = computed(() => playlistIdTypePairFinal.value?.playlistItemId)
 
-const quickBookmarkPlaylist = computed(() => store.getters.getQuickBookmarkPlaylist)
-
-const isQuickBookmarkEnabled = computed(() => quickBookmarkPlaylist.value != null)
-
-/** @type {import('vue').ComputedRef<boolean>} */
-const isInQuickBookmarkPlaylist = computed(() => {
-  if (!isQuickBookmarkEnabled.value) { return false }
-
-  // Accessing a ref has a negligible amount of overhead,
-  // however as we know that some users have playlists that have more than 10k items in them
-  // it adds up quickly, especially as there are usually lots of FtListVideo instances active at the same time.
-  // So create a temporary variable outside of the array, so we only have to do it once.
-  // Also the search is retriggered every time any playlist is modified.
-  const id_ = id.value
-
-  return quickBookmarkPlaylist.value.videos.some((video) => {
-    return video.videoId === id_
-  })
-})
-
-const quickBookmarkIconText = computed(() => {
-  if (!isQuickBookmarkEnabled.value) { return '' }
-
-  const translationProperties = {
-    playlistName: quickBookmarkPlaylist.value.playlistName,
-  }
-
-  return isInQuickBookmarkPlaylist.value
-    ? t('User Playlists.Remove from Favorites', translationProperties)
-    : t('User Playlists.Add to Favorites', translationProperties)
-})
-
-const quickBookmarkIconTheme = computed(() => isInQuickBookmarkPlaylist.value ? 'base favorite' : 'base')
-
-const playlistIconPadding = computed(() => props.appearance === 'watchPlaylistItem' ? 5 : 6)
-const playlistIconSize = computed(() => props.appearance === 'watchPlaylistItem' ? 14 : 18)
-
 const watchPageLinkQuery = computed(() => {
   const query = {}
 
@@ -1159,51 +1062,6 @@ function unhideChannel(channelName, channelId) {
   showToast(t('Channel Unhidden', { channel: channelName }))
 }
 
-function toggleQuickBookmarked() {
-  if (!isQuickBookmarkEnabled.value) {
-    // This should be prevented by UI
-    return
-  }
-
-  if (isInQuickBookmarkPlaylist.value) {
-    removeFromQuickBookmarkPlaylist()
-  } else {
-    addToQuickBookmarkPlaylist()
-  }
-}
-
-function addToQuickBookmarkPlaylist() {
-  const videoData = {
-    videoId: id.value,
-    title: title.value,
-    author: channelName.value,
-    authorId: channelId.value,
-    lengthSeconds: props.data.lengthSeconds,
-    published: published.value,
-    premiereDate: props.data.premiereDate,
-    premiereTimestamp: props.data.premiereTimestamp,
-  }
-
-  store.dispatch('addVideo', {
-    _id: quickBookmarkPlaylist.value._id,
-    videoData,
-  })
-
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been saved'))
-}
-
-function removeFromQuickBookmarkPlaylist() {
-  store.dispatch('removeVideo', {
-    _id: quickBookmarkPlaylist.value._id,
-    // Remove all playlist items with same videoId
-    videoId: id.value,
-  })
-
-  // TODO: Maybe show playlist name
-  showToast(t('Video.Video has been removed from your saved list'))
-}
-
 // The "Watch Later" playlist, for the long press actions of the list item
 // (FtListLazyWrapper.vue)
 const WATCH_LATER_PLAYLIST_ID = 'watchLater'
@@ -1248,18 +1106,6 @@ defineExpose({
   togglePlaylistPrompt,
   toggleWatchLater,
 })
-
-function moveVideoUp() {
-  emit('move-video-up', id.value, props.playlistItemId)
-}
-
-function moveVideoDown() {
-  emit('move-video-down', id.value, props.playlistItemId)
-}
-
-function removeFromPlaylist() {
-  emit('remove-from-playlist', id.value, props.playlistItemId)
-}
 
 /**
  * @param {DragEvent} event
