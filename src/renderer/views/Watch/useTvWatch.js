@@ -1,8 +1,8 @@
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { focusableGrid, gridFromElements, ITEM_ATTRIBUTE, navState } from '../../helpers/spatialNav/NavManager'
+import { focusableGrid, gridFromElements, ITEM_ATTRIBUTE, navState, scrollToViewTopAnimated } from '../../helpers/spatialNav/NavManager'
 
 const DIRECTION_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
 
@@ -12,6 +12,9 @@ const MUTE_BUTTON = '.shaka-mute-button'
 const VOLUME_OPEN_CLASS = 'tvVolumeOpen'
 const VOLUME_STEP = 0.05
 const BAR_PLAY_BUTTON = '.shaka-controls-button-panel .shaka-play-button'
+
+/** Space above the Up Next videos when they are scrolled to the top of the screen (px) */
+const UP_NEXT_TOP_PADDING = 16
 
 /** The settings (gear) menu and its submenus (quality, speed, captions, ...) */
 const SETTINGS_MENUS = '.shaka-overflow-menu, .shaka-settings-menu'
@@ -28,7 +31,8 @@ const SETTINGS_MENUS = '.shaka-overflow-menu, .shaka-settings-menu'
  * - Player controls shown: spatial nav between them. Focus starts on the big
  *   play/pause button over the video, where Left/Right seek too. Down goes
  *   to the control bar (Left/Right between its buttons), Down again scrolls
- *   to the Up Next videos, Up from their first row comes back.
+ *   the Up Next videos to the top of the screen, Up from their first row
+ *   comes back.
  * - Volume: Enter on the mute button opens the volume bar, Left/Right (or
  *   Up/Down) set the volume, Enter closes it again.
  * - Settings (gear) menu: its own zone while open, one list. Up/Down between
@@ -226,7 +230,7 @@ export function useTvWatch() {
     }
   }
 
-  useSpatialZone('watch-up-next', () => gridFromElements(upNext.value?.$el.querySelectorAll(`[${ITEM_ATTRIBUTE}]`) ?? []), {
+  const upNextZone = useSpatialZone('watch-up-next', () => gridFromElements(upNext.value?.$el.querySelectorAll(`[${ITEM_ATTRIBUTE}]`) ?? []), {
     edges: {
       up: 'watch-player',
     },
@@ -240,6 +244,15 @@ export function useTvWatch() {
         playerZone.activate({ resetPosition: true })
       }
     },
+  })
+
+  // On the first row of the Up Next videos (down from the player, or back up
+  // from the rows below), they scroll to the top of the screen, the video
+  // out of view
+  watch(upNextZone.focusedPosition, (position) => {
+    if (position?.row === 0 && upNext.value) {
+      scrollToViewTopAnimated(upNext.value.$el, UP_NEXT_TOP_PADDING)
+    }
   })
 
   /**
