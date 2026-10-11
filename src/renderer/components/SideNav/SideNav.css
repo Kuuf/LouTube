@@ -431,20 +431,32 @@
   }
 
   /* The entries are centered vertically on the screen: the panel (.inner)
-     is a column, with the free space split above the first entry and below the
-     last one (auto margins, so a list taller than the screen still scrolls
-     from its top). */
+     is a column, with the free space split by a spacer above the first entry
+     and one below the last. The upper one never gets smaller than the logo
+     it runs under, so on a screen too short for all the entries they start
+     below the logo and the panel scrolls (the lower spacer gives way first). */
   .inner > .navOption,
   .inner > hr {
     flex: none;
   }
 
-  .inner > .brand + .navOption {
-    margin-block-start: auto;
+  .inner::before,
+  .inner::after {
+    content: '';
   }
 
-  .inner > :last-child {
-    margin-block-end: auto;
+  .inner::before {
+    flex: 1 0 72px;
+  }
+
+  /* Scrolled back up to the first entry, the logo above it shows again */
+  .inner > .brand + .navOption {
+    scroll-margin-block-start: 80px;
+  }
+
+  .inner::after {
+    flex: 1 1 72px;
+    min-block-size: 8px;
   }
 
   /* Logo on top, always shown, the name beside it only in the open drawer.
