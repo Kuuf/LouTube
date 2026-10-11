@@ -739,7 +739,13 @@ function onKeyDown(event) {
   const direction = KEY_TO_DIRECTION[event.key]
   if (!direction) { return }
 
-  if (handleDirection(direction)) {
+  // At a dead end the key is left to the browser, which scrolls the page
+  // with it: the way to read on past the last control of a page. Not from
+  // persistent UI over the page (the side nav), where the page would move
+  // behind it.
+  const inChrome = navState.zones.get(navState.activeZoneId)?.isChrome
+
+  if (handleDirection(direction) || inChrome) {
     event.preventDefault()
   }
 }
