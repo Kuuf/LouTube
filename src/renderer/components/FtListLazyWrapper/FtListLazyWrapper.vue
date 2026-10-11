@@ -519,6 +519,8 @@ async function openActions() {
 function closeActions() {
   if (!actionsOpen.value) { return }
 
+  const item = actionsRef.value?.parentElement
+
   actionsOpen.value = false
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
 
@@ -533,12 +535,54 @@ function closeActions() {
 
   // Back to the item, when the focus was in its actions
   const hadFocus = navState.activeZoneId === ACTIONS_ZONE_ID
+  const zoneId = returnZoneId
   unregisterZone(ACTIONS_ZONE_ID)
-
-  if (hadFocus && returnZoneId !== null) {
-    activateZone(returnZoneId)
-  }
   returnZoneId = null
+
+  if (hadFocus && zoneId !== null) {
+    focusItemAgain(item, zoneId)
+  }
+}
+
+/** How long the item takes to shrink back (its transform's transition, FtListLazyWrapper.css) */
+const SHRINK_MS = 220
+
+/**
+ * Zones group their cells into rows by where they are on screen, and the
+ * grown item reaches into the row under it. So the focus only returns to the
+ * item once its actions are gone, and its place in the zone is looked up
+ * again when it is back to its size (unless the focus has moved on by then).
+ * @param {Element | null | undefined} item
+ * @param {string} zoneId
+ */
+async function focusItemAgain(item, zoneId) {
+  const place = () => {
+    const grid = navState.zones.get(zoneId)?.getGrid() ?? []
+    const row = grid.findIndex(cells => cells.includes(item))
+    if (row === -1) { return null }
+
+    const position = { row, col: grid[row].indexOf(item) }
+    navState.lastPosition.set(zoneId, position)
+    return position
+  }
+
+  await nextTick()
+
+  // Something else took the focus meanwhile (e.g. the playlist prompt)
+  if (navState.activeZoneId !== null) { return }
+
+  const placed = place()
+  activateZone(zoneId)
+
+  setTimeout(() => {
+    const current = navState.lastPosition.get(zoneId)
+    if (navState.activeZoneId !== zoneId || !placed || current?.row !== placed.row || current?.col !== placed.col) { return }
+
+    const settled = place()
+    if (settled && (settled.row !== placed.row || settled.col !== placed.col)) {
+      activateZone(zoneId)
+    }
+  }, SHRINK_MS + 40)
 }
 
 function addToPlaylist() {
