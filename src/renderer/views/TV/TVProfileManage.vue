@@ -91,7 +91,7 @@ import { calculateColorLuminance, profileColors } from '../../helpers/colors'
 import { getFirstCharacter } from '../../helpers/strings'
 import { MAIN_PROFILE_ID } from '../../../constants'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { focusableGrid, navState } from '../../helpers/spatialNav/NavManager'
+import { focusableGrid, navState, scrollPageToTopAnimated } from '../../helpers/spatialNav/NavManager'
 
 /**
  * @typedef {object} Profile
@@ -228,7 +228,7 @@ watch(navZone.focusedPosition, (position) => {
   }
 })
 
-useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
+const contentZone = useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
   edges: {
     // Back to the mini nav, on the section that is open
     left: () => {
@@ -236,6 +236,14 @@ useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
       return NAV_ZONE_ID
     },
   },
+})
+
+// On the first row of a section (e.g. the profile's name field), the page
+// returns to its top, the section's heading in view again
+watch(contentZone.focusedPosition, (position) => {
+  if (position?.row === 0) {
+    scrollPageToTopAnimated()
+  }
 })
 </script>
 
