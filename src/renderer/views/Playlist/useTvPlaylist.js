@@ -3,9 +3,10 @@ import { nextTick, onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { activateZone, focusableGrid, gridFromElements, ITEM_ATTRIBUTE, navState } from '../../helpers/spatialNav/NavManager'
 
-/** Items card controls: the unavailable videos alert, sort, videos, load more */
+/** Items card controls: the unavailable videos alert, search, sort, videos, load more */
 const ITEM_CONTROLS = [
   '.alertButton',
+  '.videoSearch input',
   '.sortSelect .selectTrigger',
   `[${ITEM_ATTRIBUTE}]`,
   'button.btn',

@@ -157,9 +157,32 @@
   inline-size: 140px;
 }
 
+/* The search takes the row, the sort order sits at its end */
+.itemsControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-block-end: 14px;
+}
+
+.videoSearch {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.videoSearch :deep(.ft-input) {
+  block-size: 48px;
+  margin-block-end: 0;
+}
+
+/* Only its button: the chosen order says what it is */
 .sortSelect {
-  /* Put it on the right and align with 'More Options' dropdown button */
-  margin-inline: auto 20px;
+  flex: none;
+  inline-size: 280px;
+}
+
+.sortSelect :deep(.selectHeader) {
+  display: none;
 }
 
 :deep(.videoThumbnail) {

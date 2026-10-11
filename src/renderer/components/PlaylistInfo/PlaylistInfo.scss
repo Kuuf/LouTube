@@ -192,10 +192,17 @@
     display: none;
   }
 
+  // Under the description, starting where it does
   .channelShareWrapper {
     grid-area: actions;
-    align-self: end;
+    align-self: start;
     align-items: center;
+    column-gap: 16px;
+    margin-block-start: 8px;
+  }
+
+  .playlistOptions {
+    justify-content: flex-start;
   }
 
   .channelName {

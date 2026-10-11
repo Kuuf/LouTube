@@ -69,14 +69,12 @@
           :is-duration-approximate="isDurationApproximate"
           :info-source="infoSource"
           :more-video-data-available="moreVideoDataAvailable"
-          :search-video-mode-allowed="isUserPlaylistRequested && shownVideoCount > 1"
           :search-query-text="searchQueryTextRequested"
           theme="base"
           class="playlistInfo"
           @dragstart.prevent
           @enter-edit-mode="playlistInEditMode = true"
           @exit-edit-mode="playlistInEditMode = false"
-          @search-video-query-change="handleVideoSearchQueryChange"
           @prompt-open="promptOpen = true"
           @prompt-close="promptOpen = false"
         />
@@ -104,11 +102,19 @@
             />
           </button>
         </FtFlexBox>
-        <template
-          v-if="shownPlaylistItems.length > 0"
+        <!-- The search through the playlist's videos, the sort order at its end -->
+        <div
+          v-if="isUserPlaylistRequested && (shownVideoCount > 1 || playlistInVideoSearchMode)"
+          class="itemsControls"
         >
+          <FtSearchInput
+            class="videoSearch"
+            :placeholder="t('User Playlists.SinglePlaylistView.Search for Videos')"
+            :value="videoSearchQuery"
+            @input="handleVideoSearchQueryChangeDebounced"
+            @clear="handleVideoSearchQueryChangeDebounced('')"
+          />
           <FtSelect
-            v-if="isUserPlaylistRequested && shownPlaylistItems.length > 1"
             class="sortSelect"
             :value="sortOrder"
             :select-names="sortBySelectNames"
@@ -117,6 +123,10 @@
             :icon="sortOrderIcon"
             @change="updateUserPlaylistSortOrder"
           />
+        </div>
+        <template
+          v-if="shownPlaylistItems.length > 0"
+        >
           <AutoScrollWrapper
             v-if="visiblePlaylistItems.length > 0"
             :hot-zone-enabled="isSortOrderCustom && isVideoDragging"
@@ -238,6 +248,7 @@ import FtFlexBox from '../../components/ft-flex-box/ft-flex-box.vue'
 import FtButton from '../../components/FtButton/FtButton.vue'
 import FtElementList from '../../components/FtElementList/FtElementList.vue'
 import FtSelect from '../../components/FtSelect/FtSelect.vue'
+import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import FtAutoLoadNextPageWrapper from '../../components/FtAutoLoadNextPageWrapper.vue'
 import AutoScrollWrapper from '../../components/AutoScrollWrapper/AutoScrollWrapper.vue'
 
@@ -1134,6 +1145,8 @@ function handleVideoSearchQueryChange(value) {
 
   saveStateInRouter(value)
 }
+
+const handleVideoSearchQueryChangeDebounced = debounce(handleVideoSearchQueryChange, 500)
 
 /**
  * @param {string} query
