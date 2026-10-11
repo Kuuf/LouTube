@@ -7,6 +7,7 @@
       @click.self="hide"
       @keydown.enter.self="hide"
       @keydown.left.right.capture="handleArrowKeys"
+      @keydown.up.down="handleVerticalKeys"
     >
       <FtCard
         ref="promptCard"
@@ -60,6 +61,7 @@ import { nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef, computed, 
 import android from 'android'
 
 import store from '../../store/index'
+import { focusableGrid } from '../../helpers/spatialNav/NavManager'
 
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
@@ -210,6 +212,42 @@ function handleEscape(event) {
 /**
  * @param {KeyboardEvent} event
  */
+/**
+ * Up/Down move the keyboard focus between the rows of what can be focused in
+ * the dialog (fields, list rows, buttons): the remote's spatial nav stays
+ * out of prompts (NavManager.js), so this is how a remote gets around them.
+ * A prompt handling these keys itself (`preventDefault`) is left alone.
+ * @param {KeyboardEvent} event
+ */
+function handleVerticalKeys(event) {
+  const active = /** @type {HTMLElement} */ (document.activeElement)
+
+  // Dropdowns and sliders use the keys themselves
+  if (event.defaultPrevented || active instanceof HTMLSelectElement || /** @type {HTMLInputElement} */ (active).type === 'range') {
+    return
+  }
+
+  const rows = focusableGrid(promptCard.value.$el, '.tooltip *, .ft-input-component button')
+  if (rows.length === 0) { return }
+
+  event.preventDefault()
+
+  const down = event.key === 'ArrowDown'
+  const row = rows.findIndex(cells => cells.some(cell => cell === active || cell.contains(active)))
+
+  // From outside the rows (nothing focused yet): the first or the last one
+  const targetRow = row === -1 ? rows.at(down ? 0 : -1) : rows[row + (down ? 1 : -1)]
+  if (!targetRow) { return }
+
+  const col = row === -1
+    ? 0
+    : rows[row].findIndex(cell => cell === active || cell.contains(active))
+
+  const target = /** @type {HTMLElement} */ (targetRow[Math.min(col, targetRow.length - 1)])
+  target.focus()
+  store.dispatch('showOutlines')
+}
+
 function handleArrowKeys(event) {
   const currentIndex = promptButtons.indexOf(event.target)
 

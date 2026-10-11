@@ -59,10 +59,12 @@
   display: none;
 }
 
-/* A row of its own under the search, no wider than it needs to be */
-.matchingVideosToggle {
+/* A row of its own under the search, no wider than it needs to be, with
+   room before the playlists (as specific as the pill switch rows' own
+   margin, which it replaces) */
+.ft-card.card .matchingVideosToggle {
   inline-size: min(100%, 440px);
-  margin-block-end: 20px;
+  margin-block-end: 40px;
   border-radius: pill-switch.$row-radius;
   background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
 }

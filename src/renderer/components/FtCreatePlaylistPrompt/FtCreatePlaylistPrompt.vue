@@ -1,5 +1,6 @@
 <template>
   <FtPrompt
+    theme="medium"
     :label="title"
     @click="hideCreatePlaylistPrompt"
   >
@@ -17,25 +18,27 @@
       />
     </FtFlexBox>
     <FtFlexBox v-if="playlistNameBlank">
-      <p>
+      <p class="message">
         {{ $t('User Playlists.SinglePlaylistView.Toast["Playlist name cannot be empty. Please input a name."]') }}
       </p>
     </FtFlexBox>
     <FtFlexBox v-if="playlistWithNameExists">
-      <p>
+      <p class="message">
         {{ $t('User Playlists.CreatePlaylistPrompt.Toast["There is already a playlist with this name. Please pick a different name."]') }}
       </p>
     </FtFlexBox>
-    <FtFlexBox>
+    <FtFlexBox class="actions">
       <FtButton
         :label="$t('User Playlists.CreatePlaylistPrompt.Create')"
         :disabled="playlistPersistenceDisabled"
+        :background-color="BUTTON_COLOR"
+        text-color="var(--primary-text-color)"
         @click="createNewPlaylist"
       />
       <FtButton
         :label="$t('User Playlists.Cancel')"
-        :text-color="null"
-        :background-color="null"
+        :background-color="BUTTON_COLOR"
+        text-color="var(--primary-text-color)"
         @click="hideCreatePlaylistPrompt"
       />
     </FtFlexBox>
@@ -56,6 +59,9 @@ import store from '../../store/index'
 import { showToast } from '../../helpers/utils'
 
 const { t } = useI18n()
+
+/** A mild gray: the swapped colors are the focused button (FtPrompt.css) */
+const BUTTON_COLOR = 'color-mix(in srgb, var(--primary-text-color) 12%, transparent)'
 
 const title = computed(() => t('User Playlists.CreatePlaylistPrompt.New Playlist Name'))
 

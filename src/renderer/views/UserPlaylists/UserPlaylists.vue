@@ -50,8 +50,9 @@
           @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
         />
       </template>
+      <!-- Loading, or a search waiting for the typing to pause -->
       <FtSkeletonList
-        v-if="!playlistsReady"
+        v-if="!playlistsReady || isFiltering"
         type="playlist"
       />
       <FtFlexBox
@@ -315,6 +316,7 @@ function handleQueryChange(query_, limit = undefined, doSearchPlaylistsWithMatch
   if (filterNow) {
     filterPlaylist()
   } else {
+    isFiltering.value = true
     filterPlaylistAsync()
   }
 }
@@ -330,7 +332,13 @@ function increaseLimit() {
   }
 }
 
+// From a change of the search text until the list is filtered for it (the
+// filtering waits for the typing to pause): the skeleton is shown
+const isFiltering = ref(false)
+
 function filterPlaylist() {
+  isFiltering.value = false
+
   const lowerCaseQuery_ = lowerCaseQuery.value
 
   if (lowerCaseQuery_ === '') {
