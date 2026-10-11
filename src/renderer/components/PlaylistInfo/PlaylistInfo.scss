@@ -165,6 +165,41 @@
       display: block;
       border-radius: var(--radius-md);
     }
+
+    a {
+      position: relative;
+      display: block;
+    }
+  }
+
+  // The thumbnail plays the playlist: with the focus (or the mouse) on it, it
+  // shows the player's big play button (shaka's `.shaka-big-buttons-container
+  // button`) in its middle
+  .playOverlay {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 16%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background-color: rgb(0 0 0 / 50%);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 35%);
+    color: #fff;
+    font-size: 24px;
+    opacity: 0;
+    transform: scale(0.9);
+    transition:
+      opacity 150ms ease-out,
+      transform 150ms ease-out;
+    pointer-events: none;
+  }
+
+  .playlistThumbnail a:is([data-spatial-nav-focused], :hover) .playOverlay {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .playlistStats {

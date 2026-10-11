@@ -23,6 +23,13 @@
           alt=""
           :class="{ blur: blurThumbnails }"
         >
+        <!-- Shown while focused: the thumbnail plays the playlist -->
+        <span
+          class="playOverlay"
+          aria-hidden="true"
+        >
+          <FontAwesomeIcon :icon="['fas', 'play']" />
+        </span>
       </router-link>
       <img
         v-else
