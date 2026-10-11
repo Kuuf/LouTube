@@ -22,7 +22,7 @@
   --glow-color: color-mix(in srgb, var(--primary-text-color) 3.5%, var(--side-nav-color));
 
   position: fixed;
-  inset-block-start: 50%;
+  inset-block-start: calc(50% + 32px);
   inset-inline-start: 50%;
   z-index: 0;
   inline-size: 120vmin;
@@ -44,7 +44,7 @@
    screen */
 .logo {
   position: fixed;
-  inset-block-start: 50%;
+  inset-block-start: calc(50% + 32px);
   inset-inline-start: 50%;
   z-index: 0;
   inline-size: 30vw;
