@@ -19,7 +19,7 @@
    nav's color, lifted towards the text color: on its own it is too close to
    the page's to show. */
 .logoGlow {
-  --glow-color: color-mix(in srgb, var(--primary-text-color) 7%, var(--side-nav-color));
+  --glow-color: color-mix(in srgb, var(--primary-text-color) 3.5%, var(--side-nav-color));
 
   position: fixed;
   inset-block-start: 50%;
