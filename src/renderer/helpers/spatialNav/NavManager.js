@@ -739,16 +739,26 @@ function onKeyDown(event) {
   const direction = KEY_TO_DIRECTION[event.key]
   if (!direction) { return }
 
-  // At a dead end the key is left to the browser, which scrolls the page
-  // with it: the way to read on past the last control of a page. Not from
-  // persistent UI over the page (the side nav), where the page would move
-  // behind it.
-  const inChrome = navState.zones.get(navState.activeZoneId)?.isChrome
+  // The arrow keys are spatial nav's alone: left to the browser, they scroll
+  // whichever scroller it picks (e.g. the side nav while the focus is in the
+  // page).
+  event.preventDefault()
 
-  if (handleDirection(direction) || inChrome) {
-    event.preventDefault()
+  if (handleDirection(direction)) { return }
+
+  // At a dead end, Up/Down scroll what the focused cell is in instead: the
+  // way to read on past the last control of a page. Not from persistent UI
+  // over the page (the side nav).
+  const delta = DEAD_END_SCROLL[direction]
+  const cell = document.querySelector(`[${FOCUSED_ATTRIBUTE}]`)
+
+  if (delta && cell && !navState.zones.get(navState.activeZoneId)?.isChrome) {
+    animateScrollBy(getScrollParent(cell), delta)
   }
 }
+
+/** How far Up/Down scroll at a dead end (px) */
+const DEAD_END_SCROLL = { up: -160, down: 160 }
 
 let listenerAttached = false
 
