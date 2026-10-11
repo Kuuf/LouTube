@@ -35,7 +35,7 @@ import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import SearchPage from '../SearchPage/SearchPage.vue'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { gridFromElements, ITEM_ATTRIBUTE } from '../../helpers/spatialNav/NavManager'
+import { gridFromElements, ITEM_ATTRIBUTE, scrollPageToTopAnimated } from '../../helpers/spatialNav/NavManager'
 
 const { t } = useI18n()
 const route = useRoute()
@@ -106,6 +106,18 @@ const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(r
     left: 'sidebar',
     up: 'tv-search-bar',
   },
+})
+
+// On the first row of results, the page returns to its top (the search bar
+// in view again), as long as the result still fits on screen there. Like the
+// other list pages (`topOnFirstRow` in useTvPage.js).
+watch(resultsZone.focusedPosition, (position) => {
+  if (position?.row !== 0) { return }
+
+  const cell = document.querySelector('[data-spatial-nav-focused]')
+  if (cell && cell.getBoundingClientRect().bottom + document.scrollingElement.scrollTop <= window.innerHeight) {
+    scrollPageToTopAnimated()
+  }
 })
 
 // Results render asynchronously inside SearchPage, so when the results zone
