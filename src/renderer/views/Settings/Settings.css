@@ -9,6 +9,10 @@
   /* Clear of the side nav's fading edge (SideNav.css) */
   padding-block: 24px 60px;
   padding-inline: 48px 32px;
+
+  /* The settings' hidden help texts (FtTooltip) reach past the section: on
+     a narrow screen they would let the page scroll sideways */
+  overflow-x: clip;
 }
 
 .settingsNav {
@@ -112,20 +116,14 @@
   color: var(--primary-text-color) !important;
 }
 
+/* Narrower screens keep the nav beside the section, only tighter */
 @media only screen and (width <= 1015px) {
   .settingsPage {
-    flex-direction: column;
     gap: 24px;
-    padding-inline: 16px;
+    padding-inline: 32px 16px;
   }
 
   .settingsNav {
-    position: static;
-    inline-size: 100%;
-    max-block-size: none;
-  }
-
-  .settingsContent {
-    inline-size: 100%;
+    inline-size: clamp(180px, 28%, 280px);
   }
 }

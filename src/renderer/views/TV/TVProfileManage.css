@@ -97,15 +97,14 @@
   max-inline-size: 1100px;
 }
 
+/* Narrower screens keep the nav beside the section, only tighter */
 @media only screen and (width <= 1015px) {
   .profileManage {
-    flex-direction: column;
     gap: 24px;
-    padding-inline: 16px;
+    padding-inline: 32px 16px;
   }
 
   .manageNav {
-    position: static;
-    inline-size: 100%;
+    inline-size: clamp(180px, 28%, 260px);
   }
 }
