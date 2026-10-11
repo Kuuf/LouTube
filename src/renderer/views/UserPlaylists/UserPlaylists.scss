@@ -30,18 +30,10 @@
   box-shadow: none;
 }
 
-/* The search takes the row, the sort order sits at its end */
-.controls {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  margin-block: 4px 12px;
-}
-
-/* (Not `.search`: that is FtInput's own class for another look) */
+/* The search across the page
+   (Not `.search`: that is FtInput's own class for another look) */
 .searchField {
-  flex: 1;
-  min-inline-size: 0;
+  margin-block: 4px 0;
 }
 
 .searchField :deep(.ft-input) {
@@ -49,7 +41,29 @@
   margin-block-end: 0;
 }
 
-/* Only its button, as tall as the search: the chosen order says what it is */
+.subheading {
+  margin-block: 28px 12px;
+  font-size: 19px;
+}
+
+/* The search's settings side by side: the matching videos switch and the
+   sort order */
+.searchSettings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+/* As specific as the pill switch rows' own rules, which it adds to */
+.ft-card.card .matchingVideosToggle {
+  flex: none;
+  inline-size: min(100%, 440px);
+  border-radius: pill-switch.$row-radius;
+  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+}
+
+/* Only its button, as tall as the switch row: the chosen order says what it is */
 .sortSelect {
   flex: none;
   inline-size: 280px;
@@ -59,14 +73,8 @@
   display: none;
 }
 
-/* A row of its own under the search, no wider than it needs to be, with
-   room before the playlists (as specific as the pill switch rows' own
-   margin, which it replaces) */
-.ft-card.card .matchingVideosToggle {
-  inline-size: min(100%, 440px);
-  margin-block-end: 40px;
-  border-radius: pill-switch.$row-radius;
-  background-color: color-mix(in srgb, var(--primary-text-color) 6%, transparent);
+.sortSelect :deep(.selectTrigger) {
+  min-block-size: 52px;
 }
 
 .message {
@@ -74,11 +82,6 @@
 }
 
 @media only screen and (width <= 800px) {
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .sortSelect {
     inline-size: 100%;
   }

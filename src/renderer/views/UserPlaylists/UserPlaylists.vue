@@ -22,15 +22,25 @@
         />
       </div>
       <template v-if="fullData.length > 1">
-        <!-- The search, with the sort order beside it -->
-        <div class="controls">
-          <FtSearchInput
-            ref="searchBar"
-            class="searchField"
-            :placeholder="$t('User Playlists.Search bar placeholder')"
-            :value="query"
-            @input="handleQueryChange"
-            @clear="() => handleQueryChange('')"
+        <!-- The search across the page, its settings in a row under it -->
+        <FtSearchInput
+          ref="searchBar"
+          class="searchField"
+          :placeholder="$t('User Playlists.Search bar placeholder')"
+          :value="query"
+          @input="handleQueryChange"
+          @clear="() => handleQueryChange('')"
+        />
+        <h3 class="subheading">
+          {{ $t('User Playlists.Search Settings') }}
+        </h3>
+        <div class="searchSettings">
+          <FtToggleSwitch
+            class="matchingVideosToggle"
+            :label="$t('User Playlists.Playlists with Matching Videos')"
+            :compact="true"
+            :default-value="doSearchPlaylistsWithMatchingVideos"
+            @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
           />
           <FtSelect
             class="sortSelect"
@@ -42,14 +52,13 @@
             @change="updateUserPlaylistsSortBy"
           />
         </div>
-        <FtToggleSwitch
-          class="matchingVideosToggle"
-          :label="$t('User Playlists.Playlists with Matching Videos')"
-          :compact="true"
-          :default-value="doSearchPlaylistsWithMatchingVideos"
-          @change="doSearchPlaylistsWithMatchingVideos = !doSearchPlaylistsWithMatchingVideos"
-        />
       </template>
+      <h3
+        v-if="fullData.length > 0"
+        class="subheading"
+      >
+        {{ $t('Playlists') }}
+      </h3>
       <!-- Loading, or a search waiting for the typing to pause -->
       <FtSkeletonList
         v-if="!playlistsReady || isFiltering"
