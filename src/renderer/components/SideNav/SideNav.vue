@@ -10,19 +10,21 @@
       class="drawerScrim"
       @click="closeDrawer"
     />
+    <!-- Over the panel, not in it: it stays put and whole while the entries
+         scroll and fade out under it -->
+    <div class="brand">
+      <img
+        class="brandLogo"
+        src="../../assets/img/loutube-logo.png"
+        alt=""
+      >
+      <span class="brandName">{{ APP_NAME }}</span>
+    </div>
     <div
       ref="inner"
       class="inner"
       :class="applyHiddenLabels"
     >
-      <div class="brand">
-        <img
-          class="brandLogo"
-          src="../../assets/img/loutube-logo.png"
-          alt=""
-        >
-        <span class="brandName">{{ APP_NAME }}</span>
-      </div>
       <router-link
         class="navOption topNavOption mobileShow"
         role="button"

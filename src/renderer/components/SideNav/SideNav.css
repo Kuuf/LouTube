@@ -385,6 +385,18 @@
     flex-direction: column;
     inline-size: 80px;
     overflow: hidden auto;
+
+    /* On a short screen the entries scroll, and fade out towards the top
+       and bottom edges of the panel: under the logo, which stays whole
+       above them (.brand), and at the foot of the screen */
+    mask-image:
+      linear-gradient(
+        to bottom,
+        transparent 60px,
+        #000 128px,
+        #000 calc(100% - 96px),
+        transparent
+      );
     transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
   }
 
@@ -433,8 +445,9 @@
   /* The entries are centered vertically on the screen: the panel (.inner)
      is a column, with the free space split by a spacer above the first entry
      and one below the last. The upper one never gets smaller than the logo
-     it runs under, so on a screen too short for all the entries they start
-     below the logo and the panel scrolls (the lower spacer gives way first). */
+     and the fade under it, so on a screen too short for all the entries they
+     start below those and the panel scrolls (the lower spacer gives way
+     first, down to the fade at the foot of the panel). */
   .inner > .navOption,
   .inner > hr {
     flex: none;
@@ -446,17 +459,17 @@
   }
 
   .inner::before {
-    flex: 1 0 72px;
+    flex: 1 0 128px;
   }
 
-  /* Scrolled back up to the first entry, the logo above it shows again */
-  .inner > .brand + .navOption {
-    scroll-margin-block-start: 80px;
+  /* A focused entry stops clear of the logo and of the fades */
+  .inner > .navOption {
+    scroll-margin-block: 132px 100px;
   }
 
   .inner::after {
-    flex: 1 1 72px;
-    min-block-size: 8px;
+    flex: 1 1 128px;
+    min-block-size: 100px;
   }
 
   /* Logo on top, always shown, the name beside it only in the open drawer.
@@ -466,10 +479,46 @@
 
     position: absolute;
     inset-block-start: 0;
-    inset-inline: 0;
+    inset-inline-start: 0;
+    z-index: 2;
     display: flex;
     align-items: center;
+    inline-size: 80px;
     min-block-size: 72px;
+
+    /* Cut to its width (the name shows with the open drawer), with room
+       under it for its background's fade */
+    clip-path: inset(0 0 -48px 0);
+    pointer-events: none;
+    transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
+  }
+
+  /* Its own background: the side nav's color, blurring what is behind it,
+     fading out downwards and towards the page. Entries scrolling up never
+     show through the logo and name. */
+  .brand::before {
+    content: '';
+    position: absolute;
+    inset-block: 0 -48px;
+    inset-inline: 0;
+    z-index: -1;
+    background-color: var(--side-nav-color);
+    backdrop-filter: blur(12px);
+    mask-image:
+      linear-gradient(to bottom, #000 55%, transparent),
+      linear-gradient(to right, #000 60%, transparent);
+    mask-composite: intersect;
+  }
+
+  :global(body[dir='rtl']) .brand::before {
+    mask-image:
+      linear-gradient(to bottom, #000 55%, transparent),
+      linear-gradient(to left, #000 60%, transparent);
+  }
+
+  .drawerOpen .brand {
+    inline-size: 260px;
+    transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
   }
 
   .brandLogo {
@@ -526,6 +575,7 @@
 @media (prefers-reduced-motion: reduce) {
   .sideNav::after,
   .sideNav .inner,
+  .sideNav .brand,
   .sideNav .drawerScrim,
   .sideNav .navOption .navLabel,
   .sideNav .navChannel .navLabel,
