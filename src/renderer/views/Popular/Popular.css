@@ -1,15 +1,16 @@
-.card {
-  inline-size: 85%;
+/* Always on the page background, edge to edge like the video lists
+   (videoLists.css), also when there is nothing to list (as .ft-card to win
+   over FtCard's own background) */
+.ft-card.card {
+  inline-size: auto;
   margin-block: 0 60px;
-  margin-inline: auto;
+  margin-inline: 0;
+  padding-inline: 32px;
+  box-sizing: border-box;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .headingIcon {
   color: var(--primary-color);
-}
-
-@media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
-  }
 }

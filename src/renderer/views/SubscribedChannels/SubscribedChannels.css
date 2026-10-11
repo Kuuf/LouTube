@@ -10,8 +10,12 @@
   box-shadow: none;
 }
 
+/* Nothing to list: said in the middle of the page */
 .message {
+  margin-block: 48px;
   color: var(--tertiary-text-color);
+  font-size: 1.3rem;
+  text-align: center;
 }
 
 .noResults {

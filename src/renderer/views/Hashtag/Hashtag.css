@@ -14,18 +14,27 @@
   color: var(--side-nav-hover-text-color);
 }
 
-.card {
+/* Always on the page background, edge to edge like the video lists
+   (videoLists.css), also when there is nothing to list (as .ft-card to win
+   over FtCard's own background) */
+.ft-card.card {
+  inline-size: auto;
   margin-block: 0 20px;
-  margin-inline: auto;
-  inline-size: 85%;
+  margin-inline: 0;
+  padding-inline: 32px;
+  box-sizing: border-box;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* Nothing to list: said in the middle of the page */
+.message {
+  margin-block: 48px;
+  color: var(--tertiary-text-color);
+  font-size: 1.3rem;
+  text-align: center;
 }
 
 .headingIcon {
   color: var(--primary-color);
-}
-
-@media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
-  }
 }

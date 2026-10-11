@@ -1,15 +1,7 @@
-.card {
-  inline-size: 85%;
-  margin-block: 0 60px;
-  margin-inline: auto;
-}
-
+/* Nothing to list: said in the middle of the page */
 .message {
+  margin-block: 48px;
   color: var(--tertiary-text-color);
-}
-
-@media only screen and (width <= 680px) {
-  .card {
-    inline-size: 90%;
-  }
+  font-size: 1.3rem;
+  text-align: center;
 }
