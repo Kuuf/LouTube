@@ -15,6 +15,31 @@
   margin-block-end: 0;
 }
 
+/* Behind the logo: a round glow fading out from the logo's center. The side
+   nav's color, lifted towards the text color: on its own it is too close to
+   the page's to show. */
+.logoGlow {
+  --glow-color: color-mix(in srgb, var(--primary-text-color) 7%, var(--side-nav-color));
+
+  position: fixed;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  z-index: 0;
+  inline-size: 120vmin;
+  aspect-ratio: 1;
+  background:
+    radial-gradient(
+      circle closest-side,
+      var(--glow-color),
+      color-mix(in srgb, var(--glow-color) 72%, transparent) 30%,
+      color-mix(in srgb, var(--glow-color) 30%, transparent) 62%,
+      color-mix(in srgb, var(--glow-color) 8%, transparent) 85%,
+      transparent
+    );
+  pointer-events: none;
+  translate: -50% -50%;
+}
+
 /* Shown until something is searched: the app's logo in the middle of the
    screen */
 .logo {

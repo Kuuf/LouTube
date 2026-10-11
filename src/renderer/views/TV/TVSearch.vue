@@ -12,8 +12,11 @@
     <div ref="results">
       <SearchPage v-if="query !== ''" />
     </div>
-    <!-- Nothing searched yet: the app's flair fills the screen behind the bar -->
-    <!-- Nothing searched yet: the app's logo in the middle of the screen -->
+    <!-- Nothing searched yet: the app's logo in the middle of the screen, on a soft glow -->
+    <div
+      v-if="query === ''"
+      class="logoGlow"
+    />
     <img
       v-if="query === ''"
       class="logo"
