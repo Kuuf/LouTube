@@ -30,6 +30,9 @@
         </Transition>
       </RouterView>
     </FtFlexBox>
+    <TvItemActionsPanel
+      :inert="isAnyPromptOpen"
+    />
     <FtPrompt
       v-if="showReleaseNotes"
       theme="readable-width"
@@ -100,6 +103,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import SideNav from './components/SideNav/SideNav.vue'
+import TvItemActionsPanel from './components/TvItemActionsPanel/TvItemActionsPanel.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'
 import FtToast from './components/FtToast/FtToast.vue'

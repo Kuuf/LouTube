@@ -1101,6 +1101,10 @@ function toggleWatchLater() {
 }
 
 defineExpose({
+  thumbnail,
+  blurThumbnails,
+  displayTitle,
+  channelId,
   showPlaylists,
   isInWatchLater,
   togglePlaylistPrompt,

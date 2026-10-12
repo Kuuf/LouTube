@@ -1,0 +1,169 @@
+/*
+  The actions of a list item (a long press on a video), in a panel that opens
+  on the right of the screen, over the page: the item's thumbnail and title,
+  its actions under them. The twin of the side nav's drawer (SideNav.css),
+  with its background and its timings: opening on a decelerating curve,
+  closing quicker on an accelerating one.
+*/
+.itemActionsPanel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  background-color: rgb(0 0 0 / 35%);
+  opacity: 0;
+  transition: opacity 200ms ease-in;
+}
+
+.open .scrim {
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 300ms ease-out;
+}
+
+/* The side nav's color, with no hard edge: solid under the panel, then
+   fading out over the page next to it. It grows out of the edge of the
+   screen. */
+.background {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 0;
+
+  /* Eased stops, so the fade has no visible start */
+  background:
+    linear-gradient(
+      to left,
+      var(--side-nav-color) 45%,
+      color-mix(in srgb, var(--side-nav-color) 92%, transparent) 54%,
+      color-mix(in srgb, var(--side-nav-color) 60%, transparent) 70%,
+      color-mix(in srgb, var(--side-nav-color) 22%, transparent) 86%,
+      transparent
+    );
+  transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+.open .background {
+  inline-size: 860px;
+  transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+:global(body[dir='rtl']) .background {
+  background:
+    linear-gradient(
+      to right,
+      var(--side-nav-color) 45%,
+      color-mix(in srgb, var(--side-nav-color) 92%, transparent) 54%,
+      color-mix(in srgb, var(--side-nav-color) 60%, transparent) 70%,
+      color-mix(in srgb, var(--side-nav-color) 22%, transparent) 86%,
+      transparent
+    );
+}
+
+/* Its content comes in from the edge a moment after the background, like
+   the labels of the side nav */
+.panel {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  inline-size: 360px;
+  max-inline-size: 100%;
+  padding: 24px;
+  color: var(--primary-text-color);
+  opacity: 0;
+  translate: var(--panel-shift, 12px);
+  transition:
+    opacity 100ms ease-in,
+    translate 100ms ease-in;
+}
+
+.open .panel {
+  opacity: 1;
+  translate: 0;
+  pointer-events: auto;
+  transition:
+    opacity 200ms ease-out 80ms,
+    translate 300ms cubic-bezier(0.05, 0.7, 0.1, 1) 80ms;
+}
+
+:global(body[dir='rtl']) .panel {
+  --panel-shift: -12px;
+}
+
+.thumbnail {
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.thumbnailImage {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.thumbnailImage.blur {
+  filter: blur(20px);
+}
+
+.title {
+  display: -webkit-box;
+  margin-block: 14px 20px;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.3;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.actions,
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.actions {
+  flex-direction: column;
+}
+
+/* Side by side, sharing the row. A long label takes a second line. */
+.action {
+  flex: 1 1 0;
+  box-sizing: border-box;
+  min-block-size: 44px;
+  padding-block: 6px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--primary-text-color) 14%, transparent);
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.15;
+  text-wrap: balance;
+  cursor: pointer;
+}
+
+.action:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrim,
+  .background,
+  .panel {
+    transition: none;
+  }
+}

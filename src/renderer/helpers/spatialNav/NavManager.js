@@ -312,14 +312,10 @@ export function centeredScrollTop(scroller, element) {
  * to the middle instead: the focus stays where it is and the content moves
  * under it, until the scroller reaches its start or end.
  *
- * Also for something that opens around the focused cell and has to be seen
- * whole; call it after the focus has moved, as it replaces the running focus
- * scroll.
- *
  * @param {Element} element
  * @param {boolean} [isFollowUp] - see the end of the animation
  */
-export function scrollIntoViewAnimated(element, isFollowUp = false) {
+function scrollIntoViewAnimated(element, isFollowUp = false) {
   const scroller = getScrollParent(element)
   const isDocument = scroller === document.scrollingElement
 
