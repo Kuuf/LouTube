@@ -40,15 +40,12 @@
 }
 
 /* List item cards (videos, shorts, playlists, channels, Up Next): on the
-   lighter focus background, with a white border, lifted above their
-   neighbours by a drop shadow */
+   lighter focus background, lifted above their neighbours by a drop shadow */
 [data-spatial-nav-focused][data-spatial-nav-item] {
   position: relative;
   border-radius: var(--radius-card);
   z-index: 1;
-  box-shadow:
-    0 0 0 3px #fff,
-    0 12px 32px rgb(0 0 0 / 50%);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 50%);
 }
 
 /* List items that scroll with the page leave their focus look to the focus

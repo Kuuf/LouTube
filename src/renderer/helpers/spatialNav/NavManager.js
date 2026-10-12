@@ -179,6 +179,19 @@ function syncFrame() {
 }
 
 /**
+ * The framed item changed size. Also called when it starts being observed,
+ * with the size the frame is already going to: nothing to do then, and
+ * putting the frame there at once would cut its move short.
+ */
+function syncFrameSize() {
+  const rect = focusedElement?.getBoundingClientRect()
+
+  if (rect && (Math.abs(rect.width - focusFrame.width) >= 1 || Math.abs(rect.height - focusFrame.height) >= 1)) {
+    syncFrame()
+  }
+}
+
+/**
  * @param {Element} cell - takes the focus frame, and goes to the middle of the screen
  * @param {boolean} [isFollowUp] - see `scrollIntoViewAnimated`
  */
@@ -188,7 +201,7 @@ function frameAndCenter(cell, isFollowUp = false) {
   if (!isFollowUp) {
     cell.setAttribute(FRAMED_ATTRIBUTE, '')
 
-    frameResizeObserver ??= new ResizeObserver(syncFrame)
+    frameResizeObserver ??= new ResizeObserver(syncFrameSize)
     frameResizeObserver.observe(cell)
 
     // Where it is now: all there is to it when the page has nowhere to scroll
@@ -529,12 +542,7 @@ function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
   // Longer when it goes further than one screen (e.g. back to the top of a
   // page), which otherwise passes too fast to be seen as movement
   const extraDistance = Math.max(Math.abs(target - start) - window.innerHeight, 0)
-  let duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS) * durationFactor
-
-  // Back to the very top of the page: twice as long, a calmer return
-  if (target === 0 && scroller === document.scrollingElement) {
-    duration *= 2
-  }
+  const duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS) * durationFactor
 
   // The focus frame goes where its item will be, in step with the scroll
   if (scroller === document.scrollingElement && focusedElement?.hasAttribute(FRAMED_ATTRIBUTE)) {

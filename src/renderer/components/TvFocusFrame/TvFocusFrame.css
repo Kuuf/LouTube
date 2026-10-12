@@ -20,9 +20,7 @@
   z-index: -1;
   border-radius: var(--radius-card);
   background-color: var(--focus-background);
-  box-shadow:
-    0 0 0 3px #fff,
-    0 12px 32px rgb(0 0 0 / 50%);
+  box-shadow: 0 12px 32px rgb(0 0 0 / 50%);
   opacity: 0;
   pointer-events: none;
   transition: opacity 150ms ease-out;
