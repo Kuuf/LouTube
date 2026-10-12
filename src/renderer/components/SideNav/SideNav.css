@@ -509,8 +509,8 @@
   /* From one entry to the next */
   .focusHighlight.sliding {
     transition:
-      translate 180ms cubic-bezier(0.215, 0.61, 0.355, 1),
-      block-size 180ms cubic-bezier(0.215, 0.61, 0.355, 1),
+      translate 320ms cubic-bezier(0.215, 0.61, 0.355, 1),
+      block-size 320ms cubic-bezier(0.215, 0.61, 0.355, 1),
       opacity 150ms ease-out,
       background-color 150ms ease-out,
       inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);

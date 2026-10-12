@@ -368,7 +368,7 @@ function findNext(grid, pos, direction) {
   return candidate
 }
 
-const SCROLL_DURATION_MS = 180
+const SCROLL_DURATION_MS = 320
 const SCROLL_MAX_DURATION_MS = 650
 
 /** On a scroller: keep the focused cell in its middle instead of just in view */
