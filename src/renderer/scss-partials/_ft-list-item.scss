@@ -57,7 +57,7 @@ $watched-transition-duration: 0.5s;
 
   &.watched {
     background-color: var(--bg-color);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
 
     @include low-contrast-when-watched(var(--primary-text-color));
 
@@ -78,7 +78,7 @@ $watched-transition-duration: 0.5s;
     display: grid;
 
     /* Rounded, clipping the image and the overlays at its edges */
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-card);
     overflow: hidden;
 
     .thumbnailLink,
@@ -378,7 +378,7 @@ $watched-transition-duration: 0.5s;
       // image's bottom edge instead of below the padding
       &.videoThumbnail {
         border-radius: 0;
-        clip-path: inset(0 0 12px round var(--radius-md));
+        clip-path: inset(0 0 12px round var(--radius-card));
       }
 
       .thumbnailImage {

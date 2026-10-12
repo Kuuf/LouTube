@@ -25,6 +25,7 @@
 .thumbnail {
   aspect-ratio: 16 / 9;
   inline-size: 100%;
+  border-radius: var(--radius-card);
 }
 
 .grid .thumbnail {

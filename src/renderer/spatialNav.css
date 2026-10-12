@@ -20,7 +20,7 @@
 
 /* List item cards are always rounded, so the focus background fits them */
 [data-spatial-nav-item] {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-card);
   transition:
     background-color 150ms ease-out,
     box-shadow 150ms ease-out,
@@ -44,6 +44,7 @@
    neighbours by a drop shadow */
 [data-spatial-nav-focused][data-spatial-nav-item] {
   position: relative;
+  border-radius: var(--radius-card);
   z-index: 1;
   box-shadow:
     0 0 0 3px #fff,
