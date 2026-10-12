@@ -427,13 +427,15 @@ export function scrollPageToTopAnimated() {
  * @param {number} [durationFactor] - multiplies the animation's duration
  */
 function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
-  if (Math.abs(delta) < 1) { return }
-
   const start = scroller.scrollTop
   const target = Math.min(Math.max(start + delta, 0), scroller.scrollHeight - scroller.clientHeight)
-  if (Math.abs(target - start) < 1) { return }
 
+  // Replaces the running scroll, also when there is nowhere to go: the
+  // scroller is where this call wants it, and stays there
   cancelAnimationFrame(scrollAnimations.get(scroller))
+  scrollAnimations.delete(scroller)
+
+  if (Math.abs(target - start) < 1) { return }
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     scroller.scrollTop = target
