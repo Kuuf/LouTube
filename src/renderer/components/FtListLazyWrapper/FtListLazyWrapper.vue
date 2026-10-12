@@ -122,7 +122,7 @@ import FtListHashtag from '../FtListHashtag/FtListHashtag.vue'
 
 import store from '../../store/index'
 
-import { activateZone, LONG_PRESS_MS, navState, registerZone, unregisterZone } from '../../helpers/spatialNav/NavManager'
+import { activateZone, LONG_PRESS_MS, navState, registerZone, scrollIntoViewAnimated, unregisterZone } from '../../helpers/spatialNav/NavManager'
 
 import { openItemActions } from './openItemActions'
 
@@ -503,16 +503,23 @@ async function openActions() {
     window.addEventListener('exit-prompt', closeActions)
   }
 
-  // Only when the remote is in use (some zone has the focus)
+  // The remote is in use when some zone has the focus
   const activeZoneId = navState.activeZoneId
-  if (activeZoneId === null) { return }
-
   returnZoneId = activeZoneId
   await nextTick()
 
-  if (actionsOpen.value) {
+  if (!actionsOpen.value) { return }
+
+  if (activeZoneId !== null) {
     navState.lastPosition.set(ACTIONS_ZONE_ID, { row: 0, col: 0 })
     activateZone(ACTIONS_ZONE_ID)
+  }
+
+  // The whole item with all its actions, not just the focused one: at the
+  // foot of the screen the last ones would stay out of view
+  const item = actionsRef.value?.parentElement
+  if (item) {
+    scrollIntoViewAnimated(item)
   }
 }
 

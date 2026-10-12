@@ -38,6 +38,21 @@
     0 0 0 3px var(--primary-text-color),
     0 20px 48px rgb(0 0 0 / 60%);
   transform: scale(1.05);
+
+  /* Scrolled into view with room for what the scale and the border add */
+  scroll-margin-block: 28px;
+}
+
+/* The same room under the last item of a page, which otherwise ends at the
+   item: nothing to see, it only makes the page that much longer */
+.actionsOpen::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  inline-size: 1px;
+  block-size: 28px;
+  pointer-events: none;
 }
 
 /* The video keeps its own height instead of filling the item, so the
