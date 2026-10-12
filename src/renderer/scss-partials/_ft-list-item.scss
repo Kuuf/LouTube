@@ -111,12 +111,16 @@ $watched-transition-duration: 0.5s;
       }
     }
 
+    // A pill, clear of the thumbnail's rounded corner
     .videoWatched {
       place-self: flex-start start;
       background-color: var(--bg-color);
+      border-radius: var(--radius-pill);
       color: var(--primary-text-color);
+      margin: 8px;
       opacity: $thumbnail-overlay-opacity;
-      padding: 2px;
+      padding-block: 2px;
+      padding-inline: 10px;
       pointer-events: none;
     }
 
