@@ -20,10 +20,18 @@
       >
       <span class="brandName">{{ APP_NAME }}</span>
     </div>
+    <!-- The focus highlight, under the entries and not in the panel: it
+         holds still while they scroll under it -->
+    <div
+      class="focusHighlight"
+      :class="{ shown: highlight.shown, sliding: highlight.sliding, visual: highlight.visual }"
+      :style="{ translate: `0 ${highlight.top}px`, blockSize: `${highlight.height}px` }"
+    />
     <div
       ref="inner"
       class="inner"
       :class="applyHiddenLabels"
+      data-spatial-nav-scroll="center"
     >
       <router-link
         class="navOption topNavOption mobileShow"
@@ -277,7 +285,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 
@@ -290,7 +298,7 @@ import { localizeAndAddKeyboardShortcutToActionTitle } from '../../helpers/utils
 import { KeyboardShortcuts, MAIN_PROFILE_ID } from '../../../constants'
 import { getFirstCharacter } from '../../helpers/strings'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { activateZone, gridFromElements, navState } from '../../helpers/spatialNav/NavManager'
+import { activateZone, centeredScrollTop, gridFromElements, navState, scrollToCenterAnimated } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
 const route = useRoute()
@@ -455,6 +463,50 @@ watch(() => focusedPosition.value?.row, () => {
   }
 })
 
+// The focus highlight is an element of its own, placed where the focused
+// entry comes to rest once the panel has scrolled it to the middle. From
+// one entry to the next that place stays the same, so the highlight holds
+// still while the entries scroll under it. It only moves where the panel
+// has no further to scroll, towards the first and last entries. It slides
+// there from one entry to the next only: when the focus comes back to the
+// side nav, it shows up on its entry, not on its way from the last one.
+const highlight = reactive({ shown: false, sliding: false, visual: false, top: 0, height: 0 })
+
+function updateHighlight() {
+  const position = focusedPosition.value
+  const entry = position ? sidebarGrid()[position.row]?.[position.col] : null
+
+  highlight.sliding = highlight.shown && entry != null
+  highlight.shown = entry != null
+  if (entry == null) { return }
+
+  highlight.visual = entry.hasAttribute('data-spatial-nav-visual')
+  highlight.top = entry.offsetTop - centeredScrollTop(inner.value, entry)
+  highlight.height = entry.offsetHeight
+}
+
+watch(focusedPosition, updateHighlight, { flush: 'post' })
+
+// A resize moves the middle: the panel follows at once, with the highlight
+function onResize() {
+  const position = focusedPosition.value
+  const entry = position ? sidebarGrid()[position.row]?.[position.col] : null
+
+  if (entry != null) {
+    inner.value.scrollTop = centeredScrollTop(inner.value, entry)
+  }
+
+  updateHighlight()
+}
+
+onMounted(() => {
+  window.addEventListener('resize', onResize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', onResize)
+})
+
 // Entering the side nav from a page lands on that page's link: the one
 // with the longest path matching the route.
 function syncPositionToRoute() {
@@ -474,6 +526,10 @@ function syncPositionToRoute() {
 
   if (bestRow !== -1) {
     navState.lastPosition.set('sidebar', { row: bestRow, col: 0 })
+
+    // The panel lines up as well, so the focus comes back to an entry that
+    // is already in its place
+    scrollToCenterAnimated(inner.value, sidebarGrid()[bestRow][0])
   }
 }
 

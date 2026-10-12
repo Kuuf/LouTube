@@ -262,6 +262,9 @@ function findNext(grid, pos, direction) {
 const SCROLL_DURATION_MS = 180
 const SCROLL_MAX_DURATION_MS = 650
 
+/** On a scroller: keep the focused cell in its middle instead of just in view */
+const SCROLL_ATTRIBUTE = 'data-spatial-nav-scroll'
+
 /** @type {WeakMap<Element, number>} running scroll animation frame per scroller */
 const scrollAnimations = new WeakMap()
 
@@ -281,11 +284,33 @@ function getScrollParent(element) {
 }
 
 /**
+ * Where a scroller has to be scrolled to for the element to sit in its
+ * middle, or as near to it as the scroller goes: at its start and end the
+ * element is off center.
+ *
+ * @param {Element} scroller
+ * @param {Element} element
+ * @returns {number} the `scrollTop`
+ */
+export function centeredScrollTop(scroller, element) {
+  const rect = element.getBoundingClientRect()
+  const elementCenter = rect.top + rect.height / 2
+  const viewCenter = scroller.getBoundingClientRect().top + scroller.clientHeight / 2
+  const max = scroller.scrollHeight - scroller.clientHeight
+
+  return Math.min(Math.max(scroller.scrollTop + elementCenter - viewCenter, 0), max)
+}
+
+/**
  * Vertical equivalent of `scrollIntoView({ block: 'nearest' })` (respecting
  * `scroll-margin`), but with a short ease-out animation. The browser's
  * `behavior: 'smooth'` is slower and not configurable. A new call while one
  * is running continues from the current position, so repeated key presses
  * chain into one smooth movement.
+ *
+ * In a scroller marked `data-spatial-nav-scroll="center"` the element goes
+ * to the middle instead: the focus stays where it is and the content moves
+ * under it, until the scroller reaches its start or end.
  *
  * @param {Element} element
  * @param {boolean} [isFollowUp] - see the end of the animation
@@ -293,6 +318,11 @@ function getScrollParent(element) {
 function scrollIntoViewAnimated(element, isFollowUp = false) {
   const scroller = getScrollParent(element)
   const isDocument = scroller === document.scrollingElement
+
+  if (scroller.getAttribute(SCROLL_ATTRIBUTE) === 'center') {
+    scrollToCenterAnimated(scroller, element)
+    return
+  }
 
   const rect = element.getBoundingClientRect()
   const style = getComputedStyle(element)
@@ -337,6 +367,17 @@ export function scrollToViewTopAnimated(element, offset = 0) {
 }
 
 /**
+ * Scrolls the element to the middle of its scroller (see
+ * `centeredScrollTop`), with the same animation as the focus scroll.
+ *
+ * @param {Element} scroller
+ * @param {Element} element
+ */
+export function scrollToCenterAnimated(scroller, element) {
+  animateScrollBy(scroller, centeredScrollTop(scroller, element) - scroller.scrollTop)
+}
+
+/**
  * Scrolls the page back to its very top, with the same animation as the
  * focus scroll. Like `scrollToViewTopAnimated`, call it after the focus has
  * moved, as it replaces the running focus scroll.
@@ -378,7 +419,7 @@ function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
   let duration = Math.min(SCROLL_DURATION_MS + extraDistance / 4, SCROLL_MAX_DURATION_MS) * durationFactor
 
   // Back to the very top of the page: twice as long, a calmer return
-  if (target === 0) {
+  if (target === 0 && scroller === document.scrollingElement) {
     duration *= 2
   }
 

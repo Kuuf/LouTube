@@ -463,14 +463,62 @@
     flex: 1 0 128px;
   }
 
-  /* A focused entry stops clear of the logo and of the fades */
-  .inner > .navOption {
-    scroll-margin-block: 132px 100px;
-  }
-
   .inner::after {
     flex: 1 1 128px;
     min-block-size: 100px;
+  }
+
+  /* The focus highlight of the entries (SideNav.vue): under the panel, as
+     wide as an entry, moved and sized to the focused one. Its movement has
+     the timing of the panel's scroll (NavManager.js), so an entry and the
+     highlight arrive together. */
+  .focusHighlight {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 8px;
+    z-index: 1;
+    inline-size: 64px;
+    border-radius: var(--radius-md);
+    background-color: var(--primary-text-color);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      opacity 150ms ease-out,
+      background-color 150ms ease-out,
+      inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
+  }
+
+  .focusHighlight.shown {
+    opacity: 1;
+  }
+
+  /* The profile's entry, with its colored avatar: the lighter focus
+     background of visual elements (spatialNav.css) */
+  .focusHighlight.visual {
+    background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  }
+
+  .drawerOpen .focusHighlight {
+    inline-size: 244px;
+    transition:
+      opacity 150ms ease-out,
+      background-color 150ms ease-out,
+      inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
+  }
+
+  /* From one entry to the next */
+  .focusHighlight.sliding {
+    transition:
+      translate 180ms cubic-bezier(0.215, 0.61, 0.355, 1),
+      block-size 180ms cubic-bezier(0.215, 0.61, 0.355, 1),
+      opacity 150ms ease-out,
+      background-color 150ms ease-out,
+      inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
+  }
+
+  /* The entries leave the background to it, and keep the focus text color */
+  .navOption[data-spatial-nav-focused] {
+    background-color: transparent !important;
   }
 
   /* Logo on top, always shown, the name beside it only in the open drawer.
@@ -577,6 +625,7 @@
   .sideNav::after,
   .sideNav .inner,
   .sideNav .brand,
+  .sideNav .focusHighlight,
   .sideNav .drawerScrim,
   .sideNav .navOption .navLabel,
   .sideNav .navChannel .navLabel,
