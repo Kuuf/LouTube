@@ -12,6 +12,10 @@
   flex-wrap: wrap;
   font-family: Roboto, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   block-size: 100%;
+
+  /* A stacking context of its own: the focus frame (TvFocusFrame.css) sits
+     behind the page's content, above the app's background */
+  isolation: isolate;
 }
 
 .routerView {

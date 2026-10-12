@@ -1,0 +1,50 @@
+/*
+  The remote's focus on the items of a list that scrolls with the page
+  (NavManager.js, `focusFrame`): the look of a focused list item
+  (spatialNav.css), on an element of its own that does not scroll. It is
+  placed where the focused item comes to rest, so in the middle of a list it
+  holds still while the items scroll under it.
+
+  Behind the page's content (App.css isolates the app for it), above its
+  background. Its movement has the duration of the page's scroll and its
+  curve (ease-out cubic), so an item and the frame arrive together.
+*/
+.focusFrame {
+  --focus-background: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+
+  position: fixed;
+
+  /* Physical: placed by viewport coordinates, whatever the direction */
+  /* stylelint-disable-next-line liberty/use-logical-spec */
+  inset: 0 auto auto 0;
+  z-index: -1;
+  border-radius: var(--radius-card);
+  background-color: var(--focus-background);
+  box-shadow:
+    0 0 0 3px #fff,
+    0 12px 32px rgb(0 0 0 / 50%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.focusFrame.shown {
+  opacity: 1;
+}
+
+/* From one item to the next. Not when it shows up, nor when it is put back
+   on its item after the page moved by other means. */
+.focusFrame.sliding {
+  transition:
+    opacity 150ms ease-out,
+    translate var(--frame-duration) cubic-bezier(0.215, 0.61, 0.355, 1),
+    inline-size var(--frame-duration) cubic-bezier(0.215, 0.61, 0.355, 1),
+    block-size var(--frame-duration) cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .focusFrame,
+  .focusFrame.sliding {
+    transition: none;
+  }
+}

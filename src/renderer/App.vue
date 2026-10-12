@@ -10,6 +10,7 @@
       noTapHighlight: !tapHighlight
     }"
   >
+    <TvFocusFrame />
     <SideNav
       :inert="isAnyPromptOpen"
     />
@@ -103,6 +104,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtFlexBox from './components/ft-flex-box/ft-flex-box.vue'
 import SideNav from './components/SideNav/SideNav.vue'
+import TvFocusFrame from './components/TvFocusFrame/TvFocusFrame.vue'
 import TvItemActionsPanel from './components/TvItemActionsPanel/TvItemActionsPanel.vue'
 import FtPrompt from './components/FtPrompt/FtPrompt.vue'
 import FtButton from './components/FtButton/FtButton.vue'

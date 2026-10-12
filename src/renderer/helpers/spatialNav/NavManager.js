@@ -79,6 +79,15 @@ export const LONG_PRESS_ATTRIBUTE = 'data-spatial-nav-long-press'
 export const LONG_PRESS_EVENT = 'spatial-nav-long-press'
 export const LONG_PRESS_MS = 500
 
+/**
+ * List items with this attribute take the focus frame instead of a focus
+ * look of their own, while they scroll with the page: see `focusFrame`.
+ */
+const FRAME_ATTRIBUTE = 'data-spatial-nav-frame'
+
+/** Set on the focused cell while the focus frame stands in for its focus look */
+const FRAMED_ATTRIBUTE = 'data-spatial-nav-framed'
+
 /** @type {Element | null} */
 let focusedElement = null
 
@@ -89,8 +98,108 @@ function markFocusedElement(element) {
   if (focusedElement === element) { return }
 
   focusedElement?.removeAttribute(FOCUSED_ATTRIBUTE)
+  focusedElement?.removeAttribute(FRAMED_ATTRIBUTE)
+  frameResizeObserver?.disconnect()
+
   focusedElement = element
   focusedElement?.setAttribute(FOCUSED_ATTRIBUTE, '')
+
+  if (element === null) {
+    focusFrame.shown = false
+  }
+}
+
+/**
+ * The focus frame (TvFocusFrame.vue): the focus look of the list items of a
+ * page (FRAME_ATTRIBUTE), on an element of its own that doesn't scroll with
+ * them. It is placed where the focused item comes to rest once the page has
+ * scrolled it to the middle of the screen. From one row of a list to the
+ * next that place is the same, so the frame holds still while the items
+ * scroll under it; it only moves where the page has no further to scroll,
+ * and sideways along a row. Position and size are in viewport pixels.
+ */
+export const focusFrame = reactive({
+  shown: false,
+
+  /** Moving from one item to the next, as opposed to showing up or being put back on its item */
+  sliding: false,
+  x: 0,
+  y: 0,
+  width: 0,
+  height: 0,
+
+  /** Of the move (ms): that of the page's scroll, so both arrive together */
+  duration: 0,
+})
+
+/** Showing up on its item, where it stays put until it has been drawn there */
+let isFrameAppearing = false
+
+/** @type {ResizeObserver | null} follows the framed item's size (lazily rendered items grow) */
+let frameResizeObserver = null
+
+/**
+ * @param {Element} cell
+ * @returns {boolean} whether the focus frame stands in for the cell's own focus look
+ */
+function usesFrame(cell) {
+  return cell.hasAttribute(FRAME_ATTRIBUTE) && getScrollParent(cell) === document.scrollingElement
+}
+
+/**
+ * @param {Element} cell - the focused item
+ * @param {number} scrollOffset - how far the page is about to scroll (px),
+ *   the frame goes where the item will be by then
+ * @param {number} duration - of the move (ms), 0 to place it at once
+ */
+function placeFrame(cell, scrollOffset, duration) {
+  const rect = cell.getBoundingClientRect()
+
+  if (!focusFrame.shown) {
+    isFrameAppearing = true
+    requestAnimationFrame(() => {
+      isFrameAppearing = false
+    })
+  }
+
+  focusFrame.sliding = !isFrameAppearing && duration > 0
+  focusFrame.shown = true
+  focusFrame.x = rect.left
+  focusFrame.y = rect.top - scrollOffset
+  focusFrame.width = rect.width
+  focusFrame.height = rect.height
+  focusFrame.duration = duration
+}
+
+/** Puts the frame back on its item at once, unless a scroll is taking it there */
+function syncFrame() {
+  if (focusedElement?.hasAttribute(FRAMED_ATTRIBUTE) && !scrollAnimations.has(document.scrollingElement)) {
+    placeFrame(focusedElement, 0, 0)
+  }
+}
+
+/**
+ * @param {Element} cell - takes the focus frame, and goes to the middle of the screen
+ * @param {boolean} [isFollowUp] - see `scrollIntoViewAnimated`
+ */
+function frameAndCenter(cell, isFollowUp = false) {
+  const scroller = document.scrollingElement
+
+  if (!isFollowUp) {
+    cell.setAttribute(FRAMED_ATTRIBUTE, '')
+
+    frameResizeObserver ??= new ResizeObserver(syncFrame)
+    frameResizeObserver.observe(cell)
+
+    // Where it is now: all there is to it when the page has nowhere to scroll
+    placeFrame(cell, 0, SCROLL_DURATION_MS)
+  }
+
+  animateScrollBy(scroller, centeredScrollTop(scroller, cell) - scroller.scrollTop, () => {
+    if (!isFollowUp && cell === focusedElement) {
+      frameAndCenter(cell, true)
+    }
+  })
 }
 
 /**
@@ -295,7 +404,9 @@ function getScrollParent(element) {
 export function centeredScrollTop(scroller, element) {
   const rect = element.getBoundingClientRect()
   const elementCenter = rect.top + rect.height / 2
-  const viewCenter = scroller.getBoundingClientRect().top + scroller.clientHeight / 2
+  const viewCenter = scroller === document.scrollingElement
+    ? window.innerHeight / 2
+    : scroller.getBoundingClientRect().top + scroller.clientHeight / 2
   const max = scroller.scrollHeight - scroller.clientHeight
 
   return Math.min(Math.max(scroller.scrollTop + elementCenter - viewCenter, 0), max)
@@ -404,7 +515,9 @@ function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
   cancelAnimationFrame(scrollAnimations.get(scroller))
 
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    scrollAnimations.delete(scroller)
     scroller.scrollTop = target
+    syncFrame()
     return
   }
 
@@ -423,6 +536,11 @@ function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
     duration *= 2
   }
 
+  // The focus frame goes where its item will be, in step with the scroll
+  if (scroller === document.scrollingElement && focusedElement?.hasAttribute(FRAMED_ATTRIBUTE)) {
+    placeFrame(focusedElement, target - start, duration)
+  }
+
   const step = (now) => {
     startTime ??= now
 
@@ -435,6 +553,7 @@ function animateScrollBy(scroller, delta, onEnd, durationFactor = 1) {
       scrollAnimations.set(scroller, requestAnimationFrame(step))
     } else {
       scrollAnimations.delete(scroller)
+      syncFrame()
       onEnd?.()
     }
   }
@@ -465,7 +584,12 @@ function setPosition(zoneId, grid, pos) {
       releaseDomFocus(cell)
     }
 
-    scrollIntoViewAnimated(cell)
+    if (usesFrame(cell)) {
+      frameAndCenter(cell)
+    } else {
+      focusFrame.shown = false
+      scrollIntoViewAnimated(cell)
+    }
   } else {
     markFocusedElement(null)
   }
@@ -833,12 +957,19 @@ export function initGlobalKeyListener() {
   if (listenerAttached) { return }
   document.addEventListener('keydown', onKeyDown)
   document.addEventListener('keyup', onKeyUp)
+
+  // The page moved by other means than a focus scroll (mouse wheel, a
+  // layout change): the focus frame stays on its item
+  window.addEventListener('scroll', syncFrame, { passive: true })
+  window.addEventListener('resize', syncFrame)
   listenerAttached = true
 }
 
 export function teardownGlobalKeyListener() {
   document.removeEventListener('keydown', onKeyDown)
   document.removeEventListener('keyup', onKeyUp)
+  window.removeEventListener('scroll', syncFrame)
+  window.removeEventListener('resize', syncFrame)
   cancelHeldEnter()
   listenerAttached = false
 }

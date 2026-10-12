@@ -170,6 +170,7 @@
                 :key="`${item.videoId}-${item.playlistItemId || index}`"
                 class="playlistItem"
                 data-spatial-nav-item
+                data-spatial-nav-frame
                 :data="item"
                 :playlist-id="playlistId"
                 :playlist-type="infoSource"

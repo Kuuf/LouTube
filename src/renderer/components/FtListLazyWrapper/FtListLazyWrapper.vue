@@ -13,6 +13,7 @@
       draggedVideo: isVideoDragging && draggedVideo.videoId === data.videoId && draggedVideo.playlistItemId === data.playlistItemId,
     }"
     data-spatial-nav-item
+    data-spatial-nav-frame
     :data-spatial-nav-long-press="isVideo ? '' : null"
     :draggable="isDraggable"
     v-on="isDraggable ? draggableEventHandlers : {}"

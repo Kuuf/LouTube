@@ -51,6 +51,13 @@
     0 12px 32px rgb(0 0 0 / 50%);
 }
 
+/* List items that scroll with the page leave their focus look to the focus
+   frame (TvFocusFrame.css), which doesn't scroll with them */
+[data-spatial-nav-focused][data-spatial-nav-framed] {
+  background-color: transparent;
+  box-shadow: none;
+}
+
 /* Watched cards paint the page background, which would hide the focus one */
 [data-spatial-nav-focused][data-spatial-nav-item] .ft-list-item.watched {
   background-color: transparent;
