@@ -84,8 +84,10 @@
   position: absolute;
   inset: 20px;
   z-index: -1;
-  border-radius: calc(var(--radius-card) + 6px);
-  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  border-radius: calc(var(--radius-card) + 10px);
+
+  /* Opaque: it reaches over the edges of the items next to it */
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, var(--bg-color));
   opacity: 0;
   pointer-events: none;
   transition:
@@ -94,11 +96,23 @@
 }
 
 [data-spatial-nav-focused][data-spatial-nav-center]::before {
-  inset: -8px;
+  inset: -16px;
   opacity: 1;
   transition:
     inset 260ms cubic-bezier(0.05, 0.7, 0.1, 1),
     opacity 120ms ease-out;
+}
+
+/* The item's content (thumbnail and text) grows a little with the focus, and
+   shrinks back when it leaves. The content, not the item: its box keeps its
+   size, as zones group their cells into rows by where they are on screen. */
+[data-spatial-nav-center] > * {
+  transition: transform 180ms cubic-bezier(0.3, 0, 0.8, 0.15);
+}
+
+[data-spatial-nav-focused][data-spatial-nav-center] > * {
+  transform: scale(1.03);
+  transition: transform 260ms cubic-bezier(0.05, 0.7, 0.1, 1);
 }
 
 /* And a border in the primary color around the item's thumbnail. Drawn over
@@ -124,6 +138,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   [data-spatial-nav-center],
+  [data-spatial-nav-center] > *,
   [data-spatial-nav-center]::before {
     transition: none;
   }
