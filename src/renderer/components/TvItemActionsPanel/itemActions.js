@@ -13,8 +13,8 @@ import { reactive } from 'vue'
  * @property {string} thumbnail
  * @property {boolean} blurThumbnail
  * @property {string} title
- * @property {ItemAction[][]} rows - the actions, as rows of buttons side by
- *   side
+ * @property {string | null} channelName
+ * @property {ItemAction[]} actions - top to bottom
  */
 
 /**
@@ -31,7 +31,8 @@ export const itemActions = reactive({
   thumbnail: '',
   blurThumbnail: false,
   title: '',
-  rows: [],
+  channelName: null,
+  actions: [],
 })
 
 /**

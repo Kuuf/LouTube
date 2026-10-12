@@ -409,38 +409,34 @@ function openActions() {
   const video = videoRef.value
   if (!isVideo.value || !video) { return }
 
-  /** @type {import('../TvItemActionsPanel/itemActions').ItemAction[][]} */
-  const rows = []
+  /** @type {import('../TvItemActionsPanel/itemActions').ItemAction[]} */
+  const actions = []
 
   if (isRemovable.value) {
-    rows.push([{
+    actions.push({
       label: t('User Playlists.Remove from Playlist'),
       onSelect: () => removeFromPlaylist(props.data.videoId, props.playlistItemId),
-    }])
+    })
   } else {
-    const row = []
-
     if (video.showPlaylists) {
-      row.push({
+      actions.push({
         label: t('User Playlists.Add to Playlist'),
         onSelect: () => video.togglePlaylistPrompt(),
       })
     }
 
-    row.push({
+    actions.push({
       label: video.isInWatchLater ? t('Video.Remove from Watch Later') : t('Video.Add to Watch Later'),
       onSelect: () => video.toggleWatchLater(),
     })
-
-    rows.push(row)
   }
 
   const channelId = video.channelId
   if (channelId !== null) {
-    rows.push([{
+    actions.push({
       label: t('Channels.Go To Channel'),
       onSelect: () => router.push(`/channel/${channelId}`),
-    }])
+    })
   }
 
   openItemActions({
@@ -448,7 +444,8 @@ function openActions() {
     thumbnail: video.thumbnail,
     blurThumbnail: video.blurThumbnails,
     title: video.displayTitle,
-    rows,
+    channelName: video.channelName,
+    actions,
   })
 }
 

@@ -33,25 +33,26 @@
       >
         {{ itemActions.title }}
       </p>
+      <p
+        v-if="itemActions.channelName"
+        class="channelName"
+        dir="auto"
+      >
+        {{ itemActions.channelName }}
+      </p>
       <div
         ref="actions"
         class="actions"
       >
-        <div
-          v-for="(row, rowIndex) in itemActions.rows"
-          :key="rowIndex"
-          class="row"
+        <button
+          v-for="action in itemActions.actions"
+          :key="action.label"
+          class="action"
+          type="button"
+          @click="select(action)"
         >
-          <button
-            v-for="action in row"
-            :key="action.label"
-            class="action"
-            type="button"
-            @click="select(action)"
-          >
-            {{ action.label }}
-          </button>
-        </div>
+          {{ action.label }}
+        </button>
       </div>
     </div>
   </div>
@@ -69,8 +70,8 @@ import android from 'android'
 /** @import { ItemAction } from './itemActions' */
 
 // Remote control (spatial nav): while open, the panel is a zone of its own,
-// its buttons as they are laid out. Left from it, Escape or the Back button
-// close it, and the focus returns to where it was.
+// one button per row. Left from it, Escape or the Back button close it, and
+// the focus returns to where it was.
 const ZONE_ID = 'item-actions'
 
 const actions = useTemplateRef('actions')
@@ -87,9 +88,7 @@ function actionsGrid() {
  * @returns {boolean} handled here instead of by spatial nav
  */
 function handleKey(event) {
-  const col = navState.lastPosition.get(ZONE_ID)?.col ?? 0
-
-  if (event.key === 'Escape' || (event.key === 'ArrowLeft' && col === 0)) {
+  if (event.key === 'Escape' || event.key === 'ArrowLeft') {
     event.preventDefault()
     closeItemActions()
     return true

@@ -1104,6 +1104,7 @@ defineExpose({
   thumbnail,
   blurThumbnails,
   displayTitle,
+  channelName,
   channelId,
   showPlaylists,
   isInWatchLater,
