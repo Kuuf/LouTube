@@ -79,6 +79,9 @@ export const LONG_PRESS_ATTRIBUTE = 'data-spatial-nav-long-press'
 export const LONG_PRESS_EVENT = 'spatial-nav-long-press'
 export const LONG_PRESS_MS = 500
 
+/** Set on such a cell while Enter is held on it, for a pressed look (spatialNav.css) */
+const PRESSED_ATTRIBUTE = 'data-spatial-nav-pressed'
+
 /**
  * List items with this attribute go to the middle of the screen when they
  * take the focus, while they scroll with the page: from one row of a list to
@@ -789,7 +792,10 @@ function onKeyDown(event) {
 
       if (!event.repeat) {
         const cell = focusedElement
+        cell.setAttribute(PRESSED_ATTRIBUTE, '')
+
         const held = {
+          cell,
           longPressed: false,
           timeout: setTimeout(() => {
             held.longPressed = true
@@ -837,11 +843,12 @@ const DEAD_END_SCROLL = { up: -160, down: 160 }
 let listenerAttached = false
 
 /** Registers the single document-level arrow-key listener. Call once, app-wide. */
-/** @type {{ longPressed: boolean, timeout: ReturnType<typeof setTimeout> } | null} Enter being held on a long press cell */
+/** @type {{ cell: Element, longPressed: boolean, timeout: ReturnType<typeof setTimeout> } | null} Enter being held on a long press cell */
 let heldEnter = null
 
 function cancelHeldEnter() {
   if (heldEnter !== null) {
+    heldEnter.cell.removeAttribute(PRESSED_ATTRIBUTE)
     clearTimeout(heldEnter.timeout)
     heldEnter = null
   }
