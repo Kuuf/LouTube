@@ -52,6 +52,7 @@
 /* The swapped colors of text buttons with the remote's focus
    (spatialNav.css), not the lighter background its avatar would get */
 .goToChannel[data-spatial-nav-focused] {
+  border-radius: var(--radius-pill);
   background-color: var(--primary-text-color) !important;
   box-shadow: none;
   color: var(--bg-color) !important;
