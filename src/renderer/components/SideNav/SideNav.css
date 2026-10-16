@@ -15,7 +15,7 @@
   user-select: none;
 }
 
-.inner {
+:deep(.inner) {
   block-size: 100%;
   inline-size: 80px;
   overflow: hidden auto;
@@ -195,7 +195,7 @@
     inline-size: 200px;
   }
 
-  .opened .inner {
+  .opened :deep(.inner) {
     inline-size: 200px;
   }
 
@@ -253,7 +253,7 @@
 }
 
 @media only screen and (width <= 680px) {
-  .inner {
+  :deep(.inner) {
     display: contents; /* sunglasses emoji */
   }
 
@@ -375,8 +375,8 @@
     transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
   }
 
-  .inner,
-  .hiddenLabels .inner {
+  :deep(.inner),
+  .hiddenLabels :deep(.inner) {
     position: absolute;
     inset-block: 0;
     inset-inline-start: 0;
@@ -401,7 +401,7 @@
     transition: inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
   }
 
-  .drawerOpen .inner {
+  .drawerOpen :deep(.inner) {
     inline-size: 260px;
     transition: inline-size 300ms cubic-bezier(0.05, 0.7, 0.1, 1);
   }
@@ -449,21 +449,21 @@
      and the fade under it, so on a screen too short for all the entries they
      start below those and the panel scrolls (the lower spacer gives way
      first, down to the fade at the foot of the panel). */
-  .inner > .navOption,
-  .inner > hr {
+  :deep(.inner) > .navOption,
+  :deep(.inner) > hr {
     flex: none;
   }
 
-  .inner::before,
-  .inner::after {
+  :deep(.inner::before),
+  :deep(.inner::after) {
     content: '';
   }
 
-  .inner::before {
+  :deep(.inner::before) {
     flex: 1 0 128px;
   }
 
-  .inner::after {
+  :deep(.inner::after) {
     flex: 1 1 128px;
     min-block-size: 100px;
   }
@@ -472,7 +472,7 @@
      wide as an entry, moved and sized to the focused one. Its movement has
      the timing of the panel's scroll (NavManager.js), so an entry and the
      highlight arrive together. */
-  .focusHighlight {
+  :deep(.focusHighlight) {
     position: absolute;
     inset-block-start: 0;
     inset-inline-start: 8px;
@@ -488,17 +488,17 @@
       inline-size 200ms cubic-bezier(0.3, 0, 0.8, 0.15);
   }
 
-  .focusHighlight.shown {
+  :deep(.focusHighlight.shown) {
     opacity: 1;
   }
 
   /* The profile's entry, with its colored avatar: the lighter focus
      background of visual elements (spatialNav.css) */
-  .focusHighlight.visual {
+  :deep(.focusHighlight.visual) {
     background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
   }
 
-  .drawerOpen .focusHighlight {
+  .drawerOpen :deep(.focusHighlight) {
     inline-size: 244px;
     transition:
       opacity 150ms ease-out,
@@ -507,7 +507,7 @@
   }
 
   /* From one entry to the next */
-  .focusHighlight.sliding {
+  :deep(.focusHighlight.sliding) {
     transition:
       translate 320ms cubic-bezier(0.215, 0.61, 0.355, 1),
       block-size 320ms cubic-bezier(0.215, 0.61, 0.355, 1),
@@ -623,9 +623,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sideNav::after,
-  .sideNav .inner,
+  .sideNav :deep(.inner),
   .sideNav .brand,
-  .sideNav .focusHighlight,
+  .sideNav :deep(.focusHighlight),
   .sideNav .drawerScrim,
   .sideNav .navOption .navLabel,
   .sideNav .navChannel .navLabel,

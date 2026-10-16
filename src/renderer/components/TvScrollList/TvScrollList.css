@@ -1,0 +1,33 @@
+.tvScrollList {
+  display: contents;
+}
+
+/* Placed by translate from the top of the consumer's container, sized and
+   colored by the consumer (highlightClass). Its moves have the timing of the
+   list's scroll (NavManager.js), so an entry and the highlight arrive
+   together. */
+.tvScrollListHighlight {
+  position: absolute;
+  inset-block-start: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 150ms ease-out;
+}
+
+.tvScrollListHighlight.shown {
+  opacity: 1;
+}
+
+.tvScrollListHighlight.sliding {
+  transition:
+    opacity 150ms ease-out,
+    translate 320ms cubic-bezier(0.215, 0.61, 0.355, 1),
+    block-size 320ms cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tvScrollListHighlight,
+  .tvScrollListHighlight.sliding {
+    transition: none;
+  }
+}

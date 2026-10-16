@@ -307,6 +307,12 @@ const scrollAnimations = new WeakMap()
  */
 function getScrollParent(element) {
   for (let parent = element.parentElement; parent && parent !== document.body; parent = parent.parentElement) {
+    // A list with a scroll mode of its own (SCROLL_ATTRIBUTE) scrolls itself
+    // or nothing: when it fits, the page behind it stays where it is
+    if (parent.hasAttribute(SCROLL_ATTRIBUTE)) {
+      return parent
+    }
+
     const { overflowY } = getComputedStyle(parent)
     if ((overflowY === 'auto' || overflowY === 'scroll') && parent.scrollHeight > parent.clientHeight) {
       return parent
