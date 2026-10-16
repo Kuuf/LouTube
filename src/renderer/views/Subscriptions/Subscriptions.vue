@@ -34,14 +34,20 @@ import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsChannelNav from '../../components/SubscriptionsChannelNav/SubscriptionsChannelNav.vue'
 
 import { useTvPage } from '../../composables/useTvPage'
+import { navState } from '../../helpers/spatialNav/NavManager'
 import { selectedSubscriptionsChannelId } from './subscriptionsChannel'
 
-// Left from the page goes to its channel list, and from there to the side nav
-useTvPage('page-subscriptions', { topOnFirstRow: true, left: 'subscriptions-channels' })
+const PAGE_ZONE_ID = 'page-subscriptions'
 
-// Another channel picked in the list: its videos from the top
+// Left from the page goes to its channel list, and from there to the side nav
+useTvPage(PAGE_ZONE_ID, { topOnFirstRow: true, left: 'subscriptions-channels' })
+
+// Another channel picked in the list: its videos from the top, and the
+// focus goes to the first of them when it comes back to the page, not to
+// where it was in the last channel's
 watch(selectedSubscriptionsChannelId, () => {
   document.scrollingElement.scrollTop = 0
+  navState.lastPosition.delete(PAGE_ZONE_ID)
 })
 </script>
 
