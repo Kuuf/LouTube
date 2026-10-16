@@ -1,4 +1,5 @@
 import { onBeforeUnmount, onMounted, useTemplateRef, watch } from 'vue'
+import { useRoute } from 'vue-router'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { gridFromElements, ITEM_ATTRIBUTE, navState, scrollToViewTopAnimated } from '../../helpers/spatialNav/NavManager'
@@ -38,6 +39,13 @@ export function useTvChannel() {
   const channelRoot = useTemplateRef('channelRoot')
   const channelHeader = useTemplateRef('channelHeader')
   const channelContent = useTemplateRef('channelContent')
+  const route = useRoute()
+
+  // A channel starts at its top: positions remembered from the last channel
+  // visited (the zones are the same for every channel) would send the focus
+  // down into the new one's content
+  navState.lastPosition.delete('channel-header')
+  navState.lastPosition.delete('channel-content')
 
   function headerGrid() {
     const controls = [...(channelHeader.value?.$el.querySelectorAll(HEADER_CONTROLS) ?? [])]
@@ -168,6 +176,19 @@ export function useTvChannel() {
     }
 
     headerZone.activate()
+  })
+
+  // Going from one channel to another (a featured channel) keeps the page:
+  // start over at the top of the new channel, on its selected tab once its
+  // header is there
+  watch(() => route.params.id, (channelId, previousChannelId) => {
+    if (channelId === previousChannelId) { return }
+
+    navState.lastPosition.delete('channel-header')
+    navState.lastPosition.delete('channel-content')
+    awaitingHeader = true
+    document.scrollingElement.scrollTop = 0
+    headerZone.activate({ resetPosition: true })
   })
 
   onMounted(() => {
