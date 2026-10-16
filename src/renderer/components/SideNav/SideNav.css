@@ -492,12 +492,6 @@
     opacity: 1;
   }
 
-  /* The profile's entry, with its colored avatar: the lighter focus
-     background of visual elements (spatialNav.css) */
-  :deep(.focusHighlight.visual) {
-    background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
-  }
-
   .drawerOpen :deep(.focusHighlight) {
     inline-size: 244px;
     transition:

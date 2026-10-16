@@ -37,7 +37,8 @@
       <template #item="{ item: entry, itemAttrs }">
         <hr v-if="entry.kind === 'divider'">
         <SideNavMoreOptions v-else-if="entry.kind === 'more'" />
-        <!-- The active profile: its avatar and name -->
+        <!-- The active profile: its avatar and name. Focused, it is inverted
+             like the other entries. -->
         <router-link
           v-else-if="entry.kind === 'profile'"
           v-bind="itemAttrs"
@@ -45,7 +46,6 @@
           role="button"
           to="/tv/profiles"
           :title="activeProfileName"
-          data-spatial-nav-visual
         >
           <div
             class="thumbnailContainer"
