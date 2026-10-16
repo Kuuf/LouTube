@@ -37,6 +37,7 @@
         :use-channels-hidden-preference="false"
         :display="shelf.isCommunity ? 'list' : ''"
         :render-all-items-lazily="index > 2"
+        go-to-channel-cards
       />
     </div>
   </div>

@@ -4,6 +4,7 @@
     :class="{
       list: listType === 'list',
       grid: listType === 'grid',
+      goToChannelCard,
       [appearance]: true
     }"
   >
@@ -36,7 +37,10 @@
             {{ name }}
           </h3>
         </component>
-        <div class="infoLine">
+        <div
+          v-if="!goToChannelCard"
+          class="infoLine"
+        >
           <component
             :is="enableChannelLinks ? 'router-link' : 'span'"
             v-if="handle !== null"
@@ -62,14 +66,26 @@
           </span>
         </div>
         <p
-          v-if="listType !== 'grid'"
+          v-if="listType !== 'grid' && !goToChannelCard"
           v-safer-html="description"
           class="description"
           dir="auto"
         />
       </div>
+      <!-- Featured channels (a channel's home): the way to the channel, no
+           subscribing from here. Not a stop of its own on the remote: with
+           the card focused it takes the focus look, and Enter opens the
+           channel. -->
+      <router-link
+        v-if="goToChannelCard && enableChannelLinks"
+        class="goToChannel"
+        :to="`/channel/${id}`"
+        tabindex="-1"
+      >
+        {{ $t('Channels.Go To Channel') }}
+      </router-link>
       <FtSubscribeButton
-        v-if="!hideUnsubscribeButton"
+        v-else-if="!goToChannelCard && !hideUnsubscribeButton"
         class="channelSubscribeButton"
         :channel-id="id"
         :channel-name="name"
@@ -98,6 +114,11 @@ const props = defineProps({
   appearance: {
     type: String,
     required: true
+  },
+  /** Only the avatar, the name and a Go to Channel button */
+  goToChannelCard: {
+    type: Boolean,
+    default: false
   }
 })
 

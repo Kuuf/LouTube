@@ -52,6 +52,7 @@
         v-else-if="finalDataType === 'channel'"
         :appearance="appearance"
         :data="data"
+        :go-to-channel-card="goToChannelCards"
       />
       <FtListPlaylist
         v-else-if="finalDataType === 'playlist'"
@@ -137,6 +138,10 @@ const props = defineProps({
     type: String,
     required: false,
     default: '',
+  },
+  goToChannelCards: {
+    type: Boolean,
+    default: false,
   },
   playlistId: {
     type: String,
