@@ -21,7 +21,6 @@
       :can-move-video-down="canMoveVideoDown && index < playlistItemsLength - 1"
       :can-remove-from-playlist="canRemoveFromPlaylist"
       :search-query-text="searchQueryText"
-      :go-to-channel-cards="goToChannelCards"
       :playlist-id="playlistId"
       :playlist-type="playlistType"
       :playlist-item-id="result.playlistItemId"
@@ -58,11 +57,6 @@ const props = defineProps({
     default: null,
   },
   renderAllItemsLazily: {
-    type: Boolean,
-    default: false
-  },
-  /** Channels as their avatar, name and a Go to Channel button only, see FtListChannel */
-  goToChannelCards: {
     type: Boolean,
     default: false
   },
