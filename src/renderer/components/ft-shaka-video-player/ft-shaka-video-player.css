@@ -222,6 +222,14 @@
   padding-inline: 8px 16px;
 }
 
+/* With the remote's focus, the swapped colors of the other text buttons
+   (spatialNav.css), not the lighter background its avatar would get */
+:deep(.shaka-controls-button-panel > .ft-channel-button[data-spatial-nav-focused]) {
+  background-color: var(--primary-text-color) !important;
+  box-shadow: none;
+  color: var(--bg-color) !important;
+}
+
 :deep(.ft-channel-button-name) {
   overflow: hidden;
   font-size: 16px;
