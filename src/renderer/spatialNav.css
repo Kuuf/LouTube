@@ -154,6 +154,16 @@
   color: var(--primary-text-color) !important;
 }
 
+/* The chosen one keeps the app's color (FtSelect.css), and the check in its
+   circle the page's background color */
+:is(.selectOption.selected, .iconDropdown .listItem.active)[data-spatial-nav-focused] {
+  color: var(--primary-color) !important;
+}
+
+.selectOption[data-spatial-nav-focused] .checkIndicator {
+  color: var(--bg-color) !important;
+}
+
 /* Rounded, unless the element has its own shape (circle buttons): no
    specificity, so any border-radius of the element wins */
 :where([data-spatial-nav-focused]) {

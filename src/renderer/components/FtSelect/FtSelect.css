@@ -189,6 +189,11 @@
   white-space: nowrap;
 }
 
+/* The chosen option: in the app's color, its check circle too */
+.selected {
+  color: var(--primary-color);
+}
+
 .selected .optionName {
   font-weight: 600;
 }
@@ -212,7 +217,7 @@
 }
 
 .selected .checkIndicator {
-  background-color: var(--primary-text-color);
+  background-color: var(--primary-color);
 }
 
 .selected .checkIcon {
