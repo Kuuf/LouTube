@@ -6,21 +6,17 @@
   a highlight of its own that holds still in the middle of the list.
 */
 .channelNav {
-  position: sticky;
-  inset-block-start: 0;
-
-  /* From the very top of the screen, where it is held once the page
-     scrolls: up past the space above the page (App.css .routerView, 18px
-     twice), which would otherwise push its bottom off screen */
-  margin-block-start: -36px;
+  /* Held on screen, the full height of it, however the page scrolls (a
+     sticky one would be pushed up at the end of the page). Beside the side
+     nav's 80px rail, clear of its background fading out over the page; the
+     page leaves room for it (Subscriptions.css). */
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: calc(80px + 24px);
+  z-index: 1;
   display: flex;
-  flex: none;
   flex-direction: column;
   inline-size: 260px;
-  block-size: 100vh;
-
-  /* Clear of the side nav's background, which fades out over the page */
-  margin-inline-start: 24px;
 }
 
 /* The page's heading and its refresh button (Subscriptions.vue), over the

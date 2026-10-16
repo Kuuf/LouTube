@@ -1,12 +1,7 @@
-/* The channel list (SubscriptionsChannelNav) on the left, the page beside it */
+/* The channel list (SubscriptionsChannelNav), held on the left of the
+   screen, and the page beside it: room for the list's 24px gap and 260px */
 .subscriptionsLayout {
-  display: flex;
-  align-items: flex-start;
-}
-
-.subscriptionsContent {
-  flex: 1 1 0;
-  min-inline-size: 0;
+  padding-inline-start: calc(24px + 260px);
 }
 
 /* Always on the page background, edge to edge like the video lists
