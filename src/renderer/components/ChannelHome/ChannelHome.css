@@ -2,11 +2,10 @@
   margin-block-start: 40px;
 }
 
-/* Title on the left, "View Playlist" on the right */
+/* "View Playlist" right after the title, on its line */
 .shelfHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 16px;
   margin-block: 0 16px;
 }
