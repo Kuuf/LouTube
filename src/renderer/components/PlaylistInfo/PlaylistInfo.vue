@@ -154,61 +154,60 @@
               @click="exitEditMode"
             />
           </template>
-          <template
+          <!-- One of the user's playlists: its actions in a menu, each with
+               its icon. The remote reaches them like the header's other
+               controls, one per row under the button. -->
+          <div
             v-else-if="isUserPlaylist"
+            ref="optionsMenu"
+            class="optionsMenu"
           >
+            <button
+              class="optionsMenuButton"
+              type="button"
+              :aria-expanded="optionsMenuOpen"
+              @click="optionsMenuOpen = !optionsMenuOpen"
+            >
+              {{ $t('User Playlists.Playlist Options') }}
+              <FontAwesomeIcon
+                class="optionsMenuArrow"
+                :icon="['fas', 'angle-down']"
+              />
+            </button>
+            <ul
+              v-if="optionsMenuOpen"
+              class="optionsMenuList"
+            >
+              <li
+                v-for="option in playlistOptions"
+                :key="option.label"
+              >
+                <button
+                  class="optionsMenuItem"
+                  :class="{ disabled: option.disabled }"
+                  type="button"
+                  :aria-disabled="option.disabled"
+                  @click="selectPlaylistOption(option)"
+                >
+                  <FontAwesomeIcon
+                    class="optionsMenuIcon"
+                    :icon="option.icon"
+                    fixed-width
+                  />
+                  {{ option.label }}
+                </button>
+              </li>
+            </ul>
+          </div>
+          <template v-else>
             <FtIconButton
-              :title="markedAsQuickBookmarkTarget ? $t('User Playlists.Quick Bookmark Enabled') : $t('User Playlists.Enable Quick Bookmark With This Playlist')"
-              :icon="markedAsQuickBookmarkTarget ? ['fas', 'bookmark'] : ['far', 'bookmark']"
-              :disabled="markedAsQuickBookmarkTarget"
-              :theme="markedAsQuickBookmarkTarget ? 'secondary' : 'base-no-default'"
-              @disabled-click="handleQuickBookmarkEnabledDisabledClick"
-              @click="enableQuickBookmarkForThisPlaylist"
-            />
-            <FtIconButton
-              :title="$t('User Playlists.Edit Playlist Info')"
-              :icon="['fas', 'edit']"
+              v-if="videoCount > 0 && showPlaylists"
+              :title="$t('User Playlists.Copy Playlist')"
+              :icon="['fas', 'copy']"
               theme="secondary"
-              @click="enterEditMode"
+              @click="toggleCopyVideosPrompt"
             />
           </template>
-          <FtIconButton
-            v-if="videoCount > 0 && showPlaylists && !editMode"
-            :title="$t('User Playlists.Copy Playlist')"
-            :icon="['fas', 'copy']"
-            theme="secondary"
-            @click="toggleCopyVideosPrompt"
-          />
-          <FtIconButton
-            v-if="exportPlaylistButtonVisible"
-            :title="$t('User Playlists.Export Playlist')"
-            :icon="['fas', 'file-arrow-down']"
-            theme="secondary"
-            @click="showExportPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistDuplicateItemCount > 0"
-            :title="$t('User Playlists.Remove Duplicate Videos')"
-            :icon="['fas', 'users-slash']"
-            theme="destructive"
-            @click="showRemoveDuplicateVideosPrompt = true"
-          />
-          <FtIconButton
-            v-if="!editMode && userPlaylistAnyVideoWatched"
-            :title="$t('User Playlists.Remove Watched Videos')"
-            :icon="['fas', 'eye-slash']"
-            theme="destructive"
-            @click="showRemoveVideosOnWatchPrompt = true"
-          />
-          <FtIconButton
-            v-if="deletePlaylistButtonVisible"
-            :disabled="markedAsQuickBookmarkTarget"
-            :title="!markedAsQuickBookmarkTarget ? $t('User Playlists.Delete Playlist') : playlistDeletionDisabledLabel"
-            :icon="['fas', 'trash']"
-            theme="destructive"
-            @disabled-click="handlePlaylistDeleteDisabledClick"
-            @click="showDeletePlaylistPrompt = true"
-          />
           <FtShareButton
             v-if="sharePlaylistButtonVisible"
             :id="id"
@@ -628,10 +627,6 @@ function enterEditMode() {
   })
 }
 
-function handleQuickBookmarkEnabledDisabledClick() {
-  showToast(t('User Playlists.SinglePlaylistView.Toast["This playlist is already being used for quick bookmark."]'))
-}
-
 function handlePlaylistDeleteDisabledClick() {
   showToast(playlistDeletionDisabledLabel.value)
 }
@@ -911,30 +906,105 @@ function handleDeletePlaylistPromptAnswer(option) {
   }
 }
 
-function enableQuickBookmarkForThisPlaylist() {
-  const currentQuickBookmarkTargetPlaylist = quickBookmarkPlaylist.value
+/**
+ * @typedef {object} PlaylistOption
+ * @property {string} label
+ * @property {string[]} icon
+ * @property {() => void} action
+ * @property {boolean} [disabled] - shown, its action explains why it can't be done
+ */
 
-  store.dispatch('updateQuickBookmarkTargetPlaylistId', props.id)
-  if (currentQuickBookmarkTargetPlaylist != null) {
-    showToast(
-      t('User Playlists.SinglePlaylistView.Toast["This playlist is now used for quick bookmark instead of {oldPlaylistName}. Click here to undo"]', {
-        oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
-      }),
-      5000,
-      () => {
-        store.dispatch('updateQuickBookmarkTargetPlaylistId', currentQuickBookmarkTargetPlaylist._id)
-        showToast(
-          t('User Playlists.SinglePlaylistView.Toast["Reverted to use {oldPlaylistName} for quick bookmark"]', {
-            oldPlaylistName: currentQuickBookmarkTargetPlaylist.playlistName
-          }),
-          5000,
-        )
-      },
-    )
+const optionsMenu = useTemplateRef('optionsMenu')
+const optionsMenuOpen = ref(false)
+
+/** @type {import('vue').ComputedRef<PlaylistOption[]>} */
+const playlistOptions = computed(() => {
+  const options = [
+    { label: t('User Playlists.Edit Playlist Info'), icon: ['fas', 'edit'], action: enterEditMode },
+  ]
+
+  if (props.videoCount > 0 && showPlaylists.value) {
+    options.push({ label: t('User Playlists.Copy Playlist'), icon: ['fas', 'copy'], action: () => toggleCopyVideosPrompt() })
+  }
+
+  if (exportPlaylistButtonVisible.value) {
+    options.push({ label: t('User Playlists.Export Playlist'), icon: ['fas', 'file-arrow-down'], action: () => { showExportPrompt.value = true } })
+  }
+
+  if (userPlaylistDuplicateItemCount.value > 0) {
+    options.push({ label: t('User Playlists.Remove Duplicate Videos'), icon: ['fas', 'users-slash'], action: () => { showRemoveDuplicateVideosPrompt.value = true } })
+  }
+
+  if (userPlaylistAnyVideoWatched.value) {
+    options.push({ label: t('User Playlists.Remove Watched Videos'), icon: ['fas', 'eye-slash'], action: () => { showRemoveVideosOnWatchPrompt.value = true } })
+  }
+
+  if (deletePlaylistButtonVisible.value) {
+    options.push({
+      label: t('User Playlists.Delete Playlist'),
+      icon: ['fas', 'trash'],
+      disabled: markedAsQuickBookmarkTarget.value,
+      action: markedAsQuickBookmarkTarget.value ? handlePlaylistDeleteDisabledClick : () => { showDeletePlaylistPrompt.value = true },
+    })
+  }
+
+  return options
+})
+
+/**
+ * @param {PlaylistOption} option
+ */
+function selectPlaylistOption(option) {
+  optionsMenuOpen.value = false
+  option.action()
+}
+
+// The menu closes once the remote's focus has moved out of it (checked after
+// each key press, once spatial nav has moved it), on Escape, and on a click
+// elsewhere
+function closeOptionsMenuOutside() {
+  setTimeout(() => {
+    const focused = document.querySelector('[data-spatial-nav-focused]')
+    if (optionsMenuOpen.value && focused && !optionsMenu.value?.contains(focused)) {
+      optionsMenuOpen.value = false
+    }
+  })
+}
+
+/**
+ * @param {Event} event
+ */
+function handleOptionsMenuKey(event) {
+  if (event.key === 'Escape') {
+    optionsMenuOpen.value = false
   } else {
-    showToast(t('User Playlists.SinglePlaylistView.Toast.This playlist is now used for quick bookmark'))
+    closeOptionsMenuOutside()
   }
 }
+
+/**
+ * @param {PointerEvent} event
+ */
+function handleOptionsMenuPointerDown(event) {
+  if (!optionsMenu.value?.contains(/** @type {Node} */ (event.target))) {
+    optionsMenuOpen.value = false
+  }
+}
+
+watch(optionsMenuOpen, (open) => {
+  if (open) {
+    document.addEventListener('keydown', handleOptionsMenuKey)
+    document.addEventListener('pointerdown', handleOptionsMenuPointerDown, true)
+  } else {
+    document.removeEventListener('keydown', handleOptionsMenuKey)
+    document.removeEventListener('pointerdown', handleOptionsMenuPointerDown, true)
+  }
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('keydown', handleOptionsMenuKey)
+  document.removeEventListener('pointerdown', handleOptionsMenuPointerDown, true)
+})
 
 const updateQueryDebounced = debounce((newQuery) => {
   query.value = newQuery
