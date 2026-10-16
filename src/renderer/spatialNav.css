@@ -147,6 +147,13 @@
   color: inherit !important;
 }
 
+/* Dropdown entries (selects, icon button menus, a playlist's options): a
+   lighter background, their text keeps its color */
+:is(.selectOption, .iconDropdown .listItem, .optionsMenuItem)[data-spatial-nav-focused] {
+  background-color: color-mix(in srgb, var(--primary-text-color) 22%, transparent) !important;
+  color: var(--primary-text-color) !important;
+}
+
 /* Rounded, unless the element has its own shape (circle buttons): no
    specificity, so any border-radius of the element wins */
 :where([data-spatial-nav-focused]) {
