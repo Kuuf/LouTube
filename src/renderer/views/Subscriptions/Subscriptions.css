@@ -25,42 +25,6 @@
   text-align: center;
 }
 
-/* Equal, full width tabs, however many are shown, like the Trending page */
-.tabs {
-  inline-size: 100%;
-  display: grid;
-  gap: 12px;
-  grid-auto-columns: minmax(0, 1fr);
-  grid-auto-flow: column;
-  margin-block: 4px 20px;
-  color: var(--tertiary-text-color);
-}
-
-/* Remote focus has the swapped colors (spatialNav.css), which also select
-   the tab (useTvPage.js): the selected one is dimmed while the focus is in
-   its content, like the channel page's tabs (ChannelDetails.css) */
-.selectedTab {
-  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
-  color: var(--primary-text-color);
-  font-weight: bold;
-}
-
-.tab {
-  padding-block: 12px;
-  padding-inline: 24px;
-  border-radius: var(--radius-pill);
-  font-size: 20px;
-  text-align: center;
-  cursor: pointer;
-  transition:
-    background-color 150ms ease-out,
-    color 150ms ease-out;
-}
-
-.tab:hover:not(.selectedTab) {
-  background-color: color-mix(in srgb, var(--primary-text-color) 8%, transparent);
-}
-
 .subscriptionIcon {
   color: var(--primary-color);
 }
