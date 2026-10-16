@@ -20,6 +20,19 @@
            streams or posts -->
       <FtCard class="card">
         <SubscriptionsVideos id="subscriptionsPanel" />
+        <!-- A channel picked in the list: the way to its page, under its videos -->
+        <router-link
+          v-if="selectedChannel"
+          class="goToChannel"
+          :to="`/channel/${selectedChannel.id}`"
+        >
+          <img
+            class="goToChannelAvatar"
+            :src="selectedChannel.thumbnail"
+            alt=""
+          >
+          {{ $t('Channels.Go To Channel') }}
+        </router-link>
       </FtCard>
     </div>
   </div>
@@ -27,17 +40,24 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 
 import FtCard from '../../components/ft-card/ft-card.vue'
 import SubscriptionsVideos from '../../components/SubscriptionsVideos.vue'
 import SubscriptionsChannelNav from '../../components/SubscriptionsChannelNav/SubscriptionsChannelNav.vue'
 
+import store from '../../store/index'
 import { useTvPage } from '../../composables/useTvPage'
 import { navState } from '../../helpers/spatialNav/NavManager'
 import { selectedSubscriptionsChannelId } from './subscriptionsChannel'
 
 const PAGE_ZONE_ID = 'page-subscriptions'
+
+/** The channel picked in the list, null for all channels */
+const selectedChannel = computed(() => {
+  const id = selectedSubscriptionsChannelId.value
+  return id === null ? null : store.getters.getActiveProfile.subscriptions.find(channel => channel.id === id) ?? null
+})
 
 // Left from the page goes to its channel list, and from there to the side nav
 useTvPage(PAGE_ZONE_ID, { topOnFirstRow: true, left: 'subscriptions-channels' })

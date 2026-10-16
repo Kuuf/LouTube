@@ -25,6 +25,47 @@
   text-align: center;
 }
 
+/* Under a picked channel's videos: a wide pill to its page, the label in
+   its middle, the channel's avatar at its start */
+.goToChannel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  inline-size: 100%;
+  min-block-size: 56px;
+  margin-block: 24px 0;
+  padding-inline: 60px;
+  border-radius: var(--radius-pill);
+  background-color: color-mix(in srgb, var(--primary-text-color) 12%, transparent);
+  color: var(--primary-text-color);
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.goToChannel:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 22%, transparent);
+}
+
+/* The swapped colors of text buttons with the remote's focus
+   (spatialNav.css), not the lighter background its avatar would get */
+.goToChannel[data-spatial-nav-focused] {
+  background-color: var(--primary-text-color) !important;
+  box-shadow: none;
+  color: var(--bg-color) !important;
+}
+
+.goToChannelAvatar {
+  position: absolute;
+  inset-inline-start: 10px;
+  inline-size: 36px;
+  block-size: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
 .subscriptionIcon {
   color: var(--primary-color);
 }
