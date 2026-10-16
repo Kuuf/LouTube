@@ -62,6 +62,11 @@
   font-size: 15px;
   line-height: 1;
   user-select: none;
+
+  /* Its own colors, also while the entry has the focus: the entry's swapped
+     text color (spatialNav.css) is not for its letter, nor its transition */
+  color: var(--avatar-text-color) !important;
+  transition: none !important;
 }
 
 .channelLink {

@@ -52,7 +52,7 @@
           >
             <div
               class="profileAvatar"
-              :style="{ background: activeProfile.bgColor, color: activeProfile.textColor }"
+              :style="{ background: activeProfile.bgColor, '--avatar-text-color': activeProfile.textColor }"
               dir="auto"
             >
               {{ activeProfileInitial }}
