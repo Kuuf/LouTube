@@ -77,6 +77,11 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
+  /** Takes the remote's focus as soon as it is there, on the entry of `landOn` */
+  activateOnMount: {
+    type: Boolean,
+    default: false
+  },
   scrollerClass: {
     type: [String, Array, Object],
     default: null
@@ -110,8 +115,25 @@ function grid() {
   return [...props.leadingCells(), ...entries].map(cell => [cell])
 }
 
-const { isActive, focusedPosition } = useSpatialZone(props.zoneId, grid, {
+/**
+ * The next time the focus comes in, it lands on the entry of `landOn`, the
+ * list scrolled to it already, so it is in its place
+ */
+function landOnEntry() {
+  const entry = props.landOn()
+  const row = entry ? grid().findIndex(([cell]) => cell === entry) : -1
+  if (row === -1) { return }
+
+  navState.lastPosition.set(props.zoneId, { row, col: 0 })
+  scrollToCenterAnimated(scroller.value, entry)
+}
+
+// Before the zone's own mounted hook, which activates it with `activateOnMount`
+onMounted(landOnEntry)
+
+const { isActive, focusedPosition, activate } = useSpatialZone(props.zoneId, grid, {
   isChrome: props.isChrome,
+  active: props.activateOnMount,
   edges: props.edges,
   onSelect: (position, cell) => {
     const index = cell?.hasAttribute(ITEM_ATTRIBUTE)
@@ -142,7 +164,8 @@ function updateHighlight() {
   if (entry == null) { return }
 
   highlight.visual = entry.hasAttribute('data-spatial-nav-visual')
-  highlight.top = scroller.value.offsetTop + entry.offsetTop - centeredScrollTop(scroller.value, entry)
+  // Rounded like the scroll position the list ends up at
+  highlight.top = scroller.value.offsetTop + entry.offsetTop - Math.round(centeredScrollTop(scroller.value, entry))
   highlight.height = entry.offsetHeight
 }
 
@@ -159,19 +182,11 @@ function onResize() {
   updateHighlight()
 }
 
-/**
- * Lines up for the next time the focus comes in: on the entry of `landOn`,
- * the list scrolled to it already, so it is in its place
- */
+/** Lines up for the next time the focus comes in, see `landOnEntry` */
 function syncPosition() {
-  if (isActive.value) { return }
-
-  const entry = props.landOn()
-  const row = entry ? grid().findIndex(([cell]) => cell === entry) : -1
-  if (row === -1) { return }
-
-  navState.lastPosition.set(props.zoneId, { row, col: 0 })
-  scrollToCenterAnimated(scroller.value, entry)
+  if (!isActive.value) {
+    landOnEntry()
+  }
 }
 
 watch(isActive, (active) => {
@@ -181,7 +196,6 @@ watch(isActive, (active) => {
 })
 
 onMounted(() => {
-  syncPosition()
   window.addEventListener('resize', onResize)
 })
 
@@ -189,7 +203,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', onResize)
 })
 
-defineExpose({ isActive, focusedPosition, syncPosition })
+defineExpose({ isActive, focusedPosition, syncPosition, activate })
 </script>
 
 <style scoped src="./TvScrollList.css" />

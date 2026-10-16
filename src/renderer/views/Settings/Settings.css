@@ -25,13 +25,30 @@
   display: flex;
   flex: none;
   flex-direction: column;
-  gap: 4px;
   inline-size: 280px;
-
-  /* More sections than fit on a small screen: the nav scrolls by itself */
   max-block-size: calc(100vh - 96px);
+}
+
+/* The sections (TvScrollList): more than fit on a small screen, they scroll
+   by themselves, the focused one held in the middle */
+.settingsNav :deep(.navList) {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 4px;
+  min-block-size: 0;
   overflow-y: auto;
   scrollbar-width: none;
+}
+
+/* The remote's focus: under the list, the theme's text color, the focused
+   entry's text in the background color (below) */
+.settingsNav :deep(.navHighlight) {
+  inset-inline: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-text-color);
 }
 
 .navHeader {
@@ -73,11 +90,16 @@
 }
 
 /* The open section: dimmed, the remote focus has the swapped colors
-   (spatialNav.css), like the channel page's tabs */
+   (the highlight), like the channel page's tabs */
 .navItem.active {
   background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
   color: var(--primary-text-color);
   font-weight: 600;
+}
+
+.navItem[data-spatial-nav-focused] {
+  background-color: transparent !important;
+  color: var(--bg-color) !important;
 }
 
 .navIcon {

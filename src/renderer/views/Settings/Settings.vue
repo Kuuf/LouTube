@@ -12,23 +12,37 @@
           />
           {{ t('Settings.Settings') }}
         </h2>
-        <button
-          v-for="section in settingsSectionComponents"
-          :key="section.type"
-          class="navItem"
-          :class="{ active: section.type === activeSection }"
-          type="button"
-          :data-section="section.type"
-          :aria-current="section.type === activeSection"
-          @click="activeSection = section.type"
+        <!-- The sections, scrolling like the side nav (TvScrollList) -->
+        <TvScrollList
+          ref="menuList"
+          :zone-id="MENU_ZONE_ID"
+          activate-on-mount
+          :items="settingsSectionComponents"
+          :item-key="section => section.type"
+          :edges="MENU_EDGES"
+          :land-on="activeNavItem"
+          scroller-class="navList"
+          highlight-class="navHighlight"
         >
-          <FontAwesomeIcon
-            :icon="section.icon"
-            class="navIcon"
-            fixed-width
-          />
-          <span class="navLabel">{{ section.title }}</span>
-        </button>
+          <template #item="{ item: section, itemAttrs }">
+            <button
+              v-bind="itemAttrs"
+              class="navItem"
+              :class="{ active: section.type === activeSection }"
+              type="button"
+              :data-section="section.type"
+              :aria-current="section.type === activeSection"
+              @click="activeSection = section.type"
+            >
+              <FontAwesomeIcon
+                :icon="section.icon"
+                class="navIcon"
+                fixed-width
+              />
+              <span class="navLabel">{{ section.title }}</span>
+            </button>
+          </template>
+        </TvScrollList>
       </nav>
       <div
         ref="contentRef"
@@ -51,7 +65,7 @@
 
 <script setup>
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { computed, nextTick, onMounted, ref, useTemplateRef, watch } from 'vue'
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import GeneralSettings from '../../components/GeneralSettings/GeneralSettings.vue'
@@ -68,10 +82,11 @@ import ParentalControlSettings from '../../components/ParentalControlSettings.vu
 import ExperimentalSettings from '../../components/ExperimentalSettings/ExperimentalSettings.vue'
 import PasswordSettings from '../../components/PasswordSettings/PasswordSettings.vue'
 import PasswordDialog from '../../components/PasswordDialog/PasswordDialog.vue'
+import TvScrollList from '../../components/TvScrollList/TvScrollList.vue'
 
 import store from '../../store/index'
 import { useSpatialZone } from '../../composables/useSpatialZone'
-import { focusableGrid, navState } from '../../helpers/spatialNav/NavManager'
+import { focusableGrid } from '../../helpers/spatialNav/NavManager'
 
 const { locale, t } = useI18n()
 
@@ -209,63 +224,48 @@ function handleUnlock() {
 
   // The nav only exists once unlocked
   nextTick(() => {
-    menuZone.activate()
+    menuList.value?.activate()
   })
 }
 
 // Spatial-nav (remote control): the section nav on the left, one item per
-// row, and every control of the open section beside it. Focusing a nav item
-// opens its section right away, like the profile manager's nav
-// (TVProfileManage.vue). Tooltip buttons are skipped, they would add a stop
-// to most rows.
+// row (TvScrollList), and every control of the open section beside it.
+// Focusing a nav item opens its section right away, like the profile
+// manager's nav (TVProfileManage.vue). Tooltip buttons are skipped, they
+// would add a stop to most rows.
 const MENU_ZONE_ID = 'settings-menu'
 const CONTENT_ZONE_ID = 'settings-content'
 
 const menuRef = useTemplateRef('menuRef')
+const menuList = useTemplateRef('menuList')
 const contentRef = useTemplateRef('contentRef')
-
-function menuGrid() {
-  return [...(menuRef.value?.querySelectorAll('.navItem') ?? [])].map(item => [item])
-}
 
 function contentGrid() {
   return focusableGrid(contentRef.value, '.tooltip *')
 }
 
-function activeSectionRow() {
-  return Math.max(settingsSectionComponents.value.findIndex(section => section.type === activeSection.value), 0)
+/** The nav's entry for the open section: where the focus comes back to */
+function activeNavItem() {
+  return menuRef.value?.querySelector('.navItem.active') ?? null
 }
 
-// Registered before the zone's own mounted hook, which activates it
-onMounted(() => {
-  navState.lastPosition.set(MENU_ZONE_ID, { row: activeSectionRow(), col: 0 })
-})
+const MENU_EDGES = {
+  left: 'sidebar',
+  // Nothing to move to in a section without controls
+  right: () => contentGrid().length > 0 ? CONTENT_ZONE_ID : null,
+}
 
-const menuZone = useSpatialZone(MENU_ZONE_ID, menuGrid, {
-  active: true,
-  edges: {
-    left: 'sidebar',
-    // Nothing to move to in a section without controls
-    right: () => contentGrid().length > 0 ? CONTENT_ZONE_ID : null,
-  },
-})
-
-watch(menuZone.focusedPosition, (position) => {
-  if (position == null) { return }
-
-  const sectionType = menuGrid()[position.row]?.[0]?.dataset.section
+watch(() => menuList.value?.focusedPosition, () => {
+  const sectionType = menuRef.value?.querySelector('.navItem[data-spatial-nav-focused]')?.dataset.section
   if (sectionType) {
     activeSection.value = sectionType
   }
-})
+}, { flush: 'post' })
 
 useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
   edges: {
-    // Back to the nav, on the section that is open
-    left: () => {
-      navState.lastPosition.set(MENU_ZONE_ID, { row: activeSectionRow(), col: 0 })
-      return MENU_ZONE_ID
-    },
+    // Back to the nav, on the section that is open (TvScrollList's landOn)
+    left: MENU_ZONE_ID,
   },
 })
 </script>
