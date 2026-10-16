@@ -37,8 +37,10 @@ const ITEM_WAIT_MS = 2000
  * @param {boolean} [options.topOnFirstRow] - focusing a list item of the
  *   first row scrolls the page back to its very top (heading and tabs in
  *   view again), instead of just far enough to show the item
+ * @param {string} [options.left] - the zone Left from the leftmost column
+ *   goes to, the side nav unless the page has another one beside it
  */
-export function useTvPage(zoneId, { startOn = 'item', exclude, topOnFirstRow = false } = {}) {
+export function useTvPage(zoneId, { startOn = 'item', exclude, topOnFirstRow = false, left = 'sidebar' } = {}) {
   const root = useTemplateRef('tvPageRoot')
   const excludeSelector = exclude ? `${DEFAULT_EXCLUDE}, ${exclude}` : DEFAULT_EXCLUDE
 
@@ -51,7 +53,7 @@ export function useTvPage(zoneId, { startOn = 'item', exclude, topOnFirstRow = f
   const zone = useSpatialZone(zoneId, grid, {
     active: true,
     edges: {
-      left: 'sidebar',
+      left,
     },
     onKeyDown: () => {
       usedRemote = true

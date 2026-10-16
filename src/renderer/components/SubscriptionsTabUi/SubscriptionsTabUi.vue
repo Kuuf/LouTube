@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- On the page heading's row (Subscriptions.vue) -->
+    <!-- Under the page's heading, over its channel list (Subscriptions.vue) -->
     <Teleport
       defer
       to="#subscriptionsHeaderActions"
@@ -9,6 +9,7 @@
         :disable-refresh="isLoading || !activeProfileHasSubscriptions"
         :last-refresh-timestamp="lastRefreshTimestamp"
         :title="title"
+        wide
         @click="refresh"
       />
     </Teleport>
@@ -62,7 +63,7 @@
         :display="isCommunity ? 'list' : ''"
       />
       <FtAutoLoadNextPageWrapper
-        v-if="videoList.length > dataLimit"
+        v-if="filteredVideoList.length > dataLimit"
         @load-next-page="increaseLimit"
       >
         <FtFlexBox>
@@ -88,6 +89,8 @@ import FtChannelBubble from '../FtChannelBubble/FtChannelBubble.vue'
 import FtElementList from '../FtElementList/FtElementList.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtRefreshWidget from '../FtRefreshWidget/FtRefreshWidget.vue'
+
+import { selectedSubscriptionsChannelId } from '../../views/Subscriptions/subscriptionsChannel'
 import FtSkeletonList from '../FtSkeletonList/FtSkeletonList.vue'
 
 import store from '../../store/index'
@@ -169,11 +172,15 @@ const onlyShowLatestFromChannelNumber = computed(() => {
 })
 
 const filteredVideoList = computed(() => {
-  if (props.isCommunity) {
-    return props.videoList
-  }
+  // A channel picked in the channel list (SubscriptionsChannelNav): its own only
+  const channelId = selectedSubscriptionsChannelId.value
+  let videoList = channelId === null
+    ? props.videoList
+    : props.videoList.filter(video => video.authorId === channelId)
 
-  let videoList = props.videoList
+  if (props.isCommunity) {
+    return videoList
+  }
 
   if (hideWatchedSubs.value) {
     videoList = videoList.filter((video) => {

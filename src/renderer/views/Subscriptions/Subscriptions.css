@@ -1,3 +1,14 @@
+/* The channel list (SubscriptionsChannelNav) on the left, the page beside it */
+.subscriptionsLayout {
+  display: flex;
+  align-items: flex-start;
+}
+
+.subscriptionsContent {
+  flex: 1 1 0;
+  min-inline-size: 0;
+}
+
 /* Always on the page background, edge to edge like the video lists
    (videoLists.css), also when there is nothing to list (as .ft-card to win
    over FtCard's own background) */
@@ -57,4 +68,10 @@
 
 .subscriptionIcon {
   color: var(--primary-color);
+}
+
+/* Over the channel list */
+.pageTitle {
+  margin: 0;
+  padding-inline: 8px;
 }

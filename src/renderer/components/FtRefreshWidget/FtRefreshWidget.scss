@@ -11,3 +11,38 @@
   font-size: 14px;
   color: var(--tertiary-text-color);
 }
+
+// `wide`: as wide as its container, in the app's color
+.wideRefreshSection {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .lastRefreshTimestamp {
+    font-size: 13px;
+    text-align: center;
+  }
+}
+
+.wideRefreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding-inline: 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: var(--primary-color);
+  color: var(--text-with-main-color);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}

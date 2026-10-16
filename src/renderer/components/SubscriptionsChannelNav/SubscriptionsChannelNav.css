@@ -1,0 +1,129 @@
+/*
+  The subscriptions page's channel list: All channels, then every subscribed
+  channel with its avatar. Beside the page, held on screen while it scrolls,
+  scrolling on its own. Entries and focus as in the side nav's open drawer
+  (SideNav.css): the picked channel in the app's color, the remote's focus
+  a highlight of its own that holds still in the middle of the list.
+*/
+.channelNav {
+  position: sticky;
+  inset-block-start: 0;
+
+  /* From the very top of the screen, where it is held once the page
+     scrolls: up past the space above the page (App.css .routerView, 18px
+     twice), which would otherwise push its bottom off screen */
+  margin-block-start: -36px;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  inline-size: 260px;
+  block-size: 100vh;
+
+  /* Clear of the side nav's background, which fades out over the page */
+  margin-inline-start: 24px;
+}
+
+/* The page's heading and its refresh button (Subscriptions.vue), over the
+   list, which scrolls under it */
+.header {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 16px;
+  padding-block: 24px 8px;
+  padding-inline: 8px;
+}
+
+:deep(.list) {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  flex: 1 1 0;
+  min-block-size: 0;
+  padding-block: 24px;
+  overflow: hidden auto;
+  scrollbar-width: none;
+
+  /* The entries fade out at the top and bottom edges */
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent,
+      #000 48px,
+      #000 calc(100% - 48px),
+      transparent
+    );
+}
+
+.entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-sizing: border-box;
+  inline-size: calc(100% - 16px);
+  min-block-size: 52px;
+  margin-block: 2px;
+  margin-inline: 8px;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--primary-text-color);
+  font: inherit;
+  font-size: 15px;
+  text-align: start;
+  cursor: pointer;
+}
+
+.entry:hover {
+  background-color: var(--side-nav-hover-color);
+  color: var(--side-nav-hover-text-color);
+  transition: background 0.2s ease-in;
+}
+
+/* The picked channel: a gray background. Focused, it takes the focus look
+   like any entry (below). */
+.entry.selected,
+.entry.selected:hover {
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  font-weight: 600;
+}
+
+/* The highlight stands in for the entry's own focus look (spatialNav.css),
+   with the theme's text and background colors swapped */
+.entry[data-spatial-nav-focused] {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  color: var(--bg-color) !important;
+}
+
+.avatar {
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.allChannels {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--primary-text-color) 16%, transparent);
+  color: var(--primary-text-color);
+  font-size: 14px;
+}
+
+.name {
+  flex: 1 1 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Under the list, moved and sized to the focused entry (TvScrollList) */
+:deep(.focusHighlight) {
+  inset-inline: 8px;
+  border-radius: var(--radius-md);
+  background-color: var(--primary-text-color);
+}

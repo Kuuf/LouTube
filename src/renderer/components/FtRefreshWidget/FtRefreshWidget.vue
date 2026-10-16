@@ -1,5 +1,29 @@
 <template>
+  <!-- A wide button, its label saying what it refreshes, and when that was
+       last done under it -->
   <div
+    v-if="wide"
+    class="wideRefreshSection"
+  >
+    <button
+      class="wideRefreshButton"
+      type="button"
+      :disabled="disableRefresh"
+      :title="refreshFeedButtonTitle"
+      @click="click"
+    >
+      <FontAwesomeIcon :icon="['fas', 'sync']" />
+      {{ t('Feed.Refresh Feed', { subscriptionName: title }) }}
+    </button>
+    <p
+      v-if="lastRefreshTimestamp"
+      class="lastRefreshTimestamp"
+    >
+      {{ t('Feed.Feed Last Updated', { feedName: title, date: lastRefreshTimestamp }) }}
+    </p>
+  </div>
+  <div
+    v-else
     class="floatingRefreshSection"
   >
     <p
@@ -21,6 +45,7 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 
@@ -41,6 +66,10 @@ const props = defineProps({
   title: {
     type: String,
     required: true
+  },
+  wide: {
+    type: Boolean,
+    default: false
   }
 })
 
