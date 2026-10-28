@@ -18,7 +18,8 @@ fun getVersionInfo(project: Project): VersionInfo {
 
   val packageJson = json.parse(packageJsonPath) as Map<String, Any>
   val versionName = packageJson["version"] as String
-  val appName = "io.freetubeapp." + packageJson["name"]
+  // own id so LouTube installs alongside FreeTube Android (io.freetubeapp.freetube)
+  val appName = "io.freetubeapp.loutube"
   val parts = versionName.split("-")
   val numbers = parts[0].split(".")
   val major = numbers[0].toInt()
