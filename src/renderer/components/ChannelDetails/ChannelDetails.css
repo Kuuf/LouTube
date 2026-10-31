@@ -81,9 +81,9 @@
   flex-wrap: nowrap;
 }
 
-/* One line, however many tabs: what doesn't fit is scrolled to (by the
-   remote's focus, see ChannelDetails.vue), and fades out at the side(s) with
-   more tabs. The fade size is TABS_FADE_SIZE there. */
+/* One line, however many tabs: the remote's focus stays in the middle as
+   they slide under it (ChannelDetails.vue), and what doesn't fit fades out at
+   the side(s) with more tabs */
 .tabs {
   --fade-size: 96px;
 

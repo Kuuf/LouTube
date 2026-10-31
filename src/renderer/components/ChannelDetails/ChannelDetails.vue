@@ -306,11 +306,10 @@ const formattedSubCount = computed(() => {
 })
 
 // The tabs stay on one line. Too long for the screen, they fade out at the
-// side(s) with more of them, and slide over to bring the focused one in.
+// side(s) with more of them, and the focused one stays in the middle while
+// they slide under it, like the side nav's entries. Near the first and last
+// tabs, with no further to slide, the focus moves on to the ends instead.
 const tabs = useTemplateRef('tabs')
-
-/** How far the fade reaches into the tabs (px), kept in sync with the CSS */
-const TABS_FADE_SIZE = 96
 
 const tabsFade = reactive({ start: false, end: false })
 
@@ -323,8 +322,7 @@ function updateTabsFade() {
 }
 
 /**
- * Slides the tabs so this one is clear of the fades, the first and last tabs
- * all the way to their end
+ * Slides the tabs to bring this one to their middle, as far as they go
  * @param {Element} tab
  */
 function scrollTabIntoView(tab) {
@@ -334,17 +332,7 @@ function scrollTabIntoView(tab) {
   const view = element.getBoundingClientRect()
   const rect = tab.getBoundingClientRect()
 
-  let scrollLeft = element.scrollLeft
-  if (tab === element.firstElementChild) {
-    scrollLeft = 0
-  } else if (tab === element.lastElementChild) {
-    scrollLeft = element.scrollWidth - element.clientWidth
-  } else if (rect.left < view.left + TABS_FADE_SIZE) {
-    scrollLeft -= view.left + TABS_FADE_SIZE - rect.left
-  } else if (rect.right > view.right - TABS_FADE_SIZE) {
-    scrollLeft += rect.right - (view.right - TABS_FADE_SIZE)
-  }
-
+  const scrollLeft = element.scrollLeft + (rect.left + rect.width / 2) - (view.left + view.width / 2)
   animateTabsScroll(element, Math.min(Math.max(scrollLeft, 0), element.scrollWidth - element.clientWidth))
 }
 
