@@ -114,7 +114,7 @@ function autoSearch() {
     : { name: 'tvSearch', params: { query: trimmedText } })
 }
 
-// Three spatial-nav zones: the on-screen keyboard on the left, and on the
+// Three spatial-nav zones, none scrolling the page at a dead end: the on-screen keyboard on the left, and on the
 // right the search bar on top with the results grid below it. The bar's cell
 // is its text field, which is ready to type into as soon as it has the focus
 // (opens Android's own keyboard, or takes a hardware keyboard's typing).
@@ -131,6 +131,7 @@ function keyboardGrid() {
 }
 
 const keyboardZone = useSpatialZone('tv-search-keyboard', keyboardGrid, {
+  noDeadEndScroll: true,
   edges: {
     left: 'sidebar',
     // From the top row to the search bar, from the others to the results
@@ -147,6 +148,7 @@ function searchBarGrid() {
 }
 
 useSpatialZone('tv-search-bar', searchBarGrid, {
+  noDeadEndScroll: true,
   edges: {
     left: 'tv-search-keyboard',
     // Only when there are results to go to
@@ -156,6 +158,7 @@ useSpatialZone('tv-search-bar', searchBarGrid, {
 
 // The results, and "Fetch more results" under them
 const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(results.value?.querySelectorAll(`[${ITEM_ATTRIBUTE}], .getNextPage`) ?? []), {
+  noDeadEndScroll: true,
   edges: {
     left: 'tv-search-keyboard',
     up: 'tv-search-bar',

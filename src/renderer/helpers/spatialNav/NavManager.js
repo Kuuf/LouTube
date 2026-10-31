@@ -38,6 +38,9 @@ import { reactive } from 'vue'
  *   Excluded from `lastContentZoneId` tracking, so chrome zones can send
  *   focus back to "whichever content zone was active before" via an
  *   `edges` function.
+ * @property {boolean} [noDeadEndScroll]
+ *   Up/Down at a dead end do nothing, instead of scrolling the page on (for
+ *   pages that fit the screen, e.g. the search page).
  * @property {(position: GridPosition | null) => void} [onFocusChange]
  * @property {(event: KeyboardEvent) => boolean} [onKeyDown]
  *   Sees every key press first while the zone is active (except in text
@@ -840,7 +843,8 @@ function onKeyDown(event) {
   const delta = DEAD_END_SCROLL[direction]
   const cell = document.querySelector(`[${FOCUSED_ATTRIBUTE}]`)
 
-  if (delta && cell && !navState.zones.get(navState.activeZoneId)?.isChrome) {
+  const zone = navState.zones.get(navState.activeZoneId)
+  if (delta && cell && !zone?.isChrome && !zone?.noDeadEndScroll) {
     animateScrollBy(getScrollParent(cell), delta)
   }
 }

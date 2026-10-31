@@ -18,9 +18,10 @@
   cursor: pointer;
 }
 
+/* Two keys wide and as tall as one */
 .key.wide {
   grid-column: span 2;
-  aspect-ratio: auto;
+  aspect-ratio: 2;
 }
 
 /* A word, not a character: smaller */
