@@ -4,10 +4,8 @@ import { useRoute } from 'vue-router'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { gridFromElements, ITEM_ATTRIBUTE, navState, scrollToViewTopAnimated } from '../../helpers/spatialNav/NavManager'
 
-/** Header controls: subscribe (+ profile toggle), the tabs and the channel search */
-const HEADER_CONTROLS = 'button:not([disabled]), [role="tab"], input'
-/** Not worth a stop on a remote: the search input's own buttons */
-const HEADER_EXCLUDED = '.channelSearch button'
+/** Header controls: subscribe (+ profile toggle) and the tabs */
+const HEADER_CONTROLS = 'button:not([disabled]), [role="tab"]'
 
 /**
  * Content controls: the sort buttons, Home shelves' "View Playlist", the list
@@ -27,7 +25,7 @@ const TAB_BAR_TOP_PADDING = 16
 
 /**
  * Remote control (spatial nav) for the channel page: the header (subscribe,
- * tabs, channel search) and the current tab's content below it. Focus starts
+ * tabs) and the current tab's content below it. Focus starts
  * on the selected tab once the channel has loaded. Focusing a tab or a sort
  * order selects it. Left from either leaves to
  * the side nav.
@@ -48,8 +46,7 @@ export function useTvChannel() {
   navState.lastPosition.delete('channel-content')
 
   function headerGrid() {
-    const controls = [...(channelHeader.value?.$el.querySelectorAll(HEADER_CONTROLS) ?? [])]
-    return gridFromElements(controls.filter(control => !control.matches(HEADER_EXCLUDED)))
+    return gridFromElements(channelHeader.value?.$el.querySelectorAll(HEADER_CONTROLS) ?? [])
   }
 
   const headerZone = useSpatialZone('channel-header', headerGrid, {

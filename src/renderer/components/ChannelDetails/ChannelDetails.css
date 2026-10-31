@@ -69,17 +69,6 @@
   align-items: center;
 }
 
-.channelSearch {
-  margin-block-start: 10px;
-  max-inline-size: 250px;
-  inline-size: 220px;
-  margin-inline-start: auto;
-  align-self: flex-end;
-
-  /* Only as wide as the search bar, the tabs get the rest of the row */
-  flex: none;
-}
-
 .infoTabs {
   position: relative;
   inline-size: 100%;
@@ -152,11 +141,6 @@
     block-size: auto;
     flex-flow: column-reverse;
     gap: 0;
-  }
-
-  .channelSearch {
-    inline-size: 100%;
-    max-inline-size: none;
   }
 
   .tabs {

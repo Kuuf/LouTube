@@ -41,14 +41,11 @@
       :has-error-message="!!errorMessage"
       :thumbnail-url="thumbnailUrl"
       :sub-count="subCount"
-      :show-search-bar="showSearchBar"
       :is-subscribed="isSubscribed"
       :visible-tabs="tabInfoValues"
       :current-tab="currentTab"
-      :query="lastSearchQuery"
       class="card channelDetails"
       @change-tab="changeTab"
-      @search="newSearchWithStatePersist"
       @subscribed="handleSubscription"
     />
     <FtCard
@@ -273,7 +270,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import autolinker from 'autolinker'
 import { computed, onMounted, ref, shallowRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { isNavigationFailure, NavigationFailureType, useRoute, useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { YTNodes } from 'youtubei.js'
 
 import ChannelAbout from '../../components/ChannelAbout/ChannelAbout.vue'
@@ -334,7 +331,6 @@ const router = useRouter()
 
 useTvChannel()
 
-let skipRouteChangeWatcherOnce = false
 let autoRefreshOnSortByChangeEnabled = false
 /** @type {import('youtubei.js').YT.Channel|null} */
 let channelInstance = null
@@ -587,10 +583,6 @@ const sortOptions = computed(() => {
 })
 
 watch(route, () => {
-  if (skipRouteChangeWatcherOnce) {
-    skipRouteChangeWatcherOnce = false
-    return
-  }
   isLoading.value = true
 
   if (route.query.url) {
@@ -2224,46 +2216,6 @@ function newSearch(query) {
   } else {
     searchChannelInvidious()
   }
-}
-
-/**
- * @param {string} query
- */
-function newSearchWithStatePersist(query) {
-  saveStateInRouter(query)
-  newSearch(query)
-}
-
-async function saveStateInRouter(query) {
-  skipRouteChangeWatcherOnce = true
-
-  let location
-
-  if (query === '') {
-    location = { path: `/channel/${id.value}` }
-  } else {
-    location = {
-      path: `/channel/${id.value}`,
-      params: {
-        currentTab: 'search',
-      },
-      query: {
-        searchQueryText: query,
-      }
-    }
-  }
-
-  try {
-    await router.replace(location)
-  } catch (failure) {
-    if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
-      return
-    }
-
-    throw failure
-  }
-
-  skipRouteChangeWatcherOnce = false
 }
 
 /**

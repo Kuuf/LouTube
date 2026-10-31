@@ -228,32 +228,22 @@
             {{ $t("Channel.About.About") }}
           </div>
         </div>
-
-        <FtSearchInput
-          v-if="showSearchBar"
-          ref="searchBar"
-          :placeholder="$t('Channel.Search Channel')"
-          :value="query"
-          class="channelSearch"
-          @search="search"
-        />
       </FtFlexBox>
     </div>
   </FtCard>
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, useTemplateRef } from 'vue'
+import { computed } from 'vue'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtCard from '../ft-card/ft-card.vue'
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import FtSubscribeButton from '../FtSubscribeButton/FtSubscribeButton.vue'
-import FtSearchInput from '../FtSearchInput/FtSearchInput.vue'
 
 import store from '../../store/index'
 
-import { ctrlFHandler, formatNumber } from '../../helpers/utils'
+import { formatNumber } from '../../helpers/utils'
 
 const props = defineProps({
   id: {
@@ -280,10 +270,6 @@ const props = defineProps({
     type: Number,
     default: null
   },
-  showSearchBar: {
-    type: Boolean,
-    default: true
-  },
   isSubscribed: {
     type: Boolean,
     default: false
@@ -296,13 +282,9 @@ const props = defineProps({
     type: String,
     default: 'videos'
   },
-  query: {
-    type: String,
-    default: ''
-  },
 })
 
-const emit = defineEmits(['change-tab', 'search', 'subscribed'])
+const emit = defineEmits(['change-tab', 'subscribed'])
 
 /** @type {import('vue').ComputedRef<boolean>} */
 const hideChannelSubscriptions = computed(() => {
@@ -356,29 +338,6 @@ function focusTab(currentTab, event) {
   store.dispatch('showOutlines')
 }
 
-/**
- * @param {string} query
- */
-function search(query) {
-  emit('search', query)
-}
-
-const searchBar = useTemplateRef('searchBar')
-
-/**
- * @param {KeyboardEvent} event
- */
-function keyboardShortcutHandler(event) {
-  ctrlFHandler(event, searchBar.value)
-}
-
-onMounted(() => {
-  document.addEventListener('keydown', keyboardShortcutHandler)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('keydown', keyboardShortcutHandler)
-})
 </script>
 
 <style scoped src="./ChannelDetails.css" />
