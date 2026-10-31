@@ -17,6 +17,7 @@ import { activateZone, isZoneActive, navState, registerZone, unregisterZone } fr
  * @param {object} [options]
  * @param {Partial<Record<Direction, import('../helpers/spatialNav/NavManager').EdgeTarget>>} [options.edges]
  * @param {boolean} [options.isChrome] - persistent UI (e.g. the side nav), see NavManager.
+ * @param {boolean} [options.centerInPage] - the focus in the middle of the screen, see NavManager.
  * @param {boolean} [options.noDeadEndScroll] - no scrolling at a dead end, see NavManager.
  * @param {boolean} [options.active] - activate this zone as soon as it mounts.
  * @param {(event: KeyboardEvent) => boolean} [options.onKeyDown]
@@ -26,12 +27,12 @@ import { activateZone, isZoneActive, navState, registerZone, unregisterZone } fr
  *   cell's first link/button when cells are DOM elements.
  */
 export function useSpatialZone(zoneId, grid, options = {}) {
-  const { edges = {}, isChrome = false, noDeadEndScroll = false, active = false, onKeyDown, onSelect } = options
+  const { edges = {}, isChrome = false, centerInPage = false, noDeadEndScroll = false, active = false, onKeyDown, onSelect } = options
 
   const getGrid = () => (typeof grid === 'function' ? grid() : unref(grid)) ?? []
 
   onMounted(() => {
-    registerZone({ id: zoneId, getGrid, edges, isChrome, noDeadEndScroll, onKeyDown, onSelect })
+    registerZone({ id: zoneId, getGrid, edges, isChrome, centerInPage, noDeadEndScroll, onKeyDown, onSelect })
     if (active) {
       activateZone(zoneId)
     }

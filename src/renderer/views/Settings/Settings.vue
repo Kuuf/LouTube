@@ -262,7 +262,10 @@ watch(() => menuList.value?.focusedPosition, () => {
   }
 }, { flush: 'post' })
 
+// The focused control stays in the middle of the screen, the section
+// scrolling under it, like the nav beside it
 useSpatialZone(CONTENT_ZONE_ID, contentGrid, {
+  centerInPage: true,
   edges: {
     // Back to the nav, on the section that is open (TvScrollList's landOn)
     left: MENU_ZONE_ID,

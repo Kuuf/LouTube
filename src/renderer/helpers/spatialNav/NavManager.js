@@ -38,6 +38,10 @@ import { reactive } from 'vue'
  *   Excluded from `lastContentZoneId` tracking, so chrome zones can send
  *   focus back to "whichever content zone was active before" via an
  *   `edges` function.
+ * @property {boolean} [centerInPage]
+ *   The focused cell goes to the middle of the screen, the page scrolling
+ *   under it as far as it goes, like cells with CENTER_ATTRIBUTE but without
+ *   their focus look (e.g. the settings' controls).
  * @property {boolean} [noDeadEndScroll]
  *   Up/Down at a dead end do nothing, instead of scrolling the page on (for
  *   pages that fit the screen, e.g. the search page).
@@ -508,7 +512,8 @@ function setPosition(zoneId, grid, pos) {
       releaseDomFocus(cell)
     }
 
-    if (centersInPage(cell)) {
+    const zoneCenters = navState.zones.get(zoneId)?.centerInPage && getScrollParent(cell) === document.scrollingElement
+    if (zoneCenters || centersInPage(cell)) {
       centerInPage(cell)
     } else {
       scrollIntoViewAnimated(cell)
