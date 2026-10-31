@@ -1,28 +1,41 @@
 <template>
-  <div>
-    <div class="searchBar">
-      <FtSearchInput
-        ref="searchInput"
-        :placeholder="t('Search Bar.Search')"
-        :value="typedText"
-        @input="handleInput"
-        @search="search"
+  <div class="tvSearch">
+    <!-- On the left, a third of the page: the on-screen keyboard, staying in view while the results scroll -->
+    <div
+      ref="keyboard"
+      class="keyboardColumn"
+    >
+      <TvSearchKeyboard
+        @type="typeText"
+        @backspace="deleteLastCharacter"
+        @clear="clearText"
       />
     </div>
-    <div ref="results">
-      <SearchPage v-if="query !== ''" />
+    <div class="searchColumn">
+      <div class="searchBar">
+        <FtSearchInput
+          ref="searchInput"
+          :placeholder="t('Search Bar.Search')"
+          :value="typedText"
+          @input="handleInput"
+          @search="search"
+        />
+      </div>
+      <div ref="results">
+        <SearchPage v-if="query !== ''" />
+      </div>
+      <!-- Nothing searched yet: the app's logo in the middle of the column, on a soft glow -->
+      <div
+        v-if="query === ''"
+        class="logoGlow"
+      />
+      <img
+        v-if="query === ''"
+        class="logo"
+        src="../../assets/img/loutube-logo-full.png"
+        alt=""
+      >
     </div>
-    <!-- Nothing searched yet: the app's logo in the middle of the screen, on a soft glow -->
-    <div
-      v-if="query === ''"
-      class="logoGlow"
-    />
-    <img
-      v-if="query === ''"
-      class="logo"
-      src="../../assets/img/loutube-logo-full.png"
-      alt=""
-    >
   </div>
 </template>
 
@@ -33,6 +46,7 @@ import { useRoute, useRouter } from 'vue-router'
 
 import FtSearchInput from '../../components/FtSearchInput/FtSearchInput.vue'
 import SearchPage from '../SearchPage/SearchPage.vue'
+import TvSearchKeyboard from '../../components/TvSearchKeyboard/TvSearchKeyboard.vue'
 
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { gridFromElements, ITEM_ATTRIBUTE, scrollPageToTopAnimated } from '../../helpers/spatialNav/NavManager'
@@ -43,6 +57,7 @@ const router = useRouter()
 
 const searchInput = useTemplateRef('searchInput')
 const results = useTemplateRef('results')
+const keyboard = useTemplateRef('keyboard')
 
 /** @type {import('vue').ComputedRef<string>} */
 const query = computed(() => route.params.query ?? '')
@@ -73,6 +88,21 @@ function handleInput(text) {
   autoSearchTimeout = setTimeout(autoSearch, AUTO_SEARCH_DELAY_MS)
 }
 
+/**
+ * @param {string} text
+ */
+function typeText(text) {
+  handleInput(typedText.value + text)
+}
+
+function deleteLastCharacter() {
+  handleInput(typedText.value.slice(0, -1))
+}
+
+function clearText() {
+  handleInput('')
+}
+
 /** Searches for what is typed, without leaving the field. Nothing typed: back to no search. */
 function autoSearch() {
   const trimmedText = typedText.value.trim()
@@ -84,17 +114,41 @@ function autoSearch() {
     : { name: 'tvSearch', params: { query: trimmedText } })
 }
 
-// Two spatial-nav zones: the search bar on top, the results grid below it.
-// The bar's cell is its text field, which is ready to type into as soon as
-// it has the focus (opens the on-screen keyboard on Android TV).
+// Three spatial-nav zones: the on-screen keyboard on the left, and on the
+// right the search bar on top with the results grid below it. The bar's cell
+// is its text field, which is ready to type into as soon as it has the focus
+// (opens Android's own keyboard, or takes a hardware keyboard's typing).
+// The keyboard's grid: six keys a row, and the last row's three wide keys
+// two columns each, so Up/Down go to the key above/below
+function keyboardGrid() {
+  const keys = [...(keyboard.value?.querySelectorAll('button') ?? [])]
+  const grid = []
+  for (let i = 0; i < keys.length - 3; i += 6) {
+    grid.push(keys.slice(i, i + 6))
+  }
+  grid.push(keys.slice(-3).flatMap(key => [key, key]))
+  return grid
+}
+
+const keyboardZone = useSpatialZone('tv-search-keyboard', keyboardGrid, {
+  edges: {
+    left: 'sidebar',
+    // From the top row to the search bar, from the others to the results
+    // when there are some
+    right: () => (keyboardZone.focusedPosition.value?.row !== 0 && results.value?.querySelector(`[${ITEM_ATTRIBUTE}]`)
+      ? 'tv-search-results'
+      : 'tv-search-bar'),
+  },
+})
+
 function searchBarGrid() {
   const field = searchInput.value?.$el.querySelector('input')
   return field ? [[field]] : []
 }
 
-const searchBarZone = useSpatialZone('tv-search-bar', searchBarGrid, {
+useSpatialZone('tv-search-bar', searchBarGrid, {
   edges: {
-    left: 'sidebar',
+    left: 'tv-search-keyboard',
     // Only when there are results to go to
     down: () => (results.value?.querySelector(`[${ITEM_ATTRIBUTE}]`) ? 'tv-search-results' : null),
   },
@@ -103,7 +157,7 @@ const searchBarZone = useSpatialZone('tv-search-bar', searchBarGrid, {
 // The results, and "Fetch more results" under them
 const resultsZone = useSpatialZone('tv-search-results', () => gridFromElements(results.value?.querySelectorAll(`[${ITEM_ATTRIBUTE}], .getNextPage`) ?? []), {
   edges: {
-    left: 'sidebar',
+    left: 'tv-search-keyboard',
     up: 'tv-search-bar',
   },
 })
@@ -141,12 +195,12 @@ function focusResults({ resetPosition = false } = {}) {
 onMounted(() => {
   resultsObserver.observe(results.value, { childList: true, subtree: true })
 
-  // Coming back from a video lands on the results. A fresh visit focuses the
-  // input itself, ready to type (opens the on-screen keyboard on Android TV).
+  // Coming back from a video lands on the results. A fresh visit starts on
+  // the on-screen keyboard, ready to type.
   if (query.value !== '') {
     focusResults()
   } else {
-    searchBarZone.activate()
+    keyboardZone.activate()
   }
 })
 

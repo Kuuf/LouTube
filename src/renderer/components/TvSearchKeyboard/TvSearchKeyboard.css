@@ -1,0 +1,29 @@
+/* Six keys a row: the letters and digits in six rows, then space, delete and
+   clear, two columns each */
+.tvSearchKeyboard {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.key {
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background-color: var(--search-bar-color);
+  color: var(--primary-text-color);
+  font-family: inherit;
+  font-size: 1.4em;
+  cursor: pointer;
+}
+
+.key.wide {
+  grid-column: span 2;
+  aspect-ratio: auto;
+}
+
+/* A word, not a character: smaller */
+.key.label {
+  font-size: 1em;
+}

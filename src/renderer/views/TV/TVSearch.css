@@ -1,3 +1,27 @@
+/* The on-screen keyboard in a third of the page on the left, the search bar
+   and the results (or the logo) in the rest */
+.tvSearch {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: start;
+}
+
+/* In view while the results scroll, under the search bar's top */
+.keyboardColumn {
+  position: sticky;
+  inset-block-start: 0;
+  box-sizing: border-box;
+  padding-block: 32px;
+  padding-inline: 32px 0;
+}
+
+/* Holds the logo, centered in it */
+.searchColumn {
+  position: relative;
+  min-inline-size: 0;
+  min-block-size: 100vh;
+}
+
 .searchBar {
   /* Above the logo behind it */
   position: relative;
@@ -21,11 +45,11 @@
 .logoGlow {
   --glow-color: color-mix(in srgb, var(--primary-text-color) 3.5%, var(--side-nav-color));
 
-  position: fixed;
+  position: absolute;
   inset-block-start: calc(50% + 32px);
   inset-inline-start: 50%;
   z-index: 0;
-  inline-size: 120vmin;
+  inline-size: 90vmin;
   aspect-ratio: 1;
   background:
     radial-gradient(
@@ -41,13 +65,13 @@
 }
 
 /* Shown until something is searched: the app's logo in the middle of the
-   screen */
+   search column */
 .logo {
-  position: fixed;
+  position: absolute;
   inset-block-start: calc(50% + 32px);
   inset-inline-start: 50%;
   z-index: 0;
-  inline-size: 30vw;
+  inline-size: 25vw;
   pointer-events: none;
   user-select: none;
   translate: -50% -50%;

@@ -282,10 +282,12 @@ function step(grid, pos, direction) {
  * @returns {GridPosition | null}
  */
 function findNext(grid, pos, direction) {
+  const current = grid[pos.row]?.[pos.col]
   let candidate = step(grid, pos, direction)
 
-  // Skip empty slots (null/undefined cells) rather than landing on them.
-  while (candidate && grid[candidate.row]?.[candidate.col] == null) {
+  // Skip empty slots (null/undefined cells) rather than landing on them, and
+  // the other columns of a cell spanning several (the same cell repeated)
+  while (candidate && (grid[candidate.row]?.[candidate.col] == null || grid[candidate.row][candidate.col] === current)) {
     candidate = step(grid, candidate, direction)
   }
 

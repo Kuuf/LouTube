@@ -62,6 +62,8 @@ Search Bar:
   Remove: Remove
   Open Search Container: Open Search Container
   Search: Search
+  Space: Space
+  Delete: Delete
 Search character limit: Search query is over the {searchCharacterLimit} character limit
 Search Listing:
   Label:
