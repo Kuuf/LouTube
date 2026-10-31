@@ -20,20 +20,15 @@ fun getVersionInfo(project: Project): VersionInfo {
   val versionName = packageJson["version"] as String
   // own id so LouTube installs alongside FreeTube Android (io.freetubeapp.freetube)
   val appName = "io.freetubeapp.loutube"
-  val parts = versionName.split("-")
-  val numbers = parts[0].split(".")
+  // LouTube's own version, major.minor.patch (package.json)
+  val numbers = versionName.split("-")[0].split(".")
   val major = numbers[0].toInt()
   val minor = numbers[1].toInt()
   val patch = numbers[2].toInt()
-  var build = 0
-  if (parts.size > 2) {
-    println(parts)
-    build = parts[2].toInt()
-  } else if (numbers.size > 3) {
-    build = numbers[3].toInt()
-  }
 
-  val versionCode = major * 10000000 + minor * 10000000 + patch * 1000 + build
+  // Above every code of the FreeTube Android versions it was built as before
+  // (0.25.3 = 250003000), or installing over those would be a downgrade
+  val versionCode = 300000000 + major * 1000000 + minor * 1000 + patch
 
   return VersionInfo(appName, versionName, versionCode)
 }
@@ -90,6 +85,14 @@ android {
     }
     buildFeatures {
         viewBinding = true
+    }
+
+    // loutube-v1.0.5.apk rather than app-debug.apk
+    applicationVariants.all {
+        outputs.all {
+            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
+                "loutube-v${versionName}.apk"
+        }
     }
 }
 
