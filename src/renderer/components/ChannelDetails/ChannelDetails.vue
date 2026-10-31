@@ -64,7 +64,9 @@
         class="infoTabs"
       >
         <div
+          ref="tabs"
           class="tabs"
+          :class="{ fadeStart: tabsFade.start, fadeEnd: tabsFade.end }"
           role="tablist"
           :aria-label="$t('Channel.Channel Tabs')"
         >
@@ -234,7 +236,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, useTemplateRef } from 'vue'
 
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import FtCard from '../ft-card/ft-card.vue'
@@ -302,6 +304,93 @@ const formattedSubCount = computed(() => {
   }
   return formatNumber(props.subCount)
 })
+
+// The tabs stay on one line. Too long for the screen, they fade out at the
+// side(s) with more of them, and slide over to bring the focused one in.
+const tabs = useTemplateRef('tabs')
+
+/** How far the fade reaches into the tabs (px), kept in sync with the CSS */
+const TABS_FADE_SIZE = 96
+
+const tabsFade = reactive({ start: false, end: false })
+
+function updateTabsFade() {
+  const element = tabs.value
+  if (!element) { return }
+
+  tabsFade.start = element.scrollLeft > 1
+  tabsFade.end = element.scrollLeft + element.clientWidth < element.scrollWidth - 1
+}
+
+/**
+ * Slides the tabs so this one is clear of the fades, the first and last tabs
+ * all the way to their end
+ * @param {Element} tab
+ */
+function scrollTabIntoView(tab) {
+  const element = tabs.value
+  if (!element || !element.contains(tab)) { return }
+
+  const view = element.getBoundingClientRect()
+  const rect = tab.getBoundingClientRect()
+
+  let scrollLeft = element.scrollLeft
+  if (tab === element.firstElementChild) {
+    scrollLeft = 0
+  } else if (tab === element.lastElementChild) {
+    scrollLeft = element.scrollWidth - element.clientWidth
+  } else if (rect.left < view.left + TABS_FADE_SIZE) {
+    scrollLeft -= view.left + TABS_FADE_SIZE - rect.left
+  } else if (rect.right > view.right - TABS_FADE_SIZE) {
+    scrollLeft += rect.right - (view.right - TABS_FADE_SIZE)
+  }
+
+  animateTabsScroll(element, Math.min(Math.max(scrollLeft, 0), element.scrollWidth - element.clientWidth))
+}
+
+const TABS_SCROLL_DURATION_MS = 250
+let tabsScrollFrame = 0
+
+/**
+ * Frame by frame: a smooth `scrollTo` gets cancelled by the tab's content
+ * changing (focusing a tab opens it)
+ * @param {Element} element
+ * @param {number} target
+ */
+function animateTabsScroll(element, target) {
+  cancelAnimationFrame(tabsScrollFrame)
+
+  const start = element.scrollLeft
+  const distance = target - start
+  if (Math.abs(distance) < 1) { return }
+
+  const startTime = performance.now()
+  const step = (now) => {
+    const progress = Math.min((now - startTime) / TABS_SCROLL_DURATION_MS, 1)
+    // Ease out
+    element.scrollLeft = start + distance * (1 - (1 - progress) ** 3)
+    if (progress < 1) {
+      tabsScrollFrame = requestAnimationFrame(step)
+    }
+  }
+  tabsScrollFrame = requestAnimationFrame(step)
+}
+
+const tabsResizeObserver = new ResizeObserver(updateTabsFade)
+
+onMounted(() => {
+  if (tabs.value) {
+    tabsResizeObserver.observe(tabs.value)
+    tabs.value.addEventListener('scroll', updateTabsFade, { passive: true })
+  }
+})
+
+onBeforeUnmount(() => {
+  cancelAnimationFrame(tabsScrollFrame)
+  tabsResizeObserver.disconnect()
+})
+
+defineExpose({ scrollTabIntoView })
 
 function subscribed() {
   emit('subscribed')

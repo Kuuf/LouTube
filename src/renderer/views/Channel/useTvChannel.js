@@ -142,11 +142,15 @@ export function useTvChannel() {
     }
   })
 
-  // Focusing a tab opens it, no Enter needed
+  // Focusing a tab opens it, no Enter needed, and brings it in view when
+  // the tabs are too many for one screen width
   watch(headerZone.focusedPosition, (position) => {
     if (position == null) { return }
 
     const cell = headerGrid()[position.row]?.[position.col]
+    if (cell?.matches('[role="tab"]')) {
+      channelHeader.value?.scrollTabIntoView(cell)
+    }
     if (cell?.matches('[role="tab"]:not(.selectedTab)')) {
       cell.click()
     }

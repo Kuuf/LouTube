@@ -81,15 +81,38 @@
   flex-wrap: nowrap;
 }
 
+/* One line, however many tabs: what doesn't fit is scrolled to (by the
+   remote's focus, see ChannelDetails.vue), and fades out at the side(s) with
+   more tabs. The fade size is TABS_FADE_SIZE there. */
 .tabs {
+  --fade-size: 96px;
+
   display: flex;
   flex: 1 1 0;
   min-inline-size: 0;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 12px;
+  overflow: hidden;
+
+  /* Its width from the page, never from the tabs: they would widen the page */
+  contain: inline-size;
+}
+
+.tabs.fadeEnd {
+  mask-image: linear-gradient(to right, #000 calc(100% - var(--fade-size)), transparent);
+}
+
+.tabs.fadeStart {
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-size));
+}
+
+.tabs.fadeStart.fadeEnd {
+  mask-image: linear-gradient(to right, transparent, #000 var(--fade-size), #000 calc(100% - var(--fade-size)), transparent);
 }
 
 .tab {
+  flex: none;
+  white-space: nowrap;
   padding-block: 10px;
   padding-inline: 24px;
   font-size: 22px;
@@ -145,10 +168,6 @@
 
   .tabs {
     flex: 1 1 0;
-  }
-
-  .tab {
-    flex: 1 1 0%;
   }
 }
 
