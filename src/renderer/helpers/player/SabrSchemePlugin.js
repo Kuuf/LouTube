@@ -21,6 +21,9 @@ import { deepCopy } from '../utils'
 const AbortableOperation = shaka.util.AbortableOperation
 const ShakaError = shaka.util.Error
 
+// How long a session may sit in backoff without delivering a single segment before we treat it as stuck
+const MAX_BACKOFF_WITHOUT_MEDIA_MS = 60_000
+
 /**
  * @typedef OperationInputs
  * @type {object}
@@ -52,8 +55,6 @@ const ShakaError = shaka.util.Error
  * @property {SabrStreamState} sabrStreamState
  * @property {?TimeoutController} timeoutController
  * @property {?EventEmitterLike} eventEmitter
- * @property {number} cumulativeBackOffTimeMs
- * @property {number} cumulativeBackOffRequested
  * @property {number} cumulativeRetryDueToNextRequestPolicy
  */
 /**
@@ -65,11 +66,14 @@ const ShakaError = shaka.util.Error
  * @property {?NextRequestPolicy} nextRequestPolicy
  * @property {boolean} playerReloadRequested
  * @property {number} requestNumber
+ * @property {?Promise<void>} backoffPromise
+ * @property {number} cumulativeBackOffTimeMs
+ * @property {boolean} mediaReceived
  */
 /**
  * @typedef TimeoutController
  * @type {object}
- * @property {() => void} resetTimeoutOnce
+ * @property {() => void} restartTimeout
  * @property {() => void} clearTimeout
  */
 /**
@@ -264,13 +268,9 @@ function decodePart(part, decoder) {
 function createTimeoutController(callback, timeoutMs) {
   return {
     _timeout: setTimeout(callback, timeoutMs),
-    _resetCount: 0,
-    resetTimeoutOnce() {
-      if (this._resetCount > 0) return
-
+    restartTimeout() {
       this.clearTimeout()
       this._timeout = setTimeout(callback, timeoutMs)
-      this._resetCount++
     },
     clearTimeout() {
       clearTimeout(this._timeout)
@@ -304,35 +304,43 @@ async function doRequest(
   }
 
   try {
-    let shouldReloadDueToBackoffLoop = false
-    if ((currentState.sabrStreamState.nextRequestPolicy?.backoffTimeMs || 0) > 0) {
-      const currentBackoffTimeMs = currentState.sabrStreamState.nextRequestPolicy.backoffTimeMs
-      currentState.eventEmitter.emit('backoff-requested', { backoffMs: currentBackoffTimeMs })
-      // Wait but can be aborted
+    const sabrStreamState = currentState.sabrStreamState
+    const backoffTimeMs = sabrStreamState.nextRequestPolicy?.backoffTimeMs || 0
+    if (backoffTimeMs > 0 && !sabrStreamState.backoffPromise) {
+      // Backoff is flow control from the server, not an error. Every request in this session
+      // (audio and video) waits on the same delay, and the delay is used up once it has passed,
+      // so a later response without a new policy doesn't make us wait again.
+      sabrStreamState.nextRequestPolicy.backoffTimeMs = 0
+      sabrStreamState.cumulativeBackOffTimeMs += backoffTimeMs
+      currentState.eventEmitter.emit('backoff-requested', { backoffMs: backoffTimeMs })
+      sabrStreamState.backoffPromise = new Promise((resolve) => {
+        setTimeout(() => {
+          sabrStreamState.backoffPromise = null
+          resolve()
+        }, backoffTimeMs)
+      })
+    }
+
+    if (sabrStreamState.backoffPromise) {
+      // Waiting on the server isn't a stalled request, so it shouldn't count towards the timeout
+      currentState.timeoutController?.clearTimeout()
       await new Promise((resolve, reject) => {
-        setTimeout(resolve, currentBackoffTimeMs)
+        sabrStreamState.backoffPromise.then(resolve)
         currentState.abortController.signal.addEventListener('abort', reject)
       })
-      // Must reset AFTER waiting to avoid requested aborted
-      // Since long backoff time mostly happens on the start of video playback we only reset timeout once
-      // i.e. backoff time parts received will not reset timeout - counted as video loading issue
-      currentState.timeoutController?.resetTimeoutOnce()
-
-      currentState.cumulativeBackOffTimeMs += currentState.sabrStreamState.nextRequestPolicy.backoffTimeMs
-      currentState.cumulativeBackOffRequested += 1
-      const timeoutMs = operationInputs.request.retryParameters.timeout
-      // Detect infinite backoff loop by no. of times requested and cumulative time approaching timeout
-      if (currentState.cumulativeBackOffRequested >= 3 || (timeoutMs > 0 && timeoutMs <= (currentState.cumulativeBackOffTimeMs + currentBackoffTimeMs))) {
-        shouldReloadDueToBackoffLoop = true
-      }
+      currentState.timeoutController?.restartTimeout()
     }
-    if (shouldReloadDueToBackoffLoop || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
-      // Fire fake reload event due to detecting retry loop
-      currentState.sabrStreamState.playerReloadRequested = true
+
+    // Only ask for a new session when this one is stuck: it has never delivered any media
+    // despite a long total wait, or the server keeps sending policies without media
+    const stuckInBackoff = !sabrStreamState.mediaReceived && sabrStreamState.cumulativeBackOffTimeMs >= MAX_BACKOFF_WITHOUT_MEDIA_MS
+    if (stuckInBackoff || currentState.cumulativeRetryDueToNextRequestPolicy >= 100) {
+      sabrStreamState.playerReloadRequested = true
       if (!currentState.abortController.signal.aborted) {
         currentState.abortController.abort()
         currentState.eventEmitter.emit('reload')
       }
+      throw createRecoverableNetworkError(ShakaError.Code.OPERATION_ABORTED, operationInputs.uri, operationInputs.requestType)
     }
 
     const sabrURL = new URL(currentState.sabrStreamState.sabrUrl)
@@ -409,6 +417,7 @@ async function doRequest(
           case UMPPartId.MEDIA_END: {
             if (mediaHeaderId === part.data.getUint8(0)) {
               segmentComplete = true
+              currentState.sabrStreamState.mediaReceived = true
               currentState.abortStatus.finished = true
               currentState.abortController.abort()
             }
@@ -647,6 +656,9 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
     nextRequestPolicy: undefined,
     playerReloadRequested: false,
     requestNumber: 0,
+    backoffPromise: null,
+    cumulativeBackOffTimeMs: 0,
+    mediaReceived: false,
   }
 
   shaka.net.NetworkingEngine.registerScheme('sabr', (uri, request, requestType, _progressUpdated, headersReceived, _config) => {
@@ -828,8 +840,6 @@ export function setupSabrScheme(sabrData, getPlayer, getManifest, playerWidth, p
       sabrStreamState,
       timeoutController,
       eventEmitter,
-      cumulativeBackOffTimeMs: 0,
-      cumulativeBackOffRequested: 0,
       cumulativeRetryDueToNextRequestPolicy: 0,
     }
 

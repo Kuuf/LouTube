@@ -163,6 +163,9 @@ export default defineComponent({
       // This should never be saved into history
       /** @type {number|null} */
       oneTimeTimestamp: null,
+      sabrReloadVideoId: null,
+      sabrReloadWindowStart: 0,
+      sabrReloadCount: 0,
       playNextTimeout: null,
       playNextCountDownIntervalId: null,
       blockVideoAutoplay: false,
@@ -2036,6 +2039,19 @@ export default defineComponent({
     },
 
     async onPlayerReloadRequested() {
+      // A session that keeps asking for reloads won't recover by reloading again,
+      // so stop after a few instead of looping for minutes
+      const now = Date.now()
+      if (this.sabrReloadVideoId !== this.videoId || now - this.sabrReloadWindowStart > 5 * 60_000) {
+        this.sabrReloadVideoId = this.videoId
+        this.sabrReloadWindowStart = now
+        this.sabrReloadCount = 0
+      }
+      if (++this.sabrReloadCount > 3) {
+        showToast('Video failed to load after several SABR reloads, try again later')
+        return
+      }
+
       showToast('Reloading player according to SABR request')
 
       const timestamp = this.getTimestamp()
@@ -2046,6 +2062,8 @@ export default defineComponent({
             path: this.$route.path,
             query: { ...this.$route.query, oneTimeTimestamp: timestamp },
           })
+          // The route watcher already reloads the view, reloading here as well would load the video twice
+          return
         } catch (failure) {
           if (isNavigationFailure(failure, NavigationFailureType.duplicated)) {
             // Already on route with same timestamp, allow reloadView to run instead
