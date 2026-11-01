@@ -92,6 +92,31 @@
             {{ $t("Log Viewer.Console Log") }}
           </p>
         </a>
+        <a
+          v-else-if="entry.kind === 'exit'"
+          v-bind="itemAttrs"
+          class="navOption mobileShow"
+          role="button"
+          tabindex="0"
+          :title="$t('Quit')"
+          @click="exitApp"
+          @keydown.enter.prevent="exitApp"
+        >
+          <div
+            class="thumbnailContainer"
+          >
+            <FontAwesomeIcon
+              :icon="['fas', 'power-off']"
+              class="navIcon"
+              :class="applyNavIconExpand"
+            />
+          </div>
+          <p
+            class="navLabel"
+          >
+            {{ $t('Quit') }}
+          </p>
+        </a>
         <router-link
           v-else
           v-bind="itemAttrs"
@@ -126,6 +151,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, ref, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
+import android from 'android'
 
 import FtFlexBox from '../ft-flex-box/ft-flex-box.vue'
 import SideNavMoreOptions from '../SideNavMoreOptions/SideNavMoreOptions.vue'
@@ -232,6 +258,15 @@ const showLogViewer = () => {
   store.dispatch('showLogViewer')
 }
 
+/** Closes the app (Android) or the window (desktop) */
+function exitApp() {
+  if (process.env.IS_ANDROID) {
+    android.exit()
+  } else {
+    window.close()
+  }
+}
+
 /**
  * The entries, in display order, those turned off by settings (Trending,
  * Popular, Playlists) left out
@@ -259,6 +294,7 @@ const entries = computed(() => {
     link('settings', '/settings', ['fas', 'sliders-h'], t('Settings.Settings'), 'mobileShow smallMobileOnlyHidden', settingsTitle.value),
     link('about', '/about', ['fas', 'info-circle'], t('About.About'), 'mobileHidden'),
     ...(usingAndroid && !usingRelease ? [{ kind: 'log', key: 'log' }] : []),
+    { kind: 'exit', key: 'exit' },
   ]
 })
 

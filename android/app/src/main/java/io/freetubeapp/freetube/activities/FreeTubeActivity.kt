@@ -8,6 +8,7 @@ import androidx.activity.addCallback
 import androidx.core.graphics.createBitmap
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import io.freetubeapp.freetube.helpers.ApplicationState
 import io.freetubeapp.freetube.helpers.hexToColour
@@ -23,6 +24,11 @@ open class FreeTubeActivity: LaunchIntentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     windowInsetsControllerCompat = WindowCompat.getInsetsController(window, window.decorView)
+    // a TV app: draw under the system bars and keep them hidden, a swipe
+    // from the edge shows them for a moment
+    WindowCompat.setDecorFitsSystemWindows(window, false)
+    windowInsetsControllerCompat.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+    hideSystemBars()
     onBackPressedDispatcher.addCallback {
       onBack()
     }
@@ -30,6 +36,27 @@ open class FreeTubeActivity: LaunchIntentActivity() {
 
   open fun onBack() {
 
+  }
+
+  override fun onWindowFocusChanged(hasFocus: Boolean) {
+    super.onWindowFocusChanged(hasFocus)
+    // dialogs, the keyboard and leaving the app can bring the bars back
+    if (hasFocus) {
+      hideSystemBars()
+    }
+  }
+
+  private fun hideSystemBars() {
+    windowInsetsControllerCompat.hide(WindowInsetsCompat.Type.systemBars())
+  }
+
+  /**
+   * closes the app, the keep alive service and media notification stop in `onDestroy`
+   */
+  fun exit() {
+    runOnUiThread {
+      finishAndRemoveTask()
+    }
   }
 
   fun restart() {

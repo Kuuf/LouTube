@@ -4,18 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
 import io.freetubeapp.freetube.R
 import io.freetubeapp.freetube.activities.FreeTubeActivity
-import io.freetubeapp.freetube.helpers.WindowInsetsControllerWrapper
 import io.freetubeapp.freetube.helpers.spoofDesktopUserAgent
 import io.freetubeapp.freetube.javascript.FreeTubeJavaScriptInterface
 import io.freetubeapp.freetube.javascript.dispatchEvent
@@ -25,11 +21,6 @@ import org.json.JSONObject
 class FreeTubeWebView (
   context: FreeTubeActivity
 ) : BackgroundPlayWebView(context, null) {
-  private val windowInsetsControllerWrapper = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && windowInsetsController != null) {
-    WindowInsetsControllerWrapper(windowInsetsController)
-  } else {
-    WindowInsetsControllerWrapper(context.windowInsetsController)
-  }
   val jsInterface = FreeTubeJavaScriptInterface(context, this)
 
   val onConsoleMessage: (JSONObject) -> Unit = { messageData: JSONObject ->
@@ -87,28 +78,16 @@ class FreeTubeWebView (
     }) {
       override fun onShowCustomView(view: View?, callback: CustomViewCallback?) {
         if (view != null) {
-          val viewGroup = (parent as ViewGroup)
-
-          // hide system ui
-          viewGroup.fitsSystemWindows = false
-
-          windowInsetsControllerWrapper.hide(WindowInsetsCompat.Type.systemBars())
-          windowInsetsControllerWrapper.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-
-          viewGroup.addView(view)
+          // the system bars are already hidden (the app is always immersive)
+          (parent as ViewGroup).addView(view)
           fullscreenView = view
           dispatchEvent("start-fullscreen")
         }
       }
 
       override fun onHideCustomView() {
-        val viewGroup = (parent as ViewGroup)
-
-        // show system ui
-        viewGroup.fitsSystemWindows = true
-        windowInsetsControllerWrapper.show(WindowInsetsCompat.Type.systemBars())
-
-        viewGroup.removeView(fullscreenView)
+        // the system bars stay hidden (the app is always immersive)
+        (parent as ViewGroup).removeView(fullscreenView)
         dispatchEvent("end-fullscreen")
       }
     }

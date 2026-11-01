@@ -332,6 +332,11 @@ class FreeTubeJavaScriptInterface(
     context.restart()
   }
 
+  @JavascriptInterface
+  fun exit() {
+    context.exit()
+  }
+
   /**
    * hides the splashscreen
    */
