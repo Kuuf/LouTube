@@ -25,7 +25,8 @@ const nextVersion = `${major}.${minor}.${patch + 1}`
 writeFileSync(packageJsonPath, packageJson.replace(`"version": "${version}"`, `"version": "${nextVersion}"`))
 console.log(`Version ${version} -> ${nextVersion}`)
 
-execSync('pnpm run pack', { cwd: root, stdio: 'inherit' })
+// process.platform is fixed at build time: make it linux even when building on a Mac
+execSync('pnpm run pack', { cwd: root, stdio: 'inherit', env: { ...process.env, TARGET_PLATFORM: 'linux' } })
 
 // Imported after the bump, so the packaged app gets the new version
 const { Arch, build, Platform } = await import('electron-builder')

@@ -139,7 +139,8 @@ const config = {
   plugins: [
     processLocalesPlugin,
     new webpack.DefinePlugin({
-      'process.platform': `'${process.platform}'`,
+      // TARGET_PLATFORM: building for another OS (build:linux on a Mac)
+      'process.platform': `'${process.env.TARGET_PLATFORM ?? process.platform}'`,
       'process.env.IS_ELECTRON': true,
       'process.env.IS_ELECTRON_MAIN': false,
       'process.env.SUPPORTS_LOCAL_API': true,
