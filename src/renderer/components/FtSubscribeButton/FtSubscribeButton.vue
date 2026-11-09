@@ -124,7 +124,7 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useId, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import android from 'android'
+import { enterPromptMode, exitPromptMode } from '../../helpers/backButton'
 
 import FtButton from '../FtButton/FtButton.vue'
 import FtPrompt from '../FtPrompt/FtPrompt.vue'
@@ -392,16 +392,12 @@ function handleExitPrompt() {
 watch(isProfileDropdownOpen, async (open) => {
   if (open) {
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
-    if (process.env.IS_ANDROID) {
-      android.enterPromptMode()
-      window.addEventListener('exit-prompt', handleExitPrompt)
-    }
+    enterPromptMode()
+    window.addEventListener('exit-prompt', handleExitPrompt)
   } else {
     document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
-    if (process.env.IS_ANDROID) {
-      android.exitPromptMode()
-      window.removeEventListener('exit-prompt', handleExitPrompt)
-    }
+    exitPromptMode()
+    window.removeEventListener('exit-prompt', handleExitPrompt)
   }
 
   // Only when the remote is in use (some zone has the focus)
@@ -420,10 +416,8 @@ watch(isProfileDropdownOpen, async (open) => {
 onBeforeUnmount(() => {
   if (isProfileDropdownOpen.value) {
     document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
-    if (process.env.IS_ANDROID) {
-      android.exitPromptMode()
-      window.removeEventListener('exit-prompt', handleExitPrompt)
-    }
+    exitPromptMode()
+    window.removeEventListener('exit-prompt', handleExitPrompt)
   }
 })
 
@@ -434,15 +428,13 @@ function handleUnsubscribeConfirmation(value) {
   const profile = showUnsubscribePopupForProfile.value
   showUnsubscribePopupForProfile.value = null
 
-  // The prompt leaves Android's prompt mode when it closes, the dropdown
+  // The prompt leaves prompt mode when it closes, the dropdown
   // still needs it (Back closing the dropdown)
-  if (process.env.IS_ANDROID) {
-    nextTick(() => {
-      if (isProfileDropdownOpen.value) {
-        android.enterPromptMode()
-      }
-    })
-  }
+  nextTick(() => {
+    if (isProfileDropdownOpen.value) {
+      enterPromptMode()
+    }
+  })
 
   if (value === 'yes') {
     handleUnsubscription(profile)

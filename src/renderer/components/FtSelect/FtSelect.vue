@@ -98,7 +98,7 @@ import store from '../../store/index'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { activateZone, navState } from '../../helpers/spatialNav/NavManager'
 
-import android from 'android'
+import { enterPromptMode, exitPromptMode } from '../../helpers/backButton'
 
 const props = defineProps({
   placeholder: {
@@ -263,7 +263,7 @@ function removeOpenListeners() {
 
   if (usesPromptMode) {
     usesPromptMode = false
-    android.exitPromptMode()
+    exitPromptMode()
     window.removeEventListener('exit-prompt', closeDropdown)
   }
 }
@@ -273,9 +273,9 @@ watch(isOpen, async (open) => {
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
     document.addEventListener('keydown', handleEscape)
 
-    if (process.env.IS_ANDROID && !store.getters.isAnyPromptOpen) {
+    if (!store.getters.isAnyPromptOpen) {
       usesPromptMode = true
-      android.enterPromptMode()
+      enterPromptMode()
       window.addEventListener('exit-prompt', closeDropdown)
     }
   } else {

@@ -57,7 +57,8 @@ usage: ${process.argv0} [options...] [url]
 Options:
   --help, -h           show this message, then exit
   --version            print the current version, then exit
-  --new-window         reuse an existing instance if possible`)
+  --new-window         reuse an existing instance if possible
+  --fullscreen         open in full screen (e.g. on a TV)`)
 }
 
 function runApp() {
@@ -1145,7 +1146,7 @@ function runApp() {
       newWindow.maximize()
     }
 
-    if (savedFullScreen) {
+    if (savedFullScreen || process.argv.includes('--fullscreen')) {
       newWindow.setFullScreen(true)
     }
 
@@ -2331,8 +2332,10 @@ function runApp() {
   }
 
   function getLinkUrl(argv) {
-    if (argv.length > 1) {
-      return baseUrl(argv[argv.length - 1])
+    // The last argument that isn't an option (e.g. --fullscreen, --no-sandbox)
+    const args = argv.slice(1).filter(arg => !arg.startsWith('-'))
+    if (args.length > 0) {
+      return baseUrl(args[args.length - 1])
     } else {
       return null
     }

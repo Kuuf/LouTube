@@ -123,12 +123,17 @@ import { translateWindowTitle } from './helpers/strings'
 import { calculateColorLuminance, colorChannels } from './helpers/colors'
 import { loadLocale } from './i18n/index'
 import { initGlobalKeyListener, teardownGlobalKeyListener } from './helpers/spatialNav/NavManager'
+import { initDesktopBackButton } from './helpers/backButton'
 
 import android from 'android'
 import { getUpdateInfo, updateAndroidTheme } from './helpers/android/system'
 
 const route = useRoute()
 const router = useRouter()
+
+/** Desktop: the remote's Back key (Android handles it natively) */
+let teardownBackButton = () => {}
+
 const { locale, t } = useI18n()
 
 const tapHighlight = computed(() => store.getters.getTapHighlight)
@@ -224,6 +229,7 @@ onMounted(async () => {
   document.addEventListener('mousedown', handleMouseDown)
   document.addEventListener('dragstart', handleDragStart)
   initGlobalKeyListener()
+  teardownBackButton = initDesktopBackButton(router)
 })
 
 onBeforeUnmount(() => {
@@ -233,6 +239,7 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClick)
   document.removeEventListener('auxclick', handleAuxClick)
   teardownGlobalKeyListener()
+  teardownBackButton()
 })
 
 /** @type {import('vue').ComputedRef<string>} */

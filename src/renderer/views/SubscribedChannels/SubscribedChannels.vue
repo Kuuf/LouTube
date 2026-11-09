@@ -131,7 +131,7 @@ import { useTvPage } from '../../composables/useTvPage'
 import { useSpatialZone } from '../../composables/useSpatialZone'
 import { activateZone, navState } from '../../helpers/spatialNav/NavManager'
 
-import android from 'android'
+import { enterPromptMode, exitPromptMode } from '../../helpers/backButton'
 
 // One stop per channel: its card (a list item). Pressing it expands the
 // card, which then shows its actions, see below.
@@ -434,21 +434,17 @@ function handleOutsidePointerDown(event) {
 function removeExpandedListeners() {
   document.removeEventListener('pointerdown', handleOutsidePointerDown, true)
 
-  if (process.env.IS_ANDROID) {
-    android.exitPromptMode()
-    window.removeEventListener('exit-prompt', collapse)
-  }
+  exitPromptMode()
+  window.removeEventListener('exit-prompt', collapse)
 }
 
 watch(expandedChannelId, async (channelId, previousChannelId) => {
   if (channelId != null && previousChannelId == null) {
     document.addEventListener('pointerdown', handleOutsidePointerDown, true)
 
-    // Android's Back button collapses the card
-    if (process.env.IS_ANDROID) {
-      android.enterPromptMode()
-      window.addEventListener('exit-prompt', collapse)
-    }
+    // The remote's Back button collapses the card
+    enterPromptMode()
+    window.addEventListener('exit-prompt', collapse)
   } else if (channelId == null) {
     removeExpandedListeners()
   }

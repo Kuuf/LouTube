@@ -58,7 +58,7 @@
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, useId, useTemplateRef, computed, useSlots } from 'vue'
-import android from 'android'
+import { enterPromptMode, exitPromptMode } from '../../helpers/backButton'
 
 import store from '../../store/index'
 import { focusableGrid } from '../../helpers/spatialNav/NavManager'
@@ -135,20 +135,16 @@ onMounted(() => {
     // Not on a destructive first option: a stray Enter then cancels
     focusItem(props.isFirstOptionDestructive ? promptButtons.length - 1 : 0)
   })
-  if (process.env.IS_ANDROID) {
-    android.enterPromptMode()
-    window.addEventListener('exit-prompt', exitPrompt)
-  }
+  enterPromptMode()
+  window.addEventListener('exit-prompt', exitPrompt)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('keydown', handleEscape, true)
   store.commit('removeOpenPrompt', id)
   nextTick(() => lastActiveElement?.focus())
-  if (process.env.IS_ANDROID) {
-    android.exitPromptMode()
-    window.removeEventListener('exit-prompt', exitPrompt)
-  }
+  exitPromptMode()
+  window.removeEventListener('exit-prompt', exitPrompt)
 })
 
 /**

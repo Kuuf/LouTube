@@ -65,7 +65,7 @@ import { activateZone, gridFromElements, navState, registerZone, unregisterZone 
 
 import { closeItemActions, itemActions } from './itemActions'
 
-import android from 'android'
+import { enterPromptMode, exitPromptMode } from '../../helpers/backButton'
 
 /** @import { ItemAction } from './itemActions' */
 
@@ -111,11 +111,9 @@ async function onOpen() {
   // Over the page, like the side nav: nothing behind it scrolls
   registerZone({ id: ZONE_ID, getGrid: actionsGrid, onKeyDown: handleKey, isChrome: true })
 
-  // Android's Back button closes the panel
-  if (process.env.IS_ANDROID) {
-    android.enterPromptMode()
-    window.addEventListener('exit-prompt', closeItemActions)
-  }
+  // The remote's Back button closes the panel
+  enterPromptMode()
+  window.addEventListener('exit-prompt', closeItemActions)
 
   // Only when the remote is in use (some zone has the focus)
   const activeZoneId = navState.activeZoneId
@@ -131,10 +129,8 @@ async function onOpen() {
 }
 
 function onClose() {
-  if (process.env.IS_ANDROID) {
-    android.exitPromptMode()
-    window.removeEventListener('exit-prompt', closeItemActions)
-  }
+  exitPromptMode()
+  window.removeEventListener('exit-prompt', closeItemActions)
 
   const hadFocus = navState.activeZoneId === ZONE_ID
   const zoneId = returnZoneId
