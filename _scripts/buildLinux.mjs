@@ -44,6 +44,7 @@ const output = await build({
     extraMetadata: { name: 'loutube', productName: 'LouTube', version: nextVersion, desktopName: 'loutube.desktop' },
     linux: {
       ...config.linux,
+      icon: '_icons/loutube.png',
       executableName: 'loutube',
       artifactName: `loutube-v${nextVersion}-\${arch}.\${ext}`,
       desktop: { entry: { Name: 'LouTube' } },

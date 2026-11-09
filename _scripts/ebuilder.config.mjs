@@ -20,6 +20,7 @@ export default {
   ],
   files: [
     '_icons/iconColor.*',
+    '_icons/loutube.png',
     'icon.svg',
     'dist/**/*',
     '!dist/web/*',

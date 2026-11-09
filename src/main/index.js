@@ -1014,8 +1014,8 @@ function runApp() {
       show: showWindowNow,
       backgroundColor: windowBackground,
       icon: process.env.NODE_ENV === 'development'
-        ? path.join(__dirname, '../../_icons/iconColor.png')
-        : path.join(__dirname, '../_icons/iconColor.png'),
+        ? path.join(__dirname, '../../_icons/loutube.png')
+        : path.join(__dirname, '../_icons/loutube.png'),
       autoHideMenuBar: true,
       // useContentSize: true,
       webPreferences: {
@@ -1086,8 +1086,8 @@ function runApp() {
           }
         } else {
           const icon = process.env.NODE_ENV === 'development'
-            ? path.join(__dirname, '..', '..', '_icons', 'iconColor.png')
-            : path.join(__dirname, '..', '_icons', 'iconColor.png')
+            ? path.join(__dirname, '..', '..', '_icons', 'loutube.png')
+            : path.join(__dirname, '..', '_icons', 'loutube.png')
 
           tray = new Tray(icon)
 
